@@ -186,8 +186,6 @@ kubectl delete ns dev
 nginxpod.yaml
 
 ```yml
-nginxpod.yaml
-
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -221,5 +219,17 @@ kubectl delete -f nginxpod.yaml
 ## P1717-资源管理方式-3：声明式对象配置
 
 声明式对象配置跟命令式对象配置很相似，但是它只有一个命令apply
+
+```bash
+# 首先执行一次kubectl apply -f yaml文件，发现创建了资源
+kubectl apply -f nginxpod.yaml
+namespace/dev created
+pod/nginxpod created
+
+# 再执行一次kubectl apply -f yaml文件，发现说资源没有变动
+kubectl apply -f nginxpod.yaml
+```
+
+
 
 ## P1818-资源管理方式-小结

@@ -1,3 +1,11 @@
+from: https://www.bilibili.com/video/BV1Qv41167ck
+
+​		http://yun.itheima.com/course/640.html
+
+# 第1章 k8s介绍
+
+# 第2章 集群环境搭建
+
 # 第3章  资源管理
 
 ## P1212-资源管理介绍
@@ -55,7 +63,6 @@ address: [顺义, 昌平]
 - https://www.json2yaml.com/convert-yaml-to-json 校验
 ## P1414-资源管理方式-介绍
 
-### 分类
 1. 命令式对象管理：直接使用命令去操作k8s资源
 ```bash
 kubectl run nginx-pod --image-nginx:1.17.1 --port=80
@@ -233,3 +240,113 @@ kubectl apply -f nginxpod.yaml
 
 
 ## P1818-资源管理方式-小结
+
+kubectl的运行是需要配置文件的，文件是$HOME/.kube，如果相要在node上运行些命令，需要将master上的.kube复制到node上
+
+```bash
+scp -r HOME/.kube node1: HOME/
+scp -r ~/.kube node1:~/
+```
+
+推荐方案：
+
+```bash
+kubectl apply -f xxx.yaml		   #创建/更新资源
+kubectl delete -f xxx.yaml		   #删除资源
+kubectl get(describe) 资源名称		#查询资源
+```
+
+# 第4章 实战入门
+
+## P191-实战入门-Namespace
+
+namespace: 它的主要作用是用来实现**多套环境的资源隔离**或者**多租户的资源隔离**
+
+- 空间隔离
+
+- 还可以结合k8s的资源配额机制，限定不同租户能占用的资源，例如cpu使用量，内存使用量等，来实现租户可用资源的管理。
+
+```bash
+[root@m1 ~]# kubectl get ns
+NAME              STATUS   AGE
+default           Active   13d	# 所有未指定namespace的对象都会被分配在default中
+dev               Active   18h	
+kube-node-lease   Active   13d	# 集群节点之间的心跳维护，v1.13开始引入	
+kube-public       Active   13d	# 此命名空间下的资源可以被所有人访问（包括未认证用户）
+kube-system       Active   13d	# 所有由k8s系统创建的资源都处于这个命名空间
+  
+```
+
+  查看：
+
+```bash
+# 1、查看所有的ns
+kubectl get ns
+
+# 2、查看指定的ns  kubectl get ns ns_name
+kubectl get ns default
+NAME      STATUS   AGE
+default   Active   13d
+
+# 3、查看输出格式： kubectl get ns ns_name -o 参数
+# k8s支持的格式很多，常见有：wide, json, yaml
+kubectl get ns default -o yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: "2021-03-11T08:41:53Z"
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:phase: {}
+    manager: kube-apiserver
+    operation: Update
+    time: "2021-03-11T08:41:53Z"
+  name: default
+  resourceVersion: "190"
+  uid: 9b84f7e7-e28c-4660-83b5-f514d5002645
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
+
+# 查看ns详情
+kubectl describe ns default
+Name:         default
+Labels:       <none>
+Annotations:  <none>
+Status:       Active	#active 命名空间正在使用中，Terminating 正在删除命名空间
+
+No resource quota.		#针对ns做的资源限制
+No LimitRange resource.	#针对ns中的每个组件做的资源限制
+
+```
+
+创建：
+
+```bash
+kubectl create ns dev
+namespace/dev created
+```
+
+删除：
+
+```bash
+kubectl delete ns dev
+namespace "dev" deleted
+```
+
+配置方式
+
+​	
+
+## P202-实战入门-Pod
+
+## P213-实战入门-Label
+
+## P224-实战入门-Deployment
+
+## P235-实战入门-Service

@@ -276,7 +276,7 @@ kubeadm join --token 8dv0fj.3bh9267krsx0j5j6 192.168.132.31:6443 --discovery-tok
            	Snapshot
            	Store
 ```
-   ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20210325101822.png)
+   <img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/20210325101822.png" alt="img" style="zoom:80%;" />
 
 2. node（工作节点）
 

@@ -1,4 +1,4 @@
-# 第0章 计算机概论
+# 第0章  计算机概论
 
 ## 0.1 计算机：辅助人脑的好工具
 
@@ -15,7 +15,7 @@
 - 主存储器
 ### 0.1.2 CPU架构
 
-# 第十二章、学习 Shell Scripts
+# 第12章  学习 Shell Scripts
 
 ## 12.1 什么是 Shell scripts
 
@@ -50,8 +50,6 @@ echo -e "Hello World! \a \n"
 exit 0
 ```
 
-
-
 cal.sh
 
 ```sh
@@ -73,9 +71,11 @@ time echo "scale=${num}; 4*a(1)" | bc -lq		# 4*a(1) 是 bc 主动提供的一个
 
 ## 12.6 shell script 的追踪与 debug
 
-- -n ：不要执行 script，仅查询语法的问题； 
-- -v ：再执行 sccript 前，先将 scripts 的内容输出到屏幕上；
-- -x ：将使用到的 script 内容显示到屏幕上，这是很有用的参数！
+```bash
+-n   # 不要执行 script，仅查询语法的问题； 
+-v   # 再执行 sccript 前，先将 scripts 的内容输出到屏幕上；
+-x   # 将使用到的 script 内容显示到屏幕上，这是很有用的参数！
+```
 
 ## 12.7 重点回顾
 

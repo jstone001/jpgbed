@@ -88,11 +88,11 @@ kubectl apply -f nginx-pod.yaml  #只用于创建和更新资源
 
 ## P1515-资源管理方式-1：命令式对象管理
 
-### kubectl 命令的语法：
+### kubectl 命令的语法
 
 ​	kubectl [command] [type] [name] [flags]
 
-#### 1、comand：
+#### 1、comand
 
 ​	指定要对资源执行的操作，例如 create、get、describe 和 delete
 
@@ -152,19 +152,19 @@ kubectl apply -f nginx-pod.yaml  #只用于创建和更新资源
 
 - 其他命令
 
-#### 2、type：
+#### 2、type
 
   指定资源类型，资源类型是大小写敏感的，开发者能够以单数、复数和缩略的 形式
 
-#### 3、name：
+#### 3、name
 
   指定资源的名称，名称也大小写敏感的。如果省略名称，则会显示所有的资源
 
-#### 4、flags：
+#### 4、flags
 
 ​	指定可选的参数。例如，可用-s 或者–server 参数指定 Kubernetes API server 的地址和端口
 
-### 例：
+### 例
 
 ```bash
 # 创建一个namespace
@@ -277,7 +277,7 @@ kube-system       Active   13d	# 所有由k8s系统创建的资源都处于这�
   
 ```
 
-###   查看：
+###   查看
 
 ```bash
 # 1、查看所有的ns
@@ -325,14 +325,14 @@ No LimitRange resource.	#针对ns中的每个组件做的资源限制
 
 ```
 
-### 创建：
+### 创建
 
 ```bash
 kubectl create ns dev
 namespace/dev created
 ```
 
-### 删除：
+### 删除
 
 ```bash
 kubectl delete ns dev
@@ -378,7 +378,9 @@ kube-scheduler-m1            1/1     Running   0          13d	#调度
 
 
 
-### 创建并运行：
+### 命令行
+
+#### 创建并运行pod
 
 k8s没有提供单独运行pod的命令，都是通过pod控制器来实现的
 
@@ -387,19 +389,92 @@ k8s没有提供单独运行pod的命令，都是通过pod控制器来实现的
 # --image 指定pod镜像
 # --port  指定端口
 # --namespace 指定namespace
-kubectl run nginnx --image=nginx:1.17.1 --port=80 --namespace dev
+[root@master ~]# kubectl run nginx1 --image=nginx:1.17.1 --port=80 --namespace dev
 deployment apps/nginx created
 ```
 
-### 查看pod信息：
+#### 查看pod
 
 ```bash
+# 查看pod基本信息
+kubectl get pods -n dev
 
+# 查看pod与详细信息
+kubectl describe pod nginx-5ff9343-fg2db -n dev
+```
+
+#### 访问pod
+
+```bash
+# 获取PodIP
+kubectl get pods -n dev -o wide
+
+# 访问pod
+curl http://10.244.1.23:80
+```
+
+#### 删除指定pod
+
+```bash
+kubectl delete pod nginx-5ff2343423-fg2db -n dev
+
+# 此时，显示pod删除成功，但再查询，发现又新产生一个
+# 这是因为pod是由pod控制器创建，控制器会监控pod状况，一旦发现pod死亡，会立即重建
+# 此时要想删除pod，必须删除pod控制器
+
+# 先查询一下当前namespace下的pod控制器
+kubectl get deploy -n dev
+
+# 删除此pod控制器
+kubectl delete deploy nginx -n dev
+
+# 稍等下，再查询pod，发现pod 被删除了
+kubectl get pods -n dev
+```
+
+### 基于yaml
+
+pod-nginx.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: nginx
+  namespace: dev
+spec:
+  containers:
+  - image: nginx:1.17.1
+    imagePullPolicy: IfNotPresent
+    name: pod
+    ports:
+    - name: nginx-port
+      containerPort: 80
+      protocol: TCP
+```
+
+```bash
+kubectl create -f pod-nginx.yaml  #创建
+kubectl delete -f pod-nginx.yaml  #删除
 ```
 
 
 
 ## P213-实战入门-Label
+
+概念：label的作用就是在资源上添加标识，用来对它们进行区分和选择。
+
+特点：
+
+- 一个label会以key/value键值对的开式附加到各种对象上，如node, pod, service等等。
+- 一个资源对象可以定义任意数量的label, 同一个label 也可以被添加到量的资源对够用上去。
+- label通常在资源对象定义时确定，当然也可以在对象创建后动态添加或者删除。
+
+> 一些常用的label示例如下：
+>
+> - 版本标签："version":"release", "version":"stable"
+> - 环境标签：“environment": "dev", "environment":"test"
+> - 架构标签：”tier": "frontend", "tier": "backend"
 
 ## P224-实战入门-Deployment
 

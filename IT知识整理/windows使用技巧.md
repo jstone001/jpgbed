@@ -43,11 +43,11 @@ from: https://answers.microsoft.com/zh-hans/windows/forum/all/win10%E6%90%9C%E7%
 
 Win10「搜索」功能不可用了
 
-​	![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/946e358ee480.png)
+​	<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/946e358ee480.png" alt="img" style="zoom:50%;" />
 
 版本信息如图，但是最近一周开始菜单搜索的时候白板，如下图
 
-​	![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/013416a8cb76.png)
+​	<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/013416a8cb76.png" alt="img" style="zoom: 50%;" />
 
  
 
@@ -55,7 +55,7 @@ Win10「搜索」功能不可用了
 
 最近更新 2019/02/14 37 次浏览 适用于:
 
-![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/_CopyPix_1_10.png)
+​	<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/_CopyPix_1_10.png" alt="img" style="zoom:50%;" />
 
 
 
@@ -97,7 +97,7 @@ from:http://www.ylmfwin100.com/ylmf/8643.html
 
 
 
- ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20433g354-0.png)
+ <img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/20433g354-0.png" alt="img" style="zoom: 67%;" />
 
 
 先来说下使用激活码使用方法：
@@ -123,7 +123,7 @@ slmgr /ato （弹出窗口提示：“成功的激活了产品”）
 ​	![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20433k934-2.png)
 
 
-![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20433g541-3.png)
+​	![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20433g541-3.png)
 
 ```bash
 Windows 10系统

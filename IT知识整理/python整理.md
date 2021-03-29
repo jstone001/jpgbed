@@ -2,6 +2,15 @@
 
 from: https://www.cnblogs.com/lemon-feng/p/11208435.html
 
+<font color="red">依赖库及指定python3路径</font>
+
+```bash
+yum -y install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel  libffi-devel
+./configure --prefix=/usr/local/python37 --enable-optimizations		#/usr/local/python37为上面步骤创建的目录
+```
+
+
+
 一、安装依赖环境
 
 输入命令：
@@ -147,7 +156,15 @@ pip3 -V
 
  ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1730174-20190718165523975-1547139881.png)
 
-#  xpath简介
+# lxml
+
+## xpath文档
+
+https://www.w3.org/TR/xpath/
+
+https://www.w3school.com.cn/xpath/xpath_functions.asp  中文版
+
+##  xpath简介
 
 from: https://www.jianshu.com/p/85a3004b5c06
 
@@ -658,6 +675,14 @@ lxml-4.6.2-cp37-cp37m-win_amd64.whl
 网址：https://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 ```
 
+## selector
+
+```python
+response.xpath('//div[@class ="entry-header"]/h1/text()').extract()		#extract后即转换为字符串，extract_first()  提取到第一个匹配到的元素
+```
+
+
+
 # 写入xls
 
 ## xlswriter.py
@@ -683,7 +708,7 @@ for row in range(0,len(rs)):
 workbook.close()        #关闭
 ```
 
-## 写入时间格式：
+## 写入时间格式
 
 write_datetime.py
 
@@ -730,5 +755,266 @@ from: https://www.cnblogs.com/wutaotaosin/articles/12011167.html
  worksheet.write(row, 2, '=SUM(C2:C5)', money_format)
  
  workbook.close()
+```
+
+# print
+
+```python
+stu_id = 1
+stu_id2 = 1000
+print("我的学号是%03d" % stu_id)
+print("我的学号是%03d" % stu_id)  # 好像必须是0
+print("我的学号是%03d" % stu_id2)  # 超出，原样输出
+```
+
+# 文件及文件夹的操作
+
+## 复制文件目录
+
+```python
+import shutil
+
+shutil.copy("g:/1-12_Big_Tracks,Little_Tracks-1第1辑第3本.pdf", "e:/ttt.pdf")   #拷文件
+shutil.copytree("E:\Wanda\重要文档","g:/tt1111")    #拷目录
+```
+
+# 连oracle
+
+## 安装oracle客户端_zip方式
+
+```bash
+from: from: https://www.cnblogs.com/hanjianfei/p/11453790.html
+
+#安装包来源：http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
+ 
+安装解压缩到/usr/local/oracle
+
+mkdir /usr/local/oracle
+unzip /usr/local/oracle/instantclient-basic-linux.x64-11.2.0.4.0.zip
+unzip /usr/local/oracle/instantclient-sqlplus-linux.x64-11.2.0.4.0.zip
+cd /usr/local/oracle/instantclient_11_2
+mkdir -p network/admin
+cd network/admin
+新建tnsnames.ora文件
+ 
+CM =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 10.12.11)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = cm)
+    )
+  )
+  
+ 
+添加环境变量
+vi .bash_profile
+ 
+export ORACLE_HOME=/usr/local/oracle/instantclient_11_2
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+##export NLS_LANG=AMERICAN_AMERICA.ZHS16GBK
+##export NLS_LANG='simplified chinese_china'.ZHS16GBK
+export NLS_LANG=AMERICAN_AMERICA.AL32UTF8
+export LD_LIBRARY_PATH=$ORACLE_HOME
+export PATH=$ORACLE_HOME:$PATH
+ 
+执行环境变量
+source .bash_profile
+ 
+测试数据库连接
+sqlplus username/passwd@cm
+ 
+本文参考
+https://blog.csdn.net/andy_wcl/article/details/79470705
+```
+
+## 安装cx_oracle, whl文件方式
+
+```bash
+#1、下载whl文件
+在https://pypi.org/project/cx-Oracle/7.2.3/#files下载cx_Oracle-7.2.3-cp37-cp37m-win_amd64.whl 
+
+#2、本地先安装wheel
+pip install wheel
+
+#3、将下载的whl文件放在终端文件夹下
+pip install cx_Oracle-7.2.3-cp37-cp37m-win_amd64.whl
+
+```
+
+## cx_Oracle-7.2.3.tar.gz文件方式
+
+```bash
+pip3 install wheel -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+
+tar -zxvf cx_Oracle-7.2.3.tar.gz
+cd cx_Oracle-7.2.3
+python3 setup.py install
+```
+
+## 测试oracle代码
+
+```python
+#测试文档
+#-*- coding: UTF-8 -*-
+import cx_Oracle
+
+conn = cx_Oracle.connect('xp1024/xp1024@192.168.141.130/orcl')  # 用自己的实际数据库用户名、密码、主机ip地址 替换即可
+curs = conn.cursor()
+sql = 'select * from TB_VICECATEGORY'  # sql语句
+curs.execute(sql)  # 执行sql语句
+rs = curs.fetchall()  # 一次返回所有结果集 fetchall
+print(type(rs))
+
+for l in rs:
+    for r in l:
+        print(r, end='\t')
+    print()
+curs.close()
+conn.close()
+```
+
+# 函数的重载
+
+python 没有函数的重载，所以在类中也不能写多个构造函数
+
+# 搭建简易文件服务器
+
+```bash
+python -m http.server 8888  #8888为端口，打开当前的路径
+```
+
+# 计算文件md5值
+
+```python
+import hashlib
+def main():
+   digester= hashlib.md5()
+   with open('tt.py','rb') as file_stream:
+       file_iter=iter(lambda: file_stream.read(1024),b'')
+       for data in file_iter:
+       	   digester.update(data)
+   print(digester.hexdigest())
+
+if __name__=='__main__':
+    main()
+```
+
+# python推荐库
+
+## DecryptLogin  模拟登录
+
+```bash
+#模拟登录
+pip install DecryptLogin --upgrade
+```
+
+## musicdl  音乐下载
+
+```bash
+pip install musicdl
+```
+
+# 类和对象
+
+## 魔术方法
+
+### \_\_new\_\_
+
+\_\_new\_\_是开辟一块内存，return给实例。\_\_init\_\_调用这块内存空间
+
+```python
+from: https://www.cnblogs.com/fengff/p/10238826.html
+
+new() 是在新式类中新出现的方法，它作用在构造方法建造实例之前，可以这么理解，在 Python 中存在于类里面的构造方法 init() 负责将类的实例化，而在 init() 启动之前，new() 决定是否要使用该 init() 方法，因为__new__() 可以调用其他类的构造方法或者直接返回别的对象来作为本类的实例。
+如果将类比喻为工厂，那么__init__()方法则是该工厂的生产工人，init()方法接受的初始化参数则是生产所需原料，init()方法会按照方法中的语句负责将原料加工成实例以供工厂出货。而__new__()则是生产部经理，new()方法可以决定是否将原料提供给该生产部工人，同时它还决定着出货产品是否为该生产部的产品，因为这名经理可以借该工厂的名义向客户出售完全不是该工厂的产品。
+new() 方法的特性：
+__new__() 方法是在类准备将自身实例化时调用。
+__new__() 方法始终都是类的静态方法，即使没有被加上静态方法装饰器。
+类的实例化和它的构造方法通常都是这个样子：
+
+例：
+class A:
+	pass
+ 
+class B(A):
+	def __new__(cls):
+		print("__new__方法被执行")
+		return super().__new__(cls)
+	def __init__(self):
+		print("__init__方法被执行")
+ 
+b = B()
+```
+
+### \_\_call\_\_
+
+实例直接+参数
+
+```python
+class Person:
+    def __call__(self, name):
+        print(name)
+
+t=Person('jack')
+t(10)   # __call__
+```
+
+### \_\_del\_\_
+
+```python
+http://c.biancheng.net/view/2371.html
+
+我们知道，Python 通过调用 init() 方法构造当前类的实例化对象，而本节要学的 del() 方法，功能正好和 init() 相反，其用来销毁实例化对象。
+事实上在编写程序时，如果之前创建的类实例化对象后续不再使用，最好在适当位置手动将其销毁，释放其占用的内存空间（整个过程称为垃圾回收（简称GC））。
+大多数情况下，Python 开发者不需要手动进行垃圾回收，因为 Python 有自动的垃圾回收机制（下面会讲），能自动将不需要使用的实例对象进行销毁。
+无论是手动销毁，还是 Python 自动帮我们销毁，都会调用 del() 方法。举个例子：
+class CLanguage:
+    def __init__(self):
+        print("调用 __init__() 方法构造对象")
+    def __del__(self):
+        print("调用__del__() 销毁对象，释放其空间")
+clangs = CLanguage()
+del clangs
+程序运行结果为：
+调用 init() 方法构造对象 调用__del__() 销毁对象，释放其空间
+但是，读者千万不要误认为，只要为该实例对象调用 del() 方法，该对象所占用的内存空间就会被释放。举个例子：
+class CLanguage:
+    def __init__(self):
+        print("调用 __init__() 方法构造对象")
+    def __del__(self):
+        print("调用__del__() 销毁对象，释放其空间")
+clangs = CLanguage()
+#添加一个引用clangs对象的实例对象
+cl = clangs
+del clangs
+print("***********")
+程序运行结果为：
+调用 init() 方法构造对象
+----------------------------------------------------------------------------------
+调用__del__() 销毁对象，释放其空间
+注意，最后一行输出信息，是程序执行即将结束时调用 __del__() 方法输出的。
+可以看到，当程序中有其它变量（比如这里的 cl）引用该实例对象时，即便手动调用 del() 方法，该方法也不会立即执行。这和 Python 的垃圾回收机制的实现有关。
+Python 采用自动引用计数（简称 ARC）的方式实现垃圾回收机制。该方法的核心思想是：每个 Python 对象都会配置一个计数器，初始 Python 实例对象的计数器值都为 0，如果有变量引用该实例对象，其计数器的值会加 1，依次类推；反之，每当一个变量取消对该实例对象的引用，计数器会减 1。如果一个 Python 对象的的计数器值为 0，则表明没有变量引用该 Python 对象，即证明程序不再需要它，此时 Python 就会自动调用 del() 方法将其回收。
+以上面程序中的 clangs 为例，实际上构建 clangs 实例对象的过程分为 2 步，先使用 CLanguage() 调用该类中的 init() 方法构造出一个该类的对象（将其称为 C，计数器为 0），并立即用 clangs 这个变量作为所建实例对象的引用（ C 的计数器值 + 1）。在此基础上，又有一个 clang 变量引用 clangs（其实相当于引用 CLanguage()，此时 C 的计数器再 +1 ），这时如果调用del clangs语句，只会导致 C 的计数器减 1（值变为 1），因为 C 的计数器值不为 0，因此 C 不会被销毁（不会执行 del() 方法）。
+如果在上面程序结尾，添加如下语句：
+del cl
+print("-----------")
+则程序的执行结果为：
+调用 init() 方法构造对象
+----------------------------------------------------------------------------------
+调用__del__() 销毁对象，释放其空间
+可以看到，当执行 del cl 语句时，其应用的对象实例对象 C 的计数器继续 -1（变为 0），对于计数器为 0 的实例对象，Python 会自动将其视为垃圾进行回收。
+需要额外说明的是，如果我们重写子类的 del() 方法（父类为非 object 的类），则必须显式调用父类的 del() 方法，这样才能保证在回收子类对象时，其占用的资源（可能包含继承自父类的部分资源）能被彻底释放。为了说明这一点，这里举一个反例：
+class CLanguage:
+    def __del__(self):
+        print("调用父类 __del__() 方法")
+class cl(CLanguage):
+    def __del__(self):
+        print("调用子类 __del__() 方法")
+c = cl()
+del c
+程序运行结果为：
+调用子类 del() 方法
 ```
 

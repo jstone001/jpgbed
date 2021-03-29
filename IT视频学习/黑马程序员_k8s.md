@@ -277,7 +277,7 @@ kube-system       Active   13d	# 所有由k8s系统创建的资源都处于这�
   
 ```
 
-  查看：
+###   查看：
 
 ```bash
 # 1、查看所有的ns
@@ -325,25 +325,79 @@ No LimitRange resource.	#针对ns中的每个组件做的资源限制
 
 ```
 
-创建：
+### 创建：
 
 ```bash
 kubectl create ns dev
 namespace/dev created
 ```
 
-删除：
+### 删除：
 
 ```bash
 kubectl delete ns dev
 namespace "dev" deleted
 ```
 
-配置方式
+配置方式：
 
-​	
+首先准备一个yaml文件：ns-dev.yaml
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+	name: dev
+```
+
+然后就可以执行创建和删除命令了
+
+```bash
+kubectl create -f ns-dev.yaml
+kubectl delete -f ns-dev.yaml
+```
 
 ## P202-实战入门-Pod
+
+### kubectl get -n kube-system 详解
+
+```bash
+[root@m1 ~]# kubectl get pod -n kube-system
+NAME                         READY   STATUS    RESTARTS   AGE
+coredns-7f89b7bc75-4s6lr     1/1     Running   711        13d
+coredns-7f89b7bc75-m5mnl     1/1     Running   710        13d
+etcd-m1                      1/1     Running   0          13d	#存放信息
+kube-apiserver-m1            1/1     Running   0          13d	#入口
+kube-controller-manager-m1   1/1     Running   0          13d	#具体执行
+kube-flannel-ds-4jm45        1/1     Running   0          13d	#网络组件
+kube-flannel-ds-7nq5n        1/1     Running   0          13d
+kube-proxy-2xhzd             1/1     Running   0          13d
+kube-proxy-rf6lf             1/1     Running   0          13d
+kube-scheduler-m1            1/1     Running   0          13d	#调度
+```
+
+
+
+### 创建并运行：
+
+k8s没有提供单独运行pod的命令，都是通过pod控制器来实现的
+
+```bash
+# 命令格式：kubectl run pod_name [参数]
+# --image 指定pod镜像
+# --port  指定端口
+# --namespace 指定namespace
+kubectl run nginnx --image=nginx:1.17.1 --port=80 --namespace dev
+deployment apps/nginx created
+```
+
+### 查看pod信息：
+
+```bash
+
+```
+
+
 
 ## P213-实战入门-Label
 

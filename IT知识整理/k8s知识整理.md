@@ -4,6 +4,7 @@ from: https://blog.csdn.net/weixin_43224440/article/details/111556962
 
 centos关闭swap分区
  第一步 关闭swap分区:
+
  ```bash
  swapoff -a
  ```
@@ -116,71 +117,124 @@ Other Commands:
 
 # kubeadm(快速部署)
 
-from: 尚硅谷2020_k8s  https://www.bilibili.com/video/BV1GT4y1A756
+from: 尚硅谷2020_k8s  https://www.bilibili.com/video/BV1GT4y1A756  黑马程序员 https://www.bilibili.com/video/BV1Qv41167ck
 
 1. 所有服务器操作：
 
 1.1 所有服务器初始化
+
 ```bash
-# 关闭防火墙
+# 1. 查看主机版本
+cat /etc/redhat-release 
+
+#2. 主机名解析 /etc/hosts
+192.168.132.31  m1
+192.168.132.32  n1
+192.168.132.33  n2
+
+#3. 时间同步
+#3.1 启动chronyd服务
+systemctl start chronyd
+#3.2 设置chronyd服务开机自启
+systemctl enable chronyd
+#3.3 chronyd服务启动稍等几秒钟，就可以使用date了
+date
+
+#4. 禁用iptables和firewalld服务
+#关闭firewalld 服务
 systemctl stop firewalld
 systemctl disable firewalld
 
-# 关闭selinux
-sed -i 's/enforcing/disabled/' /etc/selinux/config  # 永久
-setenforce 0  # 临时
+#关闭iptables服务
+systemctl stop iptables
+systemctl disable iptables
 
-# 关闭swap
+#5. 禁用selinux
+# 编辑/etc/selinux/config
+SELINUX=disabled
+
+setenforce 0  #临时
+getenforce  #查看状态
+
+# 6. 禁用swap
+# 编辑分区配置文件/etc/fstab, 注释到swap分区一行
+# 注释修改完之后要重启linux
 swapoff -a  # 临时
 sed -ri 's/.*swap.*/#&/' /etc/fstab    # 永久
+free -m  #查询
 
-# 根据规划设置主机名
-hostnamectl set-hostname <hostname>
-
-# 在master添加hosts
-cat >> /etc/hosts << EOF
-192.168.44.146 k8smaster
-192.168.44.145 k8snode1
-192.168.44.144 k8snode2
-EOF
-
-# 将桥接的IPv4流量传递到iptables的链
+# 7.将桥接的IPv4流量传递到iptables的链
 cat > /etc/sysctl.d/k8s.conf << EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-sysctl --system  # 生效
+sysctl -p  # 重新加载模块
+#sysctl --system  # 生效
+# 加载网桥过滤模块
+modprobe br_netfilter
+# 查看网桥过滤模块是否加载成功
+lsmod | grep br_netfilter
+br_netfilter           22256  0 
+bridge                151336  1 br_netfilter
 
-# 时间同步（如果虚拟机同步主机，则不需要）
-yum install ntpdate -y
-ntpdate time.windows.com
+# 8. 配置ipvs功能
+# 8.1 安装ipset和ipvsadm
+yum install ipset ipvsadm -y
+
+#8.2 添加加载模块的脚本文件
+cat >> /etc/sysconfig/modules/ipvs.modules << EOF
+#!/bin/bash
+modprobe -- ip_vs
+modprobe -- ip_vs_rr
+modprobe -- ip_vs_wrr
+modprobe -- ip_vs_sh
+modprobe -- nf_conntrack_ipv4
+EOF
+
+#8.3 为脚本文件添加执行权限
+chmod +x /etc/sysconfig/modules/ipvs.modules
+#8.4 执行脚本文件
+/bin/bash /etc/sysconfig/modules/ipvs.modules
+#8.5 查看对应的模块是否加载成功
+lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+
+# 重启linux
+reboot
 ```
 
 1.2  安装Docker
 
 ```bash
-# 安装docker
+# 1. 切换镜像源
 $ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
-$ yum -y install docker-ce-18.06.1.ce-3.el7
-$ systemctl enable docker && systemctl start docker
-$ docker --version
-Docker version 18.06.1-ce, build e68fc7a
 
-# 切换docker库源
+# 2. 查看当前镜像中支持的docker版本
+yum list docker-ce --showduplicates
+
+#3. 安装特定版本的docker-ce 
+# 必须指定--setopt=obsoletes-0, 否则yum会自动安装更高版本
+$ yum -y install --setopt=obsoletes-0 docker-ce-18.06.3.ce-3.el7
+
+#4. 添加一个配置文件
+# docker在默认情况下使用的Cgroup Drive为cgroupfs，而k8s推荐使用systemd来代替cgroups
+mkdir /etc/docker
 $ cat > /etc/docker/daemon.json << EOF
 {
+  "exec-opts": ["native.cgroupdriver=systemd"],
   "registry-mirrors": ["https://b9pmyelo.mirror.aliyuncs.com"]
 }
 EOF
 
-# 重启docker
-$ systemctl restart docker
+#启动docker
+$ systemctl enable docker && systemctl start docker
+$ docker --version
+Docker version 18.06.3-ce, build e68fc7a
 ```
 
 1.3 所有节点安装kubeadm/kubelet
 
 ```bash
-# 添加阿里云镜像
+# 1. 切换阿里云镜像
 $ cat > /etc/yum.repos.d/kubernetes.repo << EOF
 [kubernetes]
 name=Kubernetes
@@ -192,21 +246,56 @@ gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors
 EOF
 
 
-# 安装Kubenet组件
-$ yum install -y kubelet-1.18.0 kubeadm-1.18.0 kubectl-1.18.0
-$ systemctl enable kubelet    #开机启动
+# 2. 安装Kubenet组件
+$ yum install -y --setopt=obsoletes-0 kubelet-1.17.4-0 kubeadm-1.17.4-0 kubectl-1.17.4-0
+
+# 3. 配置kubelet的cgroup
+# 编辑/etc/sysconfig/kubelet, 添加下面的配置
+cat >> /etc/sysconfig/kubelet <<EOF
+KUBELET_CGROUP_ARGS="--cgroup-driver=systemd"
+KUBE_PROXY_MODE="ipvs"
+EOF
+
+# 4. 开机启动
+$ systemctl enable kubelet
 ```
 
 2. 部署master节点
 
+   集群初始化
+
+   ```bash
+   # 准备集群镜像
+   images=(
+       kube-apiserver:v1.17.4
+       kube-controller-manager:v1.17.4
+       kube-scheduler:v1.17.4
+       kube-proxy:v1.17.4
+       pause:3.1
+       etcd:3.4.3-0
+       coredns:1.6.5
+   )
+   
+   for imageName in ${images[@]} ; do
+   	docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+   	docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+   	docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+   done
+   
+   # 查看docker images
+   docker images
+   
+   ```
+
 2.1 部署Kubernetes Master
 
 ```bash
-kubeadm init  --apiserver-advertise-address=192.168.132.31 --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.18.0 --service-cidr=10.96.0.0/12 --pod-network-cidr=10.244.0.0/16
+kubeadm init  --apiserver-advertise-address=192.168.132.31  --kubernetes-version v1.17.4 --service-cidr=10.96.0.0/12 --pod-network-cidr=10.244.0.0/16
 # 由于默认拉取镜像地址 k8s.gcr.io 国内无法访问，这里指定阿里云镜像仓库地址。
 # 会生成token值
 ```
 2.2 使用 kubectl 工具
+
 ```bash
 mkdir -p $HOME/.kube 
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
@@ -244,7 +333,9 @@ https://www.cnblogs.com/xiaoyongyang/p/11953660.html
 https://blog.csdn.net/qianghaohao/article/details/82624920
 
 ```bash
-# 1、master上生成永久的token
+kubeadm token list  #查看token的失效时间
+
+# 1、master上生成永久的token (最后一行是token)
 kubeadm token create --ttl 0
 
 # 2、master上生成sha256
@@ -280,14 +371,12 @@ kubeadm join --token 8dv0fj.3bh9267krsx0j5j6 192.168.132.31:6443 --discovery-tok
 
 2. node（工作节点）
 
-```
+```bash
 	kubelet: master排到node节点代表，管理本机容器
 	kube-proxy: 提供网络代理，负载均衡操作
 ```
 
-   
-
-3. 其他组件
+   其他组件
 
 ```
    CoreDNS: 可以为集群中的SVC创建一个域名IP的对应关系解析
@@ -298,4 +387,12 @@ kubeadm join --token 8dv0fj.3bh9267krsx0j5j6 192.168.132.31:6443 --discovery-tok
    ELK: k8s集群日志统一分析介入平台
 ```
 
+# 查看日志
 
+```sh
+ubuntu@node1:~/.kube$ journalctl -f -u kubelet
+```
+
+# ClusterIP ping不到
+
+from: https://www.yisu.com/zixun/17436.html

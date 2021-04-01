@@ -6,11 +6,285 @@ from: https://www.bilibili.com/video/BV1Qv41167ck
 
 # 第2章 集群环境搭建
 
+## P5-环境搭建--环境规划
+
+### 集群类型：一主多从，多主多从
+
+### 安装方式：kubeadm, minikube, 二进制包
+
+​	minikube: 一个用于快速搭建单节点k8s的工具
+
+​	kubeadm: 一个用于快速搭建k8s集群的工具
+
+​	二进制包: 官网下载每个组件的2进制包
+
+### 主机规划
+
+| 作用   | IP地址          | 操作系统  | 配置                  |
+| ------ | --------------- | --------- | --------------------- |
+| master | 192.168.109.101 | centos7.5 | 2颗CPU 2g内存 50g硬盘 |
+| node1  | 192.168.109.102 | centos7.5 | 2颗CPU 2g内存 50g硬盘 |
+| node2  | 192.168.109.103 | centos7.5 | 2颗CPU 2g内存 50g硬盘 |
+
+## P6-环境搭建--主机安装
+
+docker: 18.06.3
+
+kubeadm,kubelet, kubectl: 1.17.4
+
+## P7-环境搭建--环境初始化
+
+必须CentOS7.5 以上
+
+```sh
+# 1. 查看主机版本
+cat /etc/redhat-release 
+
+#2. 主机名解析 /etc/hosts
+192.168.132.31  m1
+192.168.132.32  n1
+192.168.132.33  n2
+
+#3. 时间同步
+#3.1 启动chronyd服务
+systemctl start chronyd
+#3.2 设置chronyd服务开机自启
+systemctl enable chronyd
+#3.3 chronyd服务启动稍等几秒钟，就可以使用date了
+date
+
+#4. 禁用iptables和firewalld服务
+#关闭firewalld 服务
+systemctl stop firewalld
+systemctl disable firewalld
+
+#关闭iptables服务
+systemctl stop iptables
+systemctl disable iptables
+
+#5. 禁用selinux
+# 编辑/etc/selinux/config
+SELINUX=disabled
+
+setenforce 0  #临时
+getenforce  #查看状态
+
+# 6. 禁用swap
+# 编辑分区配置文件/etc/fstab, 注释到swap分区一行
+# 注释修改完之后要重启linux
+swapoff -a  # 临时
+sed -ri 's/.*swap.*/#&/' /etc/fstab    # 永久
+free -m  #查询
+
+# 7.将桥接的IPv4流量传递到iptables的链
+cat > /etc/sysctl.d/k8s.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl -p  # 重新加载模块
+#sysctl --system  # 生效
+# 加载网桥过滤模块
+modprobe br_netfilter
+# 查看网桥过滤模块是否加载成功
+lsmod | grep br_netfilter
+br_netfilter           22256  0 
+bridge                151336  1 br_netfilter
+
+# 8. 配置ipvs功能
+# 8.1 安装ipset和ipvsadm
+yum install ipset ipvsadm -y
+
+#8.2 添加加载模块的脚本文件
+cat >> /etc/sysconfig/modules/ipvs.modules << EOF
+#!/bin/bash
+modprobe -- ip_vs
+modprobe -- ip_vs_rr
+modprobe -- ip_vs_wrr
+modprobe -- ip_vs_sh
+modprobe -- nf_conntrack_ipv4
+EOF
+
+#8.3 为脚本文件添加执行权限
+chmod +x /etc/sysconfig/modules/ipvs.modules
+#8.4 执行脚本文件
+/bin/bash /etc/sysconfig/modules/ipvs.modules
+#8.5 查看对应的模块是否加载成功
+lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+
+# 重启linux
+reboot
+```
+
+
+
+## P8-环境搭建--集群所需组件安装
+
+安装docker: 18.06.3， kubeadm,kubelet, kubectl: 1.17.4
+
+### 安装docker
+
+```sh
+# 1. 切换镜像源
+$ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
+
+# 2. 查看当前镜像中支持的docker版本
+yum list docker-ce --showduplicates
+
+#3. 安装特定版本的docker-ce 
+# 必须指定--setopt=obsoletes-0, 否则yum会自动安装更高版本
+$ yum -y install --setopt=obsoletes-0 docker-ce-18.06.3.ce-3.el7
+
+#4. 添加一个配置文件
+# docker在默认情况下使用的Cgroup Drive为cgroupfs，而k8s推荐使用systemd来代替cgroups
+mkdir /etc/docker
+$ cat > /etc/docker/daemon.json << EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "registry-mirrors": ["https://b9pmyelo.mirror.aliyuncs.com"]
+}
+EOF
+
+#启动docker
+$ systemctl enable docker && systemctl start docker
+$ docker --version
+Docker version 18.06.3-ce, build e68fc7a
+
+
+```
+
+### 安装kubernetes组件
+
+```bash
+# 1. 切换阿里云镜像
+$ cat > /etc/yum.repos.d/kubernetes.repo << EOF
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+
+
+# 2. 安装Kubenet组件
+$ yum install -y --setopt=obsoletes-0 kubelet-1.17.4-0 kubeadm-1.17.4-0 kubectl-1.17.4-0
+
+# 3. 配置kubelet的cgroup
+# 编辑/etc/sysconfig/kubelet, 添加下面的配置
+cat >> /etc/sysconfig/kubelet <<EOF
+KUBELET_CGROUP_ARGS="--cgroup-driver=systemd"
+KUBE_PROXY_MODE="ipvs"
+EOF
+
+# 4. 开机启动
+$ systemctl enable kubelet    
+```
+
+## P9-环境搭建--集群安装
+
+### 集群初始化
+
+```bash
+# 准备集群镜像
+images=(
+    kube-apiserver:v1.17.4
+    kube-controller-manager:v1.17.4
+    kube-scheduler:v1.17.4
+    kube-proxy:v1.17.4
+    pause:3.1
+    etcd:3.4.3-0
+    coredns:1.6.5
+)
+
+for imageName in ${images[@]} ; do
+	docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+	docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+	docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+done
+
+# 查看docker images
+docker images
+
+```
+
+### master下
+
+```sh
+# master下创建集群
+kubeadm init  --apiserver-advertise-address=192.168.132.31  --kubernetes-version v1.17.4 --service-cidr=10.96.0.0/12 --pod-network-cidr=10.244.0.0/16
+# 由于默认拉取镜像地址 k8s.gcr.io 国内无法访问，这里指定阿里云镜像仓库地址。
+# 会生成token值
+
+# 创建必要文件
+mkdir -p $HOME/.kube 
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
+sudo chown $(id -u):$(id -g) $HOME/.kube/config 
+$ kubectl get nodes
+```
+
+### node下
+
+```sh
+kubeadm join 192.168.132.31:6443 --token vxthmk.y58aankfjbuflzi4 \
+    --discovery-token-ca-cert-hash sha256:e176a6c8f39fd190f515617c4be04e653b2ff15b70d7f1dd82d9645adea13fa4
+```
+
+
+
+## P10-环境搭建--网络插件安装
+
+### master下
+
+```sh
+# 获取fannel的配置文件
+wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+# 修改文件中quay.io仓库为quay-mirror.qiniu.com （现在不用这样做了）
+sed -i 's#quay.io#quay-mirror.qiniu.com#g' kube-flannel.yml
+
+# 使用配置文件启动fannel
+kubectl apply -f kube-flannel.yml
+
+# 稍等片刻，再次查看集群节点的状态
+kubectl get nodes
+NAME   STATUS   ROLES    AGE   VERSION
+m1     Ready    master   23m   v1.17.4
+n1     Ready    <none>   16m   v1.17.4
+n2     Ready    <none>   16m   v1.17.4
+
+# 至此，k8s的集群环境搭建完成
+```
+
+## P11-环境搭建--环境测试
+
+```sh
+# 部署nginx
+kubectl create deployment nginx --image=nginx:1.14-alpine
+
+#暴露端口
+kubectl expose deployment nginx --port=80 --type=NodePort
+
+#查看服务状态
+kubectl get pod,svc
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nginx-6867cdf567-8p624   1/1     Running   0          28s
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        27m
+service/nginx        NodePort    10.105.205.24   <none>        80:32434/TCP   13s
+
+#最后在电脑上访问部署的nginx服务
+http://192.168.132.32:32434/	# 是否有nginx主页
+```
+
+
+
 # 第3章  资源管理
 
-## P1212-资源管理介绍
+## P12-资源管理介绍
 
-## P1313-yaml语言介绍
+## P13-yaml语言介绍
 
 #### 1、语法
 
@@ -61,7 +335,7 @@ address: [顺义, 昌平]
 - 书写yaml切记：后面要加一个空格
 - 如果需要将多段yaml配置放在一个文件中，中章要使用---分隔
 - https://www.json2yaml.com/convert-yaml-to-json 校验
-## P1414-资源管理方式-介绍
+## P14-资源管理方式-介绍
 
 1. 命令式对象管理：直接使用命令去操作k8s资源
 ```bash
@@ -86,7 +360,7 @@ kubectl apply -f nginx-pod.yaml  #只用于创建和更新资源
 
 
 
-## P1515-资源管理方式-1：命令式对象管理
+## P15-资源管理方式-1：命令式对象管理
 
 ### kubectl 命令的语法
 
@@ -188,7 +462,7 @@ kubectl delete ns dev
 
 
 
-## P1616-资源管理方式-2：命令式对象配置
+## P16-资源管理方式-2：命令式对象配置
 
 nginxpod.yaml
 
@@ -223,7 +497,7 @@ kubectl delete -f nginxpod.yaml
 
 总结：命令式对象配置的方式操作资源，可以简单的认为：命令+yaml配置文件（里面是命令需要的各种参数）
 
-## P1717-资源管理方式-3：声明式对象配置
+## P17-资源管理方式-3：声明式对象配置
 
 声明式对象配置跟命令式对象配置很相似，但是它只有一个命令apply
 
@@ -239,7 +513,7 @@ kubectl apply -f nginxpod.yaml
 
 
 
-## P1818-资源管理方式-小结
+## P18-资源管理方式-小结
 
 kubectl的运行是需要配置文件的，文件是$HOME/.kube，如果相要在node上运行些命令，需要将master上的.kube复制到node上
 
@@ -258,7 +532,7 @@ kubectl get(describe) 资源名称		#查询资源
 
 # 第4章 实战入门
 
-## P191-实战入门-Namespace
+## P19-实战入门-Namespace
 
 namespace: 它的主要作用是用来实现**多套环境的资源隔离**或者**多租户的资源隔离**
 
@@ -357,7 +631,7 @@ kubectl create -f ns-dev.yaml
 kubectl delete -f ns-dev.yaml
 ```
 
-## P202-实战入门-Pod
+## P20-实战入门-Pod
 
 ### kubectl get -n kube-system 详解
 
@@ -460,22 +734,257 @@ kubectl delete -f pod-nginx.yaml  #删除
 
 
 
-## P213-实战入门-Label
+## P21-实战入门-Label
+
+#### label
 
 概念：label的作用就是在资源上添加标识，用来对它们进行区分和选择。
 
 特点：
 
-- 一个label会以key/value键值对的开式附加到各种对象上，如node, pod, service等等。
+- 一个label会以key/value键值对的开式附加到各种对象上，如 node, pod, service等等。
 - 一个资源对象可以定义任意数量的label, 同一个label 也可以被添加到量的资源对够用上去。
 - label通常在资源对象定义时确定，当然也可以在对象创建后动态添加或者删除。
 
 > 一些常用的label示例如下：
 >
 > - 版本标签："version":"release", "version":"stable"
+>
 > - 环境标签：“environment": "dev", "environment":"test"
+>
 > - 架构标签：”tier": "frontend", "tier": "backend"
+>
+>   
 
-## P224-实战入门-Deployment
+#### label selector
 
-## P235-实战入门-Service
+​	label用于给某个资源对象定义标识
+
+​	label selector用于查询和筛选拥有某引起标签的资源对象
+
+##### 2种label selector
+
+- ​	基于等式的label selector
+
+  ​	name=slave: 选择所有包含label中key='name'且value="slave"的对象
+
+  ​	env!=production: 选择所有包括label中的key="env" 且value不等于"production"的对象
+
+- ​	基于集合的label selector
+
+  ​	name in (master, slave): 选择所有包含label中key="name"且value="master"或"slave"对象
+
+  ​	name not in(frontend): 选择所有包含label中的key="name" 且value不等于"frontend"的对象
+
+  
+#### 命令方式
+```bash
+# 为pod资源打标签
+kubectl label pod pod_name version=1.0 -n dev
+
+#为pod资源更新标签
+kubectl label pod pod_name version=2.0 -n dev --overwrite
+
+# 查看标签
+kubectl get pod pod_name -n dev --show-labels
+
+# 筛选标签
+kubectl get pod -n dev -l version=2.0 --show-labels
+kubectl get pod -n dev -l version!=2.0 --show-labels
+
+# 删除标签
+kubectl label pod pod_name version- -n dev
+```
+#### 基于yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: nginx
+  namespace: dev
+  labels:
+    version: "3.0"
+    env: "test"
+spec:
+  containers:
+  - image: nginx:1.17.1
+    imagePullPolicy: IfNotPresent
+    name: pod
+    ports:
+    - name: nginx-port
+      containerPort: 80
+      protocol: TCP
+```
+
+
+
+## P22-实战入门-Deployment
+
+pod控制器用于pod的管理，确保pod资源符合预期的状态。
+
+deployment是pod控制器的一种
+
+### 命令操作
+
+```bash
+# 命令格式：kubectl run deployment_name [参数]
+# --image 指定pod的镜像
+# --port 指定端口
+# --replicas  指定创建pod数量
+# --namespace 指定namespace
+kubectl run nginx2 --image=nginx:1.17.1 --port=80 --replicas=3 -n dev
+
+# 查看pod
+kubectl get pod -n dev
+
+# 查看deployment的信息
+kubectl get deploy -n dev
+
+# UP-TO-DATE: 成功升级的副本数量
+# AVAILABLE: 可用副本的数量
+kubectl get deploy -n dev -o wide
+
+# 查看deployment的详细信息
+kubectl describe deploy nginx -n dev
+
+#删除
+kubectl delete deploy nginx -n dev
+```
+
+### 配置yaml操作
+
+deploy-nginx.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: nginx
+  ###### pod 模板
+  template:   
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx:1.17.1
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+```
+
+```bash
+kubectl create -f deploy-nginx.yaml  #创建
+kubectl delete -f deploy-nginx.yaml  #删除
+```
+
+## P23-实战入门-Service
+
+虽然每个pod都会分配一个单独的ip, 但却存在2个问题：
+
+- pod ip  会随着pod的重建产生变化
+- pod ip  仅仅是集群内可见的虚拟ip, 外部无法访问
+
+这对于访问这个服务带来了难度，因此，k8s设计了service来解决这个问题。
+
+service 可以看作是一组同类pod**对外的访问接口**借助。service, 应用可以方便地实现服务发现和负载均衡。
+
+### 创建及查看
+
+```sh
+# 操作一：集群内部访问
+# 暴露service
+kubectl expose deploy nginx --name=svc-nginx1 --type=ClusterIP --port=80 --target-port=80 -n dev
+
+#查看service
+kubectl get svc svc-nginx1 -n dev -o wide
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+svc-nginx1   ClusterIP   10.103.170.48   <none>        80/TCP    20s   run=nginx
+
+#这里产生了一个CLSTER-IP，这就是service的IP, 在service生命周期中，这个地址是不会变动的
+#可以通过这个IP访问当前service对应的pod
+curl 10.103.170.48:80
+```
+
+```sh
+# 操作二：集群外部访问
+# 修改type为NodePort
+kubectl expose deploy nginx --name=svc-nginx2 --type=NodePort --port=80 --target-port=80 -n dev
+
+# 查看时会发现出现了NodePort类型的service，而且有一对port
+$ kubectl get svc -n dev
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+svc-nginx1   ClusterIP   10.103.170.48   <none>        80/TCP         13m
+svc-nginx2   NodePort    10.96.1.50      <none>        80:30496/TCP   44s
+
+# 接下来可以通过集群外主机访问
+http://192.168.132.31:30496/
+http://192.168.132.32:30496/
+http://192.168.132.33:30496/
+```
+
+### 删除service
+
+```sh
+kubectl delete svc svc-nginx1 -n dev
+```
+
+### 配置yaml方式
+
+svc-nginx.yaml
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-nginx
+  namespace: dev
+spec: 
+  clusterIP: 10.109.179.231
+  ports: 
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: nginx
+  type: ClusterIP
+```
+
+```sh
+kubectl create -f svc-nginx.yaml
+kubectl delete -f svc-nginx.yaml
+```
+
+# pod详解
+
+## P23-实战入门-Service
+## P24-Pod详解-结构和定义
+## P25-Pod详解-基本配置
+## P26-Pod详解-镜像拉取策略
+## P27-Pod详解-启动命令
+## P28Pod详解-环境变量
+## P29Pod详解-端口设置
+## P30Pod详解-资源配额
+## P31-Pod详解-生命周期-概述
+## P32-Pod详解-生命周期-创建和终止
+## P33-Pod详解-生命周期-初始化容器
+## P34-Pod详解-生命周期-钩子函数
+## P35-Pod详解-生命周期-容器探测
+## P36-Pod详解-生命周期-容器探测补充
+## P37-Pod详解-生命周期-重启策略
+## P38-Pod详解-调度-概述
+## P39-Pod详解-定向调度
+## P40-Pod详解-亲和性调度-概述
+## P41-Pod详解-亲和性调度-nodeAffinity
+## P42-Pod详解-亲和性调度-podAffinity
+## P43-Pod详解-亲和性调度-podAntiAffinity
+## P44-Pod详解-调度-污点
+## P45-Pod详解-调度-容忍

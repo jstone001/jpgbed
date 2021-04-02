@@ -988,3 +988,4 @@ kubectl delete -f svc-nginx.yaml
 ## P43-Pod详解-亲和性调度-podAntiAffinity
 ## P44-Pod详解-调度-污点
 ## P45-Pod详解-调度-容忍
+

@@ -963,10 +963,22 @@ kubectl create -f svc-nginx.yaml
 kubectl delete -f svc-nginx.yaml
 ```
 
+## P23-实战入门-Service
+
 # pod详解
 
-## P23-实战入门-Service
 ## P24-Pod详解-结构和定义
+
+### Pause容器
+
+作用：
+
+- ​	可以以它为依据，评估整个pod的健康状态
+
+- ​	可以在根容器上设置ip地址，其它窗口都以此为ip，以实现pod内部的通信
+
+> 这里是pod内部的通讯，pod之间的通讯采用虚拟2层风络技术来实现，我们当前用flannel
+
 ## P25-Pod详解-基本配置
 ## P26-Pod详解-镜像拉取策略
 ## P27-Pod详解-启动命令

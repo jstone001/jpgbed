@@ -39,7 +39,7 @@ from:http://www.xitongzhijia.net/xtjc/20150129/36428.html
 　　打开“终端”（应用程序-》实用工具），输入以下两条命令：
 
 ```sh
-　defaults write com.apple.finder _FXShowPosixPathInTitle -bool TRUE;killall Finder
+defaults write com.apple.finder _FXShowPosixPathInTitle -bool TRUE;killall Finder
 ```
 
 你看完整的路径地址出来了吧。

@@ -963,13 +963,13 @@ kubectl create -f svc-nginx.yaml
 kubectl delete -f svc-nginx.yaml
 ```
 
-## P23-实战入门-Service
-
-# pod详解
+# 第4章 pod详解
 
 ## P24-Pod详解-结构和定义
 
-### Pause容器
+### pod结构
+
+#### Pause容器
 
 作用：
 
@@ -979,7 +979,71 @@ kubectl delete -f svc-nginx.yaml
 
 > 这里是pod内部的通讯，pod之间的通讯采用虚拟2层风络技术来实现，我们当前用flannel
 
+### pod定义
+
+pod.yaml
+
+```yaml
+apiVersino: v1	#必选，版本号，例如v1
+kind: Pod		#必选，资源类型，例如Pod
+metadata: 		#必选，元数据
+  name: string		#必选，pod名称
+  namespace: string  #pod所属空间，默认为default
+  labels: 
+  - name: string
+spec:		#必选，pod中容器的详细定义
+  containers:  	#必选，pod中容器列表
+  - name: string 	#必选，容器名称
+    image: string  	#必选，容器的镜像名称
+    imagePullPolicy: [Always|Never|IfNotPresent] 	#获取镜像的策略
+    command: [string]  	#容器的启动命令列表，如不指定，使用打包时使用的启动命令
+    args: [string]		#容器的启动命令参数列表
+    workingDir: string	#容器的工作目录
+    volumnMounts:		#挂载到容器内部的存储卷配置
+    - name: string 		#引用pod定义的共享存储卷的名称，需用volumes[]部分定义的卷名
+    mountPath: string	#存储卷在容器内mount的绝对路径，应少于512字符
+    readOnly: boolean	#是否为只读模式
+  ports: 		#需要暴露的端口库号列表
+  - name: string		#端口的名称
+  containerPort: int	#容器需要监听的端口号
+  hostPort: int			#容器所在主机需要监听的端口号，默认与container相同
+  protocal: string		#端口协议，支持TCP和UDP, 默认TCP
+```
+
+```sh
+# 属性查询 
+kubectl explain 资源类型	#查看某种资源配置的一级属性
+kubectl explain 资源类型.属性		#查看属性的子属性
+kubectl explain pod
+kubectl explain pod.metadata
+```
+
+```sh
+# 一级属性
+apiVersion	<string>	# 版本。k8s 内部定义。 kubectl api-vesions查询所有的版本
+kind	<string>		# 类型，k8s内部定义。 kubectl api-resources 查询 
+metadata	<Object>	# 元数据，主要是资源标识和说明，常用有name, namespace, labels等
+spec	<Object>		# 描述，这是配置中最重要的一部分，里面是对各种资源配置的详细描述
+status	<Object>		#状态信息，由k8s自动生成
+
+#查看状态 
+kubectl get pod nginx_name -n dev -o yaml
+```
+
+```sh
+#spec 常见属性
+containers	#容器列表，用于定义容器的详细信息
+nodeName	#根据nodeName的值将pod调度到指定node节点上
+nodeSelector	#根据nodeSelector中定义的信息选择将该pod调度到包含这些label的node上
+hostNetwork		#是否使用主机网络模式，默认为false, 如果设置true, 表示使用宿主机网络
+volumes		#存储卷，用于定义pod上面挂在的存储信息
+restartPolicy 	#重启策略，表示pod在遇到故障的时候的处理策略
+```
+
+
+
 ## P25-Pod详解-基本配置
+
 ## P26-Pod详解-镜像拉取策略
 ## P27-Pod详解-启动命令
 ## P28Pod详解-环境变量

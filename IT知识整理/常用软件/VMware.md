@@ -54,17 +54,17 @@ from: https://blog.csdn.net/main_h_/article/details/56291977
 
 首先，在VMware的编辑->虚拟网络编辑器重新建立ＮＡＴ网络**（之前的要删掉，新建的同样选择ＶＭｎｅｔ８就可以）。**
 
-![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/221184054745.png)
+ ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/221184054745.png)
 
 如果还不能上网，在windows的服务里面，看一下
 
-![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/221184304065.png)
+ ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/221184304065.png)
 
 确保这三项已经打开，如果服务处于停止状态重新开启并且设置为自动运行。（**注：使用360加速球优化可能会把VMware DHCP服务关闭。如果优化被360关闭吧VMware服务添加360白名单）**
 
 做完这一些需要重启虚拟机，如果还是不能连接网络的话进去windows的网络和共享中心*（控制面板）。把vmnat8的iPV4地址设置为自动获取，dns也自动获取。
 
-![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/221184901749.png)
+ ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/221184901749.png)
 
 重启虚拟机。
 

@@ -1138,6 +1138,21 @@ imp smpaweb/smpaweb@localhost:1521/XE file=e:\smpaweb.dmp
 imp wcms/wcms@localhost:1521/XE file=e:\wcms.dmp tables=(CMS_PAGE) ignore=y
 imp smpaweb/smpaweb@localhost:1521/XE file=e:\smpa.dmp tables=(UAP_BLOB) ignore=y
 imp smpaweb/smpaweb@localhost:1521/XE file=e:\smpa.dmp tables=(UAP_CLOB) ignore=y
+
+imp ybjc/ybjc@192.168.17.237:1521/YBCP file=e:\dmsb_error.dmp full=y；
+exp ysreader/ysreader@172.30.196.26/ycnw  file=d:\temp.dmp  tables=(tb_temp_yppzm,temp_invoice_rtj,temp_order_rtj,temp_invoice_rtj_dt,temp_order_rtj_dt)
+imp ysxt/ysxt@192.168.17.237:1521/ybcp file=e:\temp.dmp full=y
+imp ysreader/ysreader@172.31.196.25:1521/ycww  file=f:\temp.dmp full=y
+
+exp smpaweb/smpaweb@192.168.132.130/orcl file=e:\smpaweb.dmp 
+exp wcms/wcms@192.168.132.130/orcl file=e:\wcms.dmp 
+exp wcms/wcms@192.168.132.130/orcl file=e:\wcms.dmp tables=(cms_schedule)
+imp smpaweb1/smpaweb1@192.168.132.130:1521/orcl  file=e:\smpaweb.dmp  fromuser=smpaweb touser=smpaweb1 ignore=y 
+impdp smpaweb1/smpaweb1 dumpfile=smpaweb.dmp directory=e:\ remap_schema=smpaweb:smpaweb1 remap_tablespace=system:SMPA_1_DATA,users:SMPA_1_DATA
+imp wcms1/wcms1@192.168.132.130:1521/orcl  file=e:\wcms.dmp full=y 
+
+exp smpaweb1/smpaweb1@192.168.132.130/orcl file=e:\smpaweb_dev.dmp
+exp wcms1/wcms1@192.168.132.130/orcl file=e:\wcms_dev.dmp
 ```
 
 # 分页
@@ -1371,25 +1386,267 @@ select segment_name ,sum(bytes)/1024/1024 from user_segments where segment_type 
 select segment_name ,sum(bytes)/1024/1024 from user_segments where segment_type ='INDEX' group by segment_name;
 ```
 
-# 表空间
+# 用户
 
-## 查看表空间大小，使用率
+## 删除用户及其所有对象
 
 ```sql
-select
-　　a.a1 表空间名称,
-　　c.c2 类型,
-　　c.c3 区管理,
-　　b.b2/1024/1024 表空间大小M,
-　　(b.b2-a.a2)/1024/1024 已使用M,
-    a.a2/1024/1024  剩余M,
-　　substr((b.b2-a.a2)/b.b2*100,1,5) 利用率
-　　from
-　　(select tablespace_name a1, sum(nvl(bytes,0)) a2 from dba_free_space group by tablespace_name) a,
-　　(select tablespace_name b1,sum(bytes) b2 from dba_data_files group by tablespace_name) b,
-　　(select tablespace_name c1,contents c2,extent_management c3 from dba_tablespaces) c
-　　where a.a1=b.b1 and c.c1=b.b1;
+select * from all_users;	--sys查看
+--查找工作空间的路径
+select * from dba_data_files; 
+
+--删除表空间
+drop tablespace 表空间名称 including contents and datafiles cascade constraint;
+例如：删除用户名成为LYK，表空间名称为LYK
+--删除用户，及级联关系也删除掉
+drop user LYK cascade;
+--如果报Oracle ORA-01940 无法删除当前已连接用户:
+select  username,sid,serial# from v$session;
+alter system kill  session '19,33180';
+
+--删除表空间，及对应的表空间文件也删除掉
+drop tablespace LYK including contents and datafiles cascade constraint;
 ```
+
+# 角色权限
+
+## 查看角色权限
+
+```sql
+select * from Dba_Sys_Privs where grantee='DBA';
+```
+
+## 查看角色(只能查看登陆用户拥有的角色)所包含的权限
+
+```sql
+select * from role_sys_privs;
+```
+
+## 查看用户对象权限
+
+```sql
+select * from dba_tab_privs;
+select * from all_tab_privs;
+select * from user_tab_privs;
+```
+
+## 查看所有角色
+
+```sql
+select * from dba_roles;
+```
+
+## 查看哪些用户有sysdba或sysoper系统权限(查询时需要相应权限)
+
+```sql
+select * from V$PWFILE_USERS;
+```
+
+
+
+# 查看数据库
+
+## 查看数据库库对象 
+
+```sql
+SELECT owner, object_type, status, COUNT(*) count# 
+FROM all_objects 
+GROUP BY owner, object_type, status; 
+```
+
+## 查看数据库的版本
+
+```sql
+SELECT version 
+FROM product_component_version 
+WHERE substr(product, 1, 6) = 'Oracle'; 
+```
+
+### 查看数据库的创建日期和归档方式
+
+```sql
+SELECT created, log_mode, log_mode FROM v$database
+```
+
+# oracle连接数
+
+## 查询oracle的连接数
+
+```sh
+select count(*) from v$session;
+```
+
+## 查询oracle的并发连接数
+
+```sql
+select count(*) from v$session where status='ACTIVE';
+```
+
+## 查看不同用户的连接数
+
+```sql
+select username,count(username) from v$session where username is not null group by username;
+```
+
+## 修改最大连接数
+
+```sql
+alter system set processes = 300 scope = spfile;
+--重启数据库:
+shutdown immediate;
+startup;
+
+--查看当前有哪些用户正在使用数据
+SELECT osuser, a.username,cpu_time/executions/1000000||'s', sql_fulltext,machine
+from v$session a, v$sqlarea b
+where a.sql_address =b.address order by cpu_time/executions desc;
+
+
+select count(*) from v$session --连接数
+select count(*) from v$session where status='ACTIVE'　--并发连接数
+show parameter processes --最大连接
+select count(*) from v$process --当前的连接数
+select value from v$parameter where name = 'processes' --数据库允许的最大连接
+alter system set processes = value scope = spfile; --重启数据库 --修改连接
+```
+
+
+
+# 查找数据库中的topsql语句
+
+## 查找使用资源最多的SQL语句
+
+```sql
+--（较高的磁盘读取（disk_reads消耗I/O）和较高的逻辑读取（buffer_gets消耗CPU）被用作衡量标准）
+
+select sql_text from
+(select sql_text,executions,buffer_gets,disk_reads
+from v$sql
+where buffer_gets > 100000
+or disk_reads > 100000
+order by buffer_gets + 100*disk_reads DESC)
+where rownum <= 5;
+```
+
+## 查找使用CPU最多的SQL语句
+
+```sql
+-- （较高的逻辑读取（buffer_gets消耗CPU）被用作衡量标准）
+select sql_text from
+(select sql_text,executions,buffer_gets,disk_reads
+from v$sql
+where buffer_gets > 100000
+order by buffer_gets desc)
+where rownum <= 5;
+或者
+（直接使用v$sql里的cpu_time）
+select sql_text,
+round(cpu_time/1000000, 2) cpu_seconds from
+(select * from v$sql order by cpu_time desc)
+where rownum <= 5;
+```
+
+## 查找使用磁盘I/O最多的SQL语句
+
+```sql
+-- （较高的磁盘读取（disk_reads消耗I/O）被用作衡量标准）
+
+select sql_text from
+(select sql_text,executions,buffer_gets,disk_reads
+from v$sql
+where disk_reads > 100000
+order by disk_reads desc)
+where rownum <= 5;
+```
+
+## 查找占用数据库时间最多的SQL语句
+
+```sql
+select sql_text,round(elapsed_time/1000000, 2) elapsed_seconds,executions from
+(select * from v$sql order by elapsed_time desc)
+where rownum <= 5;
+```
+
+## 查找执行次数（executions）最多的SQL语句
+
+```sh
+select sql_text, executions from
+(select * from v$sql
+where executions > 1000
+order by executions desc)
+where rownum <= 5;
+```
+
+## 查找解析调用最多的SQL语句
+
+```sql
+select sql_text,parse_calls from
+(select * from v$sql
+where parse_calls > 1000
+order by parse_calls desc)
+where rownum <= 5;
+```
+
+## 查找使用共享内存最多的SQL语句
+
+```sql
+-- （使用共享内存大于1048576（bytes）的SQL语句会显示）
+select sql_text,sharable_mem from
+(select * from v$sql
+where sharable_mem > 1048576
+order by sharable_mem desc)
+where rownum <= 5;
+```
+
+
+
+# 表空间
+
+## 查看表空间的名称及大小
+
+```sql
+SELECT t.tablespace_name, round(SUM(bytes / (1024 * 1024)), 0) ts_size 
+FROM dba_tablespaces t, dba_data_files d 
+WHERE t.tablespace_name = d.tablespace_name 
+GROUP BY t.tablespace_name; 
+```
+
+## 查看表空间物理文件的名称及大小 
+
+```sql
+SELECT tablespace_name, 
+file_id, 
+file_name, 
+round(bytes / (1024 * 1024), 0) total_space 
+FROM dba_data_files 
+ORDER BY tablespace_name; 
+```
+
+## 查看表空间的使用情况
+
+```sh
+SELECT SUM(bytes) / (1024 * 1024) AS free_space, tablespace_name 
+FROM dba_free_space 
+GROUP BY tablespace_name; 
+SELECT a.tablespace_name, 
+a.bytes total, 
+b.bytes used, 
+c.bytes free, 
+(b.bytes * 100) / a.bytes "% USED ", 
+(c.bytes * 100) / a.bytes "% FREE " 
+FROM sys.sm$ts_avail a, sys.sm$ts_used b, sys.sm$ts_free c 
+WHERE a.tablespace_name = b.tablespace_name 
+AND a.tablespace_name = c.tablespace_name; 
+
+```
+
+## 查看表空间物理位置
+
+```sql
+select tablespace_name, file_id,file_name, round(bytes/(1024*1024),0)||'M' total_space from dba_data_files order by tablespace_name;
+```
+
+
 
 ## <font color="red">创建表空间</font>
 
@@ -1452,13 +1709,11 @@ ON traffic_vehicle_pass(plate_no, pass_time, crossing_id) TABLESPACE P201507;  -
  
  
 ----- 案例三：oracle表空间（数据文件）满了后，修改表空间的大小
-1、扩展表空间
+--1、扩展表空间
 alter database datafile 'D:\ORACLE\PRODUCT\ORADATA\TEST\USERS01.DBF' resize 50m;
-
-
-2、自动增长
+--2、自动增长
 alter database datafile 'D:\ORACLE\PRODUCT\ORADATA\TEST\USERS01.DBF' autoextend on next 50m maxsize 500m;
-3、增加数据文件
+--3、增加数据文件
 alter tablespace yourtablespacename add datafile 'd:\newtablespacefile.dbf' size 5m;
 
 
@@ -1565,6 +1820,37 @@ alter table TB_YBYP move tablespace SMPA_1_DATA;
 alter table TB_YBGZ_SYGZ_BDK move tablespace SMPA_1_DATA;
 alter table TB_DRUGSERACH move tablespace SMPA_1_DATA;
 alter table TB_DRUGSEARCHDETAIL move tablespace SMPA_1_DATA;
+```
+
+
+
+# 日志文件
+
+## 查看回滚段名称及大小
+
+```sql
+SELECT segment_name, 
+tablespace_name, 
+r.status, 
+(initial_extent / 1024) initialextent, 
+(next_extent / 1024) nextextent, 
+max_extents, 
+v.curext curextent 
+FROM dba_rollback_segs r, v$rollstat v 
+WHERE r.segment_id = v.usn(+) 
+ORDER BY segment_name; 
+```
+
+## 查看控制文件
+
+```sql
+SELECT NAME FROM v$controlfile; 
+```
+
+## 查看日志文件
+
+```sql
+SELECT MEMBER FROM v$logfile
 ```
 
 

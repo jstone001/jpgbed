@@ -963,13 +963,15 @@ kubectl create -f svc-nginx.yaml
 kubectl delete -f svc-nginx.yaml
 ```
 
-# 第4章 pod详解
+# 第5章 pod详解
 
 ## P24-Pod详解-结构和定义
 
-### pod结构
+### 5.1 pod介绍
 
-#### Pause容器
+#### 5.1.1 pod结构
+
+Pause容器 
 
 作用：
 
@@ -979,12 +981,12 @@ kubectl delete -f svc-nginx.yaml
 
 > 这里是pod内部的通讯，pod之间的通讯采用虚拟2层风络技术来实现，我们当前用flannel
 
-### pod定义
+#### 5.1.2 pod定义
 
 pod.yaml
 
 ```yaml
-apiVersino: v1	#必选，版本号，例如v1
+apiVersion: v1	#必选，版本号，例如v1
 kind: Pod		#必选，资源类型，例如Pod
 metadata: 		#必选，元数据
   name: string		#必选，pod名称
@@ -1024,32 +1026,260 @@ apiVersion	<string>	# 版本。k8s 内部定义。 kubectl api-vesions查询所�
 kind	<string>		# 类型，k8s内部定义。 kubectl api-resources 查询 
 metadata	<Object>	# 元数据，主要是资源标识和说明，常用有name, namespace, labels等
 spec	<Object>		# 描述，这是配置中最重要的一部分，里面是对各种资源配置的详细描述
-status	<Object>		#状态信息，由k8s自动生成
+status	<Object>		# 状态信息，由k8s自动生成
 
 #查看状态 
 kubectl get pod nginx_name -n dev -o yaml
 ```
 
 ```sh
-#spec 常见属性
-containers	#容器列表，用于定义容器的详细信息
-nodeName	#根据nodeName的值将pod调度到指定node节点上
-nodeSelector	#根据nodeSelector中定义的信息选择将该pod调度到包含这些label的node上
-hostNetwork		#是否使用主机网络模式，默认为false, 如果设置true, 表示使用宿主机网络
-volumes		#存储卷，用于定义pod上面挂在的存储信息
-restartPolicy 	#重启策略，表示pod在遇到故障的时候的处理策略
+#spec  常见属性
+containers		# 容器列表，用于定义容器的详细信息
+nodeName		# 根据nodeName的值将pod调度到指定node节点上
+nodeSelector	# 根据nodeSelector中定义的信息选择将该pod调度到包含这些label的node上
+hostNetwork		# 是否使用主机网络模式，默认为false, 如果设置true, 表示使用宿主机网络
+volumes			# 存储卷，用于定义pod上面挂在的存储信息
+restartPolicy 	# 重启策略，表示pod在遇到故障的时候的处理策略
+```
+
+## P25-Pod详解-基本配置
+
+### 5.2 pod配置
+
+```sh
+# pod.spec.containers 属性
+kubectl explain pod.spec.containers
+KIND:     Pod
+VERSION:  v1
+
+RESOURCE: containers <[]Object>		# 数组，代表可以有多个容器
+
+FIELDS:
+   args			# 启动参数列表
+   command		# 启动命令列表
+   env	<[]Object>	# 窗口环境变量的配置
+   image			# 镜像地址
+   imagePullPolicy	# 拉取策略
+   lifecycle	<Object>
+   name	<string> -required- 	# 容器名称
+   ports	<[]Object>
+   resources	<Object>	# 资源限制和次源请求的设置
+
+```
+
+#### 5.2.1 基本配置
+
+创建pod-base.yaml
+
+```yaml
+apiVersion: v1	#必选，版本号，例如v1
+kind: Pod		#必选，资源类型，例如Pod
+metadata: 		#必选，元数据
+  name: pod-base		#必选，pod名称
+  namespace: dev  #pod所属空间，默认为default
+  labels: 
+    user: heima
+spec:		#必选，pod中容器的详细定义
+  containers:  	#必选，pod中容器列表
+  - name: nginx 	#必选，容器名称
+    image: nginx:1.17.1  	#必选，容器的镜像名称（docker配置的镜像源）
+  - name: busybox	#busybox是一个小巧的Linux命令集合
+    image: busybox:1.30
+```
+
+```sh
+kubectl apply -f pod-base.yaml	#创建pod
+# 查看pod状况
+```
+
+## P26-Pod详解-镜像拉取策略
+
+#### 5.2.2 镜像拉取策略
+
+```sh
+# imagePullPolicy
+## always: 总是从远程拉取
+## IfNotPresent: 本地有就不拉，没有就拉
+## Never: 只使用本地镜像，不拉取
+```
+
+<font color='red'>如果tag为具体版本号，默认策略是：IfNotPresent</font>
+
+<font color='red'>如果镜像tag为：lastest，默认策略是always</font>
+
+## P27-Pod详解-启动命令
+
+#### 5.2.3 启动命令
+
+busybox并不是一个程序，面是一个工具类的集合，k8s集群启动管理后，它会自动关闭，解决押一付一是让其一直运行，这就用到了command配置。
+
+创建pod-command.yaml
+
+```yaml
+apiVersion: v1	#必选，版本号，例如v1
+kind: Pod		#必选，资源类型，例如Pod
+metadata: 		#必选，元数据
+  name: pod-command		#必选，pod名称
+  namespace: dev  #pod所属空间，默认为default
+spec:		#必选，pod中容器的详细定义
+  containers:  	#必选，pod中容器列表
+  - name: nginx 	#必选，容器名称
+    image: nginx:1.17.1  	#必选，容器的镜像名称（docker配置的镜像源）
+  - name: busybox	#busybox是一个小巧的Linux命令集合
+    image: busybox:1.30
+    command: ["/bin/sh","-c","touch /tmp/hello.txt;while true;do /bin/echo $/(date +%T) >> /tmp/hello.txt; sleep 3; done;"]
+```
+
+```sh
+# 进入pod的busybox容器
+# kubectl exec pod_name -n namespace_name -it -c 容器名称 /bin/sh  在容器内部执行命令
+kubectl exec pod-command -n dev -it -c busybox /bin/sh
+tail -f /tmp/hello.txt
+```
+
+<font color='red'>特别说明：</font>
+
+k8s中的command, args两荐其实是实现覆盖Dockerfile中的ENTRYPOINT的功能。
+
+1. 如果command和args均没写，那么用Dockerfile的配置
+2. 如果command写了，args没有写，那么Dockerfile默认的撇脂会被 忽略，执行输入的command
+3. 如果command没写，但args写了，那么Dockerfile中配置的ENTRYPOINT的命令会被执行，使用当前的args参数
+4. 如果command和args都写了，那么Dockerfile的配置被忽略，执行command并追加args参数
+
+## P28Pod详解-环境变量
+
+#### 5.2.4 环境配置
+
+设置容器的环境变量（企业不太用）
+
+以后会单独存储在配置文件中，
+
+pod-env.yaml
+
+```yaml
+apiVersion: v1	#必选，版本号，例如v1
+kind: Pod		#必选，资源类型，例如Pod
+metadata: 		#必选，元数据
+  name: pod-env		#必选，pod名称
+  namespace: dev  #pod所属空间，默认为default
+spec:		#必选，pod中容器的详细定义
+  containers:  	#必选，pod中容器列表
+  - name: busybox 	#必选，容器名称
+    image: busybox:1.30  	#必选，容器的镜像名称（docker配置的镜像源）
+    command: ["/bin/sh","-c","while true;do /bin/echo $(date +%T);sleep 60; done;"]
+    env：
+    - name: "usrname"
+      value: "admin"
+    - name: "password"
+      value: "123456"
+```
+
+```sh
+# 验证
+kubectl exec pod-env -n dev -c busybox -it /bin/sh
+echo $username
+echo $password
 ```
 
 
 
-## P25-Pod详解-基本配置
+## P29-Pod详解-端口设置
 
-## P26-Pod详解-镜像拉取策略
-## P27-Pod详解-启动命令
-## P28Pod详解-环境变量
-## P29Pod详解-端口设置
-## P30Pod详解-资源配额
+#### 5.2.5  端口设置
+
+```sh
+kubectl explain pod.spec.containers.ports
+   containerPort	# 0~65536	(重要)
+   hostIP			# 将外部端口绑定到主机IP(一般省略)
+   hostPort			# 容器要在主机上公开的端口，如果设置，主机上只能运行容器的一个副本（一般省略）
+   name	<string>	# 端口名称
+   protocol	<string>	# UDP/TCP/SCTP。默认TCP
+```
+
+pod-ports.yaml
+
+```yaml
+apiVersion: v1	#必选，版本号，例如v1
+kind: Pod		#必选，资源类型，例如Pod
+metadata: 		#必选，元数据
+  name: pod-ports		#必选，pod名称
+  namespace: dev  #pod所属空间，默认为default
+spec:		#必选，pod中容器的详细定义
+  containers:  	#必选，pod中容器列表
+  - name: nginx 	#必选，容器名称
+    image: nginx:1.17.1  	#必选，容器的镜像名称（docker配置的镜像源）
+    ports:
+    - name: nginx-port
+      containerPort: 80	
+      protocol: TCP
+```
+
+```sh
+# 验证
+kubectl get pod pod-ports -n dev -o yaml
+```
+
+## P30-Pod详解-资源配额
+
+#### 5.2.6 resources配额
+
+k8s对内存和cpu资源进行配额的机制，通过resources选项实现，他有2个子选项：
+
+- limits: 用于限制运行时容器的最大占用资源，当窗口占用资源超过Limits时会被终止，并进行重启。
+- requests: 用于设置容器需要的最小资源，如果环境资源不够，容器将无法启动。
+
+pod-resources.yaml
+
+```yaml
+apiVersion: v1	#必选，版本号，例如v1
+kind: Pod		#必选，资源类型，例如Pod
+metadata: 		#必选，元数据
+  name: pod-resources		#必选，pod名称
+  namespace: dev  #pod所属空间，默认为default
+spec:		#必选，pod中容器的详细定义
+  containers:  	#必选，pod中容器列表
+  - name: nginx 	#必选，容器名称
+    image: nginx:1.17.1  	#必选，容器的镜像名称（docker配置的镜像源）
+    resources:
+      limits: 
+        cpu: "2"
+        memory: "18Gi"
+      requests:
+        cpu: "1"
+        moemory: "10Mi"
+```
+
+> cpu: core数，可以为整数或小数
+>
+> memory: 内存大小，可以使用Gi，Mi，G，M等形式
+
+
+
 ## P31-Pod详解-生命周期-概述
+
+### 5.3 生命周期
+
+- pod创建过程
+
+- 运行初始化容器(init container) 过程
+
+- 运行主容器(main container) 过程
+
+  - 容器启动后钩子(post start), 容器终止前钩子(pre stop)
+  - 容器的存活性控沙漠风暴(liveness probe), 就绪性控测(readiness probe)
+
+- pod终止过程
+
+  
+
+5种状态（相位）：
+
+- 挂起 (pending)：apiserver已经 创建了pod资源对象，但它尚未被调度完成或者仍处于下载镜像的过程中
+- 运行中(running): pod已经被调度至某节点，并且所有容器都已经被k8s创建
+- 成功(succeeded):  pod中的所有容器都已经到哪里下图止并且不会被重启
+- 失败(failed): 所有容器都已经终止，但至少有一个容器终止失败，那容器返回了非0值的退出状态
+- 未知(unknown): apiserver无法正常获取到pod对象的状态信息，通常由网络通信失败所导致。
+
 ## P32-Pod详解-生命周期-创建和终止
 ## P33-Pod详解-生命周期-初始化容器
 ## P34-Pod详解-生命周期-钩子函数

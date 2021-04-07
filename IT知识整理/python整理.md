@@ -1047,3 +1047,15 @@ Python strip() 方法用于移除字符串头尾指定的字符（默认为空�
 去两边字符串：str.strip('d')，相应的也有lstrip，rstrip
 ```
 
+# utf8转中文
+
+```python
+s = '''
+"[{\"c\":\"00\",\"t\":\"\xe5\xb7\xb2\xe8\xb6\xb3\xe9\x87\x8f\xe9\x85\x8d\xe9\x80\x81\"},{\"c\":\"01\",\"t\":\"\xe5\xb7\xb2\xe9\x83\xa8\xe5\x88\x86\xe9\x85\x8d\xe9\x80\x81\"}]"
+'''
+ss = s.encode('raw_unicode_escape')
+print(ss)  # 结果：b'\xe9\x9d\x92\xe8\x9b\x99\xe7\x8e\x8b\xe5\xad\x90'
+sss = ss.decode()
+print(sss)
+```
+

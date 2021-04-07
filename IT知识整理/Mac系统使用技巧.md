@@ -53,3 +53,25 @@ defaults delete com.apple.finder _FXShowPosixPathInTitle;killall Finder
 ```
 
 这就是如何在Finder栏上显示当前浏览文件的访问路径的方法，有需要或是有兴趣的用户，可以尝试下这种方法。
+
+# Install JD-GUI on Mac OSX
+
+from: http://macappstore.org/jd-gui/
+
+About the App
+App name: JD-GUI
+App description: jd-gui (App: JD-GUI.app)
+App website: http://jd.benow.ca/
+Install the App
+
+Press <font color='red'>Command+Space</font> and type Terminal and press enter/return key.
+
+```sh
+#Run in Terminal app:
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null ; brew install caskroom/cask/brew-cask 2> /dev/null
+#and press enter/return key. Wait for the command to finish.
+#Run:
+brew cask install jd-gui
+#Done! You can now use JD-GUI.
+```
+

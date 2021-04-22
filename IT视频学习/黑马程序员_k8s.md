@@ -2795,7 +2795,7 @@ ipvsadm -Ln
 
   ​		该模式下，kube-proxy充当一个四层负责均衡器的角色。由于Kube-proxy运行在userspace中，在进行转发处理时会增加内核和用户之间的数据拷贝，虽然比较稳定，但是效率比较低。
 
-  ![image-20210420140411460](E:\JS\booknote\jpgBed\image-20210420140411460.png)
+  ![image-20210420140411460](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210420140411460.png)
 
 - **iptables模式**
 
@@ -2803,13 +2803,13 @@ ipvsadm -Ln
 
   ​		该模式下Kube-proxy不承担四层负责均衡器的角色，只负责创建iptables规则。该模式的优点是较userspace模式效率更高，但不能提供灵活的LB策略，当后端pod不可用时也无法进重重试。（LB：负载均衡）
 
-  ![image-20210420140505365](E:\JS\booknote\jpgBed\image-20210420140505365.png)
+  ![image-20210420140505365](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210420140505365.png)
 
 - <font color='red'>**ipvs模式**</font>
 
   ​	ipvs模式和iptables类似，kube-prox监控pod的变化并创建相应的ipvs规则。ipvs相对iptables转发效率更高。除此以外，ipvs支持更多的LB算法。
 
-  ![image-20210420141118449](E:\JS\booknote\jpgBed\image-20210420141118449.png)
+  ![image-20210420141118449](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210420141118449.png)
 
   ```sh
   # 此模式必须安装ipvs内核模块，否则会降级为iptables
@@ -2820,7 +2820,7 @@ ipvsadm -Ln
   IP Virtual Server version 1.2.1 (size=4096)
   Prot LocalAddress:Port Scheduler Flags
     -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
-  TCP  127.0.0.1:31274 rr
+  TCP  127.0.0.1:31274 rr		# rr 轮询
     -> 10.244.3.138:8111            Masq    1      0          0         
     -> 10.244.4.23:8111             Masq    1      0          0         
     -> 10.244.4.24:8111             Masq    1      0          0         
@@ -2838,14 +2838,319 @@ ipvsadm -Ln
 
 ### 7.2 Service类型
 
+service资源清单
+
+```yaml
+kind: Service	
+apiVersion: v1
+metadata: 
+  name: service
+  namespace: dev
+spec:
+  selector: 	# 标签选择器，用于确定当前service代理哪些pod
+    app: nginx
+  type: #service类型，指定service的访问方式
+  clusterIP:  #虚拟服务的ip地址
+  sessioinAffinity:	#session亲和性，支持ClientIP, None两个选项
+  ports: 
+  - protocol: TCP
+    port: 3017	# service端口
+    targtPort: 5003	# pod端口
+    nodePort: 31122	# 主机端口
+```
+
+service类型：
+
+- ClusterIP：默认值，它是k8s系统自动分配的虚拟IP，只能在集群内部访问
+- NodePort：将service通过指定的node上的端口暴露给外部，通过此方法，就可以在集群外部访问服务
+- LoadBalancer：使用外接负载均衡器完成到服务的负载分发，注意此模式需要外部云环境支持。
+- ExternalName：把集群外部的服务引入集群内部，直接使用。
+
 ## P60-Service--实验--环境准备
+
+### 7.3 Service使用
+
+#### 7.3.1 实验环境准备
+
+deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pc-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17.1
+        ports:
+        - containerPort: 80
+```
+
+```sh
+kubectl create -f deployment.yaml
+
+# 查看pod详情
+kubectl get pods -n dev -o wide --show-labels
+NAME                             READY   STATUS    RESTARTS   AGE   IP             NODE   NOMINATED NODE   READINESS GATES   LABELS
+pc-deployment-6696798b78-5j4md   1/1     Running   0          11s   10.244.4.66    n2     <none>           <none>            app=nginx-pod,pod-template-hash=6696798b78
+pc-deployment-6696798b78-dpvkg   1/1     Running   0          11s   10.244.4.67    n2     <none>           <none>            app=nginx-pod,pod-template-hash=6696798b78
+pc-deployment-6696798b78-kmg46   1/1     Running   0          11s   10.244.3.160   n1     <none>           <none>            app=nginx-pod,pod-template-hash=6696798b78
+
+# 为了方便后面的测试，修改下三台nginx的index.html页面（三台修改的IP地址不一致）
+kubectl exec -it pc-deployment-66cb59984-8p84h -n dev /bin/sh
+echo '10.244.1.40' > /usr/share/nginx/html/index.html
+
+# 修改之后，访问测试
+```
+
+
+
 ## P61-Service--实验--ClusterIP类型
+
+#### 7.3.2 ClusterIP类型的Service
+
+service-clusterip.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-clusterip
+  namespace: dev
+spec:
+  selector: 
+    app: nginx-pod
+  clusterIP: 10.97.97.97	# service的ip地址，如果不写，默认会生成一个
+  type: ClusterIP
+  ports:
+  - port: 80	# Service 端口
+    targetPort: 80 	#pod端口
+```
+
+```sh
+kubectl create -f service-clusterip.yaml
+
+# 查看service
+kubectl get svc -n dev -o wide
+NAME                TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service-clusterip   ClusterIP   10.97.97.97   <none>        80/TCP    11s   app=nginx-pod
+
+# 查看service的详细信息
+kubectl describe svc service-clusterip -n dev
+```
+
+**Endpoint**
+
+​		Endpoint是K8s中的一个资源对象，存储在etcd中，用来记录一个service对应的所有pod的访问地址，它是根据service三围文件中selector爬藤榕产生的。
+
+​		一个service由一组pod组成，这些pod通过Endpoints暴露出来，Endpoints是实现实际服务的**端点集合**。换句话说，service和pod之间的联系是通过Endpoints实现的。
+
+```sh
+kubectl get endpoints -n dev
+ipvsadm -Ln  # 查看映射规则（rr 轮询）
+
+# 循环访问测试
+while true;do curl 10.97.97.97:80; sleep 5; done;
+# 会轮询到各个服务器
+```
+
+**负载分发策略**
+
+​		对service的访问被 分发到了后端的pod上，目前k8s提供了两种负载分发策略：
+
+- 如果不定义，默认使用kube-proxy的策略，比较随机、轮询
+
+- 基于客户端地址的会话保持模式，即来自同一个客户端发起的所有请求都会转发到固定的一个pod上
+
+   些塔式可以在spec中添加 sesssionAffinity: ClientIP选项
+
+修改发分策略
+
+```sh
+# 修改发分策略 ----sessionAffinity:ClientIP
+vim service-clusterip.yaml
+# 查看ipvs规则（persistent 代表持久）
+ipvsadm -Ln
+
+curl 10.97.97.97:80
+```
+
 ## P62-Service--实验--HeadLiness类型
+
+#### 7.3.3  HeadLiness 类型的Service
+
+​		在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自已来控制负载均衡策略，针对这种情况，k8s提供了HeadLiness，这类service不会分配ClusterIP，如果想要访问service，只能通过service的域名进行查询。
+
+service-headliness.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata: 
+  name: service-headliness
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: None	# 将clusterIP设置为None，即可创建headliness Service
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+```sh
+kubectl get svc -n dev
+kubectl get pod -n dev
+
+# 进入pod
+kubectl exec -it pc-deployment-6696798b78-5j4md -n dev /bin/bash
+cat /etc/resolv.conf
+nameserver 10.96.0.10
+search dev.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+
+# 退出
+exit
+
+dig @10.96.0.10 service-headliness.dev.svc.cluster.local   #dig @10.96.0.10 service_name.dev.svc.cluster.local
+```
+
 ## P63-Service--实验--NodePort类型
+
+#### NodePort类型
+
+​		如果希望将service暴露给集群外部使用，就要使用Nodeport类型。NodePort的工作原理其实就是将service的端口**映射到Node的一个端口上**，然后就可以通过NodeIp:NodePort来访问serivce了。
+
+创建service-nodeport.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata: 
+  name: service-nodeport
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  type: NodePort	# service类型
+  ports:
+  - port: 80
+    nodePort: 30002	#绑定的node端口（默认取值为：30000~32767），如果不指定，会默认分配
+    targetPort: 80
+```
+
+
+
 ## P64-Service--实验--LoadBalancer类型
+
+#### 6.3.5 LoadBalancer类型
+
+​		与NodePort的区别在于，LoadBalancer会在集群的外部再来一个负载均衡设备，而这个设备需要外部环境支持的，外部服务发送到这个设备上的请求，会被设备负载之后转发到集群中。
+
 ## P65-Service--实验--ExternalName类型
+
+#### 6.3.6 ExternalName类型的Service
+
+​		ExternalName类型的Service用于引 入集群外部的服务，它通过externalName属性指定外部一个服务的地址，然后在集群内部访问此service就可以访问到外部的服务了。
+
+<font color='red'>**外部服务引入到pod**</font>
+
+service-externalname.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-externalname
+  namespace: dev
+spec: 
+  type: ExternalName
+  externalName: www.baidu.com	#改成ip地址也可以
+```
+
+```sh
+kubectl create -f service-externalname.yaml
+
+# 域名解析
+dig @10.96.0.10 service-externalname.dev.svc.cluster.local
+```
+
 ## P66-Ingress介绍
+
+### 7.4 Ingress介绍
+
+Service对集群之外暴露的主要方式有2种：NodePort和LoadBalancer，但这2种方式，都有一定的缺点：
+
+- NodePort方式的缺点是会占用很多集群机器的端口，那么当集群服务变动很多的时候，这个缺点愈发明显。
+- LB方式的缺点是每个service需要一个LB，浪费，麻烦，并且需要k8s之外设备的支持。
+
+基于这种现状，k8s提供了Ingress资源对象，Ingress只需要一个nodePortt或者一个LB就可以满足暴露多个service的需求。
+
+![image-20210422110458684](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210422110458684.png)
+
+​		实际上，Ingress相当于一个7层负载均衡器，是以k8s对反向代理的一个抽象。它的工作原理类似于Nginx，可以理解成在**Ingress里建立诸多映射规则，Ingress Controller通过监听这些配置规则并转化成Nginx的配置，然后对外部提供服务**。在这里有2个核心概念：
+
+- Ingress: k8s中的一个对象，作用是定义请求如何转发到service的规则
+- Ingress controller: 具体实现反向代理及负载均衡的程序，对Ingress定义的规则进行解析，根据配置的规则来实现请求转发，实现方式有很多，比如Nginx, Contour, Haproxy等。
+
+Ingress（以Nginx为例）的工作原理如下：
+
+1. 用户编写Ingress规则，说明哪个域名对应k8s集群中的哪个service
+2. Ingress控制器动态感知Ingress服务规则的变化，然后生居一段对应的Nginx配置。
+3. Ingress控制器会将生成的Nginx配置写入到一个运行着的Nginx服务中，并动态更新
+4. 到此为止，其实真正在工作的就是一个Nginx了，内部配置了用户定义的请求转发规则
+
+![image-20210422113902373](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210422113902373.png)
+
+  
+
 ## P67-Ingress案例--环境准备
+
+### 7.5  Ingress使用
+
+#### 7.5.1 环境准备
+
+**搭建Ingress环境**
+
+```sh
+# 创建文件夹
+mkdir ingress-controller
+cd ingress-controller
+
+# 获取ingress-nginx, 本次使用0.30版本
+wget https://github.com/kubernetes/ingress-nginx/tree/nginx-0.30.0/deploy/static/mandatory.yaml
+
+wget https://github.com/kubernetes/ingress-nginx/blob/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
+
+# 修改mandatory.yaml文件中的仓库
+# 修改quay.io/kuberntes-ingress-controller/nginx-ingress-controller:0.30.0
+# 为quay-mirror.qiniu.com/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+# 创建ingress-nginx
+kubectl apply -f ./
+
+# 查看ingress-nginx
+kubectl get pod -n ingress-nginx
+
+# 查看service
+kubectl get svc -n ingress-nginx
+```
+
+准备service和pod
+
+
+
 ## P68-Ingress案例--http代理
 ## P69-Ingress案例--https代理
 

@@ -228,6 +228,38 @@ quit
 
 #### [shift]+{[PageUP]|[Page Down]}按键
 
+# 第9章 vim程序编辑器
+
+## 9.1 vi 与 vim
+
+### 9.1.1 为何要学 vim
+
+## 9.2 vi 的使用
+
+- 一般指令模式 (command mode)
+
+- 编辑模式 (insert mode)
+
+- 指令列命令模式 (command-line mode)
+
+  ​	在一般模式当中，输入『 : / ? 』三个中的任何一个按钮，就可以将光标移动到最底下那一列。
+
+### 9.2.1 简易执行范例
+
+### 9.2.2 按键说明
+
+```sh
+h, j, k ,l		# 方向键
+ctrl+f	# pagedown
+ctrl+b	# page Up
+ctrl+d	# 向下移半页
+ctrl+u 	# 向上移半页
+```
+
+
+
+
+
 # 第10章  认识与学习 BASH
 
 ## 10.1 认识 BASH 这个 Shell

@@ -278,8 +278,6 @@ service/nginx        NodePort    10.105.205.24   <none>        80:32434/TCP   13
 http://192.168.132.32:32434/	# 是否有nginx主页
 ```
 
-
-
 # 第3章  资源管理
 
 ## P12-资源管理介绍
@@ -3136,25 +3134,233 @@ wget https://github.com/kubernetes/ingress-nginx/blob/nginx-0.30.0/deploy/static
 
 # 修改mandatory.yaml文件中的仓库
 # 修改quay.io/kuberntes-ingress-controller/nginx-ingress-controller:0.30.0
-# 为quay-mirror.qiniu.com/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+# 为registry.aliyuncs.com/google_containers/nginx-ingress-controller:0.30.0
 # 创建ingress-nginx
 kubectl apply -f ./
 
 # 查看ingress-nginx
 kubectl get pod -n ingress-nginx
+NAME                                        READY   STATUS    RESTARTS   AGE
+nginx-ingress-controller-7b86f6f9fc-8nkhr   1/1     Running   0          87s
 
 # 查看service
 kubectl get svc -n ingress-nginx
+NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx   NodePort   10.101.158.154   <none>        80:31256/TCP,443:32175/TCP   108s
+# 80是http对应端口，443是https对应端口
 ```
 
-准备service和pod
+**准备service和pod**
 
+tomcat-nginx.yaml
 
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17.1
+        ports:
+        - containerPort: 80
+        
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat-pod
+  template:
+    metadata:
+      labels:
+        app: tomcat-pod
+    spec:
+      containers:
+      - name: tomcat
+        image: tomcat:8.5-jre10-slim
+        ports:
+        - containerPort: 8080
+        
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-service
+  namespace: dev
+spec:
+  selector:
+    app: tomcat-pod
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+ 
+```
+
+```sh
+# 先重建下dev namespace
+kubectl delete ns dev
+kubectl create ns dev
+
+# 创建
+kubectl create -f tomcat-nginx.yaml
+```
 
 ## P68-Ingress案例--http代理
+
+#### 7.5.2 http代理
+
+ingress-http.yaml
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-http
+  namespace: dev
+spec:
+  rules:
+  - host: nginx.itheima.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-service
+          servicePort: 80
+  - host: tomcat.itheima.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: tomcat-service
+          servicePort: 8080
+    
+```
+
+```sh
+# 创建
+kubectl create -f ingress-http.yaml
+# 查看
+kubetl gt ing ingress-http -n dev
+NAME           HOSTS                                  ADDRESS          PORTS   AGE
+ingress-http   nginx.itheima.com,tomcat.itheima.com   10.101.158.154   80      8s
+
+# 查看详情
+kubectl describe ing ingress-http -n dev
+Rules:
+  Host                Path  Backends
+  ----                ----  --------
+  nginx.itheima.com   
+                      /   nginx-service:80 (10.244.3.164:80,10.244.4.75:80,10.244.4.78:80)
+  tomcat.itheima.com  
+                      /   tomcat-service:8080 (10.244.3.163:8080,10.244.4.76:8080,10.244.4.77:8080)
+
+# 修改主机的host规则
+C:\Windows\System32\drivers\etc\hosts
+192.168.132.31   nginx.itheima.com
+192.168.132.31   tomcat.itheima.com
+
+# 查看ingress服务对应的端口
+[root@m1 ingress-controller]# kubectl get svc -n ingress-nginx
+NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx   NodePort   10.101.158.154   <none>        80:31256/TCP,443:32175/TCP   63m
+
+# 浏览器输入
+http://nginx.itheima.com:31256
+```
+
 ## P69-Ingress案例--https代理
 
+创建证书
+
+```sh
+# 生成证书
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=itheima.com"
+
+# 创建密钥
+kubectl create secret tls tls-secret --key tls.key --cert tls.crt
+```
+
+创建ingress-https.yaml
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-https
+  namespace: dev
+spec:
+  tls:
+    - hosts:
+      - nginx.itheima.com
+      - tomcat.ithima.com
+      secretName: tls-secret	# 指定密钥
+  rules:
+  - host: nginx.itheima.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-service
+          servicePort: 80
+  - host: tomcat.itheima.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: tomcat-service
+          servicePort: 8080
+```
+
+```sh
+kubectl create -f ingress-https.yaml
+
+# 查看
+kubectl get ing ingress-https -n dev
+NAME            HOSTS                                  ADDRESS   PORTS     AGE
+ingress-https   nginx.itheima.com,tomcat.itheima.com             80, 443   20s
+
+kubectl describe ing ingress-https -n dev
+```
+
 # 第8章 数据存储
+
+## P70-数据存储介绍
 
 为了持久化保存容器的数据，k8s引入了Volume的概念
 
@@ -3166,17 +3372,251 @@ Volume 支持多种哦打，常见有：
 - 高级存储：PV， PVC
 - 配置存储：ConfigMap, Secret
 
-## P70-数据存储介绍
+ 
+
+## P71-基本存储--EmptyDir
 
 ### 8.1 基本存储
 
 #### 8.1.1 EmptyDir
 
-## P71-基本存储--EmptyDir
+​		EmptyDir是最基础的Volume类型，一个EmptyDir就是Host上的一个空目录。
+
+​		EmptyDir是在Pod被分配到Node时创建的，它的初始内容为空，并且无须指定宿主机上对应的目录文件，因为k8s会自动分配一个目录，当pod销毁时，EmptyDir中的数据也会被永久删除。EmptyDir用途如下：
+
+- 临时空间，例如用于某些应用程序运行时所需的临时目录，且无须永久保留。
+- 一个窗口需要从另一个窗口中获取数据的目录（多窗口共享目录）
+
+案例：
+
+​		在一个pod中准备两个容器nginx和busybox，然后声明一个Volume分别挂在到两个容器的目录中，然后nginx窗口负责向Volume中写日志，busybox中通过命令将日志内容读到控制台。
+
+volume-emptydir.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: volume-emptydir
+  namespace: dev
+spec: 
+  containers:
+  - name: nginx
+    image: nginx:1.17.1
+    ports:
+    - containerPort: 80
+    volumeMounts:	# 将logs-volume挂在到nginx容器中，对应的目录为/var/log/nginx
+    - name: logs-volume
+      mountPath: /var/log/nginx
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","tail -f /logs/access.log"] # 初始命令，动态读取指定文件中内容
+    volumeMounts:	# 将logs-volume挂在到busybox容器中，对应的目录为 /logs
+    - name: logs-volume
+      mountPath: /logs
+  volumes: 	# 声明volumme, name为logs-volume, 类型为emptyDir
+  - name: logs-volume
+    emptyDir: {}
+```
+
+```sh
+kubectl create -f volume-emptydir.yaml
+
+#查看pod
+kubectl  get pods volume-emptydir -n dev -o wide
+
+#访问nginx
+curl 10.244.1.100
+
+# 通过kubectl logs命令查看指定容器的标准输出 
+kubectl logs -f volume-emptydir -n dev -c busybox
+```
+
+
+
 ## P72-基本存储--HostPath
+
+### 8.1.2 HostPath
+
+​		EmptyDir中数据不会被持久化， 它会随着Pod的结束而销毁，如果想简单的将数据持久化到主机中，可以选择HostPath。
+
+​		HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就要以保证Pod销毁了，但是数据依然可以存在于nodey主机上。
+
+volume-hostpath.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: volume-hostpath
+  namespace: dev
+spec: 
+  containers:
+  - name: nginx
+    image: nginx:1.17.1
+    ports:
+    - containerPort: 80
+    volumeMounts:	# 将logs-volume挂在到nginx容器中，对应的目录为/var/log/nginx
+    - name: logs-volume
+      mountPath: /var/log/nginx
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","tail -f /logs/access.log"] # 初始命令，动态读取指定文件中内容
+    volumeMounts:	# 将logs-volume挂在到busybox容器中，对应的目录为 /logs
+    - name: logs-volume
+      mountPath: /logs
+  volumes: 	# 声明volumme, name为logs-volume, 类型为emptyDir
+  - name: logs-volume
+    hostPath:
+      path: /root/logs
+      type: DirectoryOrCreate	# 目录存在就使用，不存在就先创建后使用
+```
+
+关于type值的说明
+
+- DirectoryOrCreate  目录存在就使用，不存在就先创建后使用
+- Directory  目录必须存在
+- FireOrCreate  文件存在就使用，不存在就先创建后使用
+- File    文件必须存在
+- Socket     unix套接字必须存在
+- CharDevice   字符设备必须存在
+- BlockDevice    块设备必须存在
+
+<font color='red'>pod部署在哪个node上，就在哪个node上创建hostpath</font>
+
 ## P73-基本存储--NFS
+
+​		HostPath可以解决数据持久化的问题，但是一旦Node节点的故障了，pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的有NFS, CIFS。
+
+1、准备nfs服务器
+
+```sh
+# 在master上安装nfs服务
+yum install nfs-utils -y
+
+# 准备一个共享目录
+mkdir /root/data/nfs -pv
+
+# 将共享目录以读写权限暴露给192.168.109.0/24网段中的所有主机
+vim /etc/exports
+more /etc/exports
+/root/data/nfs		192.168.132.0/24(rw,no_root_squash)	# 可读可写，不用root权限
+
+# 启动nfs服务
+systemctl start nfs
+```
+
+2、每个node节点都安装下nfs, 这样的目的是为了node节点可以驱动nfs设备
+
+```sh
+# 在node上安装nfs服务，注意不需要启动
+yum install nfs-utils -y
+```
+
+3、volume-nfs.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: volume-nfs
+  namespace: dev
+spec: 
+  containers:
+  - name: nginx
+    image: nginx:1.17.1
+    ports:
+    - containerPort: 80
+      nodePort: 80
+    volumeMounts:	# 将logs-volume挂在到nginx容器中，对应的目录为/var/log/nginx
+    - name: logs-volume
+      mountPath: /var/log/nginx
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","tail -f /logs/access.log"] # 初始命令，动态读取指定文件中内容
+    volumeMounts:	# 将logs-volume挂在到busybox容器中，对应的目录为 /logs
+    - name: logs-volume
+      mountPath: /logs
+  volumes: 	# 声明volumme, name为logs-volume, 类型为emptyDir
+  - name: logs-volume
+    nfs:
+      server: 192.168.132.31	# nfs服务器地址
+      path: /root/data/nfs
+```
+
+```sh
+# 创建pod
+kubectl create -f volume-nfs.yaml
+
+# 查看pod
+kubectl get pod -n dev -o wide
+
+# 查看访问日志
+tail -f /root/data/nfs/access.log
+10.244.3.1 - - [27/Apr/2021:06:18:19 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"
+```
+
+
+
 ## P74-高级存储--pv和pvc的介绍
+
+### 8.2.1  PV和PVC
+
+​		NFS提供存储，此时就要求用户会搭建NFS系统，并且会在yaml配置nfs。由于k8s支持的存储系统很多，要求客户全都要掌握，显然不现实。为了能够屏蔽底层存储实现的细节，方便用户使用，k8s引入PV和PVC两种资源对象。
+
+- PV（Persistent Volume）是持久化卷的意思。是对底层的共享在座的一种抽象。一般情况下PV由k8s管理员进行 创建和配置，它与底层具体的共享存储技术有关，并通过插件完成与共享存储的对接。
+
+- PVC（Persistent Volume Claim）是持久卷声明的意思，是用户对于存储需求的一种声明。换句话说，PVC其实就是用户向k8s系统发出的一种资源需求申请。
+
+使用了PV和PVC之后，工作可以进一步细分：
+
+- 存储：存储工程师维护
+- PV：k8s管理员维护
+- PVC：k8s用户维护
+
 ## P75-高级存储--pv
+
+### 8.2.2 PV
+
+<font color='red'>PV是跨nacespce的</font>
+
+资源清单
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv2
+spec:
+  nfs: 	#存储类型，与底层真正存储对应
+  capacity: # 存储能力，目前只支持存储空间的设置
+    storage: 2Gi
+  accessModes: #  访问模式
+  storageClassName:  #存储类别 
+  persistentVolumeReclaimPolicy:  #回收策略
+```
+
+PV的关键参数说明：
+
+- 存储类型：底层实际存储的类型，k8s支持多种存储类型，每种存储类型的配置都有所差异。
+
+- 存储能力（capacity）：目前只支持存储空间的设置（storage=1Gi）。不过未来可能会加入IOSPS，吞吐量等指标的配置。
+
+- 访问模式（accessModes）：用于描述用户应用对存储资源的访问权限，访问权限包括下面几种方式：
+
+  - ReadWriteOnce（RWO）：读写权限，但是只能被单个节点挂载。
+  - ReadOnlyMany(ROX)：只读权限，可以被多个节点挂载。
+  - ReadWriteMany（RWX）：读写权限，可以被多个节点挂载
+
+  <font color='red'>需要注意的是是，底层不同的存储类型可能支持的访问模式不同</font>
+
+- 回收策略（persistentVolumeReclaimPolicy）：当PV不再被使用了之后，对其的处理方式。目前支持3种策略：
+
+  - Retain（保留）：保留数据，需要管理员手工清理数据
+  - 
+
+
+
 ## P76-高级存储--pvc
 ## P77-高级存储--pv和pvc的生命周期
 ## P78-配置存储--configmap

@@ -3560,7 +3560,7 @@ tail -f /root/data/nfs/access.log
 
 ## P74-高级存储--pv和pvc的介绍
 
-![image-20210428104907303](E:\JS\booknote\jpgBed\image-20210428104907303.png)
+![image-20210428104907303](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210428104907303.png)
 
 ### 8.2.1  PV和PVC
 

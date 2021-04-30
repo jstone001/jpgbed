@@ -3560,6 +3560,8 @@ tail -f /root/data/nfs/access.log
 
 ## P74-高级存储--pv和pvc的介绍
 
+![image-20210428104907303](E:\JS\booknote\jpgBed\image-20210428104907303.png)
+
 ### 8.2.1  PV和PVC
 
 ​		NFS提供存储，此时就要求用户会搭建NFS系统，并且会在yaml配置nfs。由于k8s支持的存储系统很多，要求客户全都要掌握，显然不现实。为了能够屏蔽底层存储实现的细节，方便用户使用，k8s引入PV和PVC两种资源对象。
@@ -3613,14 +3615,421 @@ PV的关键参数说明：
 - 回收策略（persistentVolumeReclaimPolicy）：当PV不再被使用了之后，对其的处理方式。目前支持3种策略：
 
   - Retain（保留）：保留数据，需要管理员手工清理数据
-  - 
+  - Recycle（回收）：清除PV中的数据，效果相当于执行rm -rf /thevolume/*
+  - Delete（删除）：与PV相连后端存储完成volume的删除操作，当我这常见于云服务商的存储服务
 
+  <font color='red'>需要注意的是是，底层不同的存储类型可能支持的访问模式不同</font>
 
+- 存储类别：PV通过storageClassName参数指定一个存储类别（比较少用）
+
+  - 具有特定类别的PV只能与请求了该类别的PVC进行绑定。
+  - 未这对定类别的PV则只能与不请求任保类别的PVC进行绑定
+
+- 状态（status）：一个PV的生命周期中，可能会处于不同的阶段：
+
+  - Available（可用）：表示可用状态，还未被任保PVC绑定
+  - Bound（已绑定）：表示PV已经被PVC绑定
+  - Released（已释放）：表示PVC被删除，但是资源还未被集群重新声明
+  - Failed（失败）：表示该PV的自动回收失败
+
+**实验**：使用NFS准备NFS作为存储，来演示PV的使用，创建3个PV，对应NFS中的3个暴露的路径。
+
+1、准备NFS环境
+
+```sh
+# 创建目录
+mkdir /root/data/{pv1,pv2,pv3} -pv
+
+# 暴露服务
+more /etc/exports
+/root/data/pv1    192.168.132.0/24(rw,no_root_squash)
+/root/data/pv2    192.168.132.0/24(rw,no_root_squash)
+/root/data/pv3    192.168.132.0/24(rw,no_root_squash)
+
+# 重启服务
+systemctl restart nfs
+```
+
+2、pv.yaml
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv1
+    server: 192.168.132.31
+    
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv2
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv2
+    server: 192.168.132.31
+    
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv3
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv3
+    server: 192.168.132.31
+
+```
+
+```sh
+# 创建pv
+kubectl create -f pv.yaml
+
+# 查看
+kubectl get pv -o wide
+NAME   CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE     VOLUMEMODE
+pv1    1Gi        RWX            Retain           Available                                   2m44s   Filesystem
+pv2    2Gi        RWX            Retain           Available                                   2m44s   Filesystem
+pv3    3Gi        RWX            Retain           Available                                   2m44s   Filesystem
+```
 
 ## P76-高级存储--pvc
+
+PVC是资源的是申请，用来声明对存储空间、访问模式、存储类别需求信息。资源清单文件：
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc
+  namespace: dev
+spec:
+  accessModes: # 访问模式
+  selector: # 采用标签对PV选择
+  storageClassName: 	#存储类别 
+  resources:	# 请求空间
+    requests: 
+      storage: 5Gi
+```
+
+PVC关键配置参数说明：
+
+- 访问模式（accessModes）：用于描述用户对存储资源的访问权限
+- 选择条件（selector）：通过Label Selector的设置，可使用PVC对系统中已存在的PV进行筛选
+- 存储类别（storageClassName）：PVC在定义时可以设定老百姓要的后端存储的类别，只有设置了该class的pvc才能被系统选出
+- 资源请求（Resours）：描述对存储 资源的请求
+
+pvc.yaml
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+  namespace: dev
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+    
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc2
+  namespace: dev
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+    
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv3
+  namespace: dev
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+```
+
+```sh
+kubectl create -f pvc.yaml
+
+# 查看
+kubectl get pvc -n dev
+kubectl get pv
+```
+
+创建pvc-pods.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: pod1
+  namespace: dev
+spec: 
+  containers:
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","while true;do echo pod1 >> /root/out.txt; sleep 10; done;"] 
+    volumeMounts:	
+    - name: volume
+      mountPath: /root/		#绑定容器内部的路径
+  volumes: 	
+  - name: volume
+    persistentVolumeClaim:
+      claimName: pvc1
+      readOnly: false
+      
+---
+
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: pod2
+  namespace: dev
+spec: 
+  containers:
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","while true;do echo pod2 >> /root/out.txt; sleep 10; done;"] 
+    volumeMounts:	
+    - name: volume
+      mountPath: /root/
+  volumes: 	
+  - name: volume
+    persistentVolumeClaim:
+      claimName: pvc2
+      readOnly: false
+```
+
+```sh
+kubectl create -f pvc-pod.yaml
+
+# 查看master下/root/data/pv1/out.txt 和/root/data/pv2/out.txt
+tail -f /root/data/pv1/out.txt
+tail -f /root/data/pv2/out.txt
+```
+
+
+
 ## P77-高级存储--pv和pvc的生命周期
+
+#### 8.2.4 生命周期
+
+PVC和PV是一一对应的，PV和PVC之间的相互作用遵循以下生命周期：
+
+- **资源供应**：管理员手动创建底层存储和PV
+
+- 资源绑定：用户创建PVC, k8s负责根据PVC的声明去寻找PV，并绑定在用户定义好的PVC之后，系统将根据PVC对存储资源的请求在已存在的PV中选择一个满足条件的
+
+  - 一旦找到，就将该PV与用户定义的PVC进行绑定，用户的应用就可以使用这个PVC了
+  - 如果找不到，PVC则会无限期处于Pending状态，直到等到系统管理员创建一个符合其要求的PV
+
+  <font color='red'>PV一旦绑定到某个PVC上，就会被这个PVC独占，不能再与其他PVC进行绑定了</font>
+
+- **资源使用**：用户可在pod中像volume一样使用PVC
+
+  Pod使用Volume的定义，将PVC挂载到容器内的某个路径进行使用。
+
+- **资源释放**：用户删除pvc来释放pv
+
+  当存储资源使用完毕后，用户可以删除pvc，与该PVC绑定的PV将会被标记为“released"，但还不能立刻与其他pvc进行绑定，通过之前PVC写入的数据可能还被留在存储设备上，只有在清除之后该pv才能再次使用。
+
+- 资源回收：k8s根据pv设置的回收策略进行资源的回收
+
+  对于pv，管理员可以设定回收策略，用于设置与之绑定的PVC释放资源之后如何处理遗留数据的问题。只有PV的存储空间完成回收，才能供新的PVC绑定和使用。
+
+  ![image-20210428144917804](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210428144917804.png)
+
+  
+
+  
+
 ## P78-配置存储--configmap
+
+#### 8.3.1 ConfigMap
+
+configmap.yaml
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap
+  namespace: dev
+data:
+  info: 
+    username:admin
+    password:123456
+```
+
+```sh
+# 创建configmap
+kubectl create -f configmap.yaml
+
+#查看configmmap详情
+kubectl describe cm configmap -n dev
+Data
+====
+info:
+----
+username:admin password:123456
+Events:  <none>
+```
+
+创建pod pod-configmap.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-configmap
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.17.1
+    volumeMounts: 	# 将configmap挂载到目录
+    - name: config
+      mountPath: /configmap/config
+  volumes:	# 引用configmap
+  - name: config
+    configMap:
+      name: configmap
+```
+```sh
+# 创建pod
+kubectl create -f pod-configmap.yaml
+
+# 查看pod
+kubectl get pod-configmap -n dev
+
+# 进入容器
+kubectl exec -it pod-configmap -n dev /bin/bash
+# cd /configmap/config
+# ls
+more info
+
+# 可以看到映射成功，每个configmap都映射成了一个目录
+# key --->文件    value--->文件中的内容
+# 此例中info是文件名， username, password都是内容
+# 此时如果更新configmap的内容，容器中的值也会动态更新（要等一会，大概1分钟）
+```
+
 ## P79-配置存储--secret
+
+#### 8.3.2 Secret
+
+​		它主要用于存储敏感信息，例如密码，密钥，证书等
+
+1、对base64对数据进行编码
+
+```sh
+echo -n 'admin' | base64  # 准备username
+YWRtaW4=
+echo -n '123456' | base64
+MTIzNDU2
+
+```
+
+2、secret.yaml
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret
+  namespace: dev
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: MTIzNDU2
+```
+
+```sh
+# 创建secret
+kubectl create -f secret.yaml
+# 查看secret详情
+kubectl describe secret  secret -n dev
+Name:         secret
+Namespace:    dev
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+password:  6 bytes	# 加密了
+username:  5 bytes  # 加密了
+```
+
+创建pod-secret.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-secret
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.17.1
+    volumeMounts: 	# 将secret挂载到目录
+    - name: config
+      mountPath: /secret/config
+  volumes:	
+  - name: config
+    secret:
+      secretName: secret
+```
+
+```sh
+#创建pod
+kubectl create -f pod-secret.yaml
+
+# 进入容器，查看secret信息，发现已经自动解码了
+kubectl exec -it pod-secret /bin/bash -n dev
+# ls /secret/config/
+# more /secret/config/username
+admin
+# more /secret/config/password
+123456
+```
 
 # 第9章 安全认证
 
@@ -3641,9 +4050,318 @@ PV的关键参数说明：
 - Authorization（授权）：判断用户是否有权限对访问的资源执行特定的动作。
 - Admission Control（准入控制）：用于补充授权机制以实现更加精细的访问控制功能。
 
+![image-20210430102222304](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210430102222304.png)
+
 ## P81-安全认证--认证方式
+
+### 9.2 认证管理
+
+​		k8s集群安全的最关键点在于如何识别并认证客户端身份，它提供了3种客户端身份认证方式：
+
+- **http Base认证**：通过用户名+密码的方式认证
+
+  ​	这种认证方式是把“用户名：密码”用BASE6算法进行编码后的字符串放在http请求中的Header Authorization域里发送给服务端。服务端收到后进行解码，获取用户名及密码，然后进行用户身份认证的进程。
+
+- **http token认证**：通过一个token来识别合法用户
+
+  ​	这种认证方式是用一个很长的难以被模仿的字符串——token来表明客户身份的一种方式。每个token对应一个用户名，当客户端发起API调用请求时，需要在http Header里放入token，API Server接到token后会跟服务器中保存的tokken进行比对，然后进行用户身份认证的过程。
+
+- **https证书认证**：基于CA根证书签名的双向数字证书认证方式
+
+  ​	这种认证方式是安全性最高的一种方式，但是同时也是操作起来最麻烦的一种方式。
+
+  ![image-20210430103703990](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210430103703990.png)
+
+http认证大体分为3个过程：
+
+1. 证书申请和下发
+
+   ​	https通过双方的服务器向ca机构申请证书，ca机构下发根证书、服务端证书及私钥给申请者
+
+2. 客户端和服务端的双向认证
+
+   ```md
+   1. 客户端向服务器端发起请求，服务端下发自己的证书给客户端，
+      客户端接收到证书后，通过私钥解密证书，在证书中获得服务端的公钥，
+      客户端利用服务器端的公钥认证证书中的信息，如果一致，则认可这个服务器
+   2. 客户端发送自己的证书给服务器端，服务端接收到证书后，通过私钥解密证书，
+      在证书中获得客户端的公钥，并用该公钥认证证书信息，确认客户端是否合法。
+   ```
+
+3. 服务器端和客户端进行通信
+
+   ​	服务端和客户端协商好加密方案后，客户端会产生一个随机的秘钥并加密，然后发送到服务端。
+
+   ​    服务端接收这个秘钥后，双方接下来通信的所有内容都通过该随机秘钥加密
+
+   PS：**k8s允许同时配置多种认证方式，只要其中任意一个方式认证通过即可**。
+
 ## P82-安全认证--授权管理
+
+### 9.3  授权管理
+
+​		授权发生在认证成功之后，通过认证就可以态度同一个求用 户是谁，然后k8s会根据事先定义的授权策略来决定用户是否有权限访问，这个过程就称为授权。
+
+​		每个发送到ApiServer的请求都带上了用户和资源的信息：比如发送请求的用户，请求的路径，请求的动作等，授权就是根据这些信息和授权策略进行比较，如果符合策略，则认为授权通过，否则会返回错误。
+
+API Server目前支持以下几种授权策略：
+
+- AlwaysDeny：表示拒绝所有请求，一般用于测试
+
+- AlwaysAllow：允许接收所有请求，相当于集群不需要授权流程（k8s默认的策略）
+
+- ABAC：基于属性的访问控制，表示使用用户配置的授权规则对用䚮请求进行匹配和控制。
+
+- Webhook：通过调用外部REST服务对用户进行授权。
+
+- Node：是一各专用模式，用于对kubelet发出的请求进行访问控制。
+
+- **RBAC**：基于角色的访问控制（kubeadm安装方式下的默认选项）
+
+  RBAC（Role-Base Access Control）基于角色的访问控制，主要是在描述一件事情：**给哪些对象授予哪些权限**
+
+  **基中涉及到了下面几个概念**：
+
+  - 对象：user, groups, ServiceAccount
+  - 角色：代表着一组定义在资源上的要操作动作的集合
+  - 绑定：将定义好的角色跟用䚮绑定在一起
+
+  RBAC引入4个顶级资源对象：
+
+  - Role，ClusterRole：角色，用于指定一组权限
+  - RoleBinding, ClusterRoleBinnding：角色权限，用于将角色（权限）赋予给对象
+
+  **Role, ClusterRole**
+
+  一个角色就是一组权限的集合，这时的权限都是许可形式的（白名单）。
+
+```yaml
+# Role只能对命名空间内的资源进行授权，需要指定namespace
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: dev
+  name: authorization-role
+rules:
+- apigroups: [""]  # 支持的API组列表，""空字符串，表示核心API群
+  resources: ["pods"] # 支持的资源对象列表
+  verbs: ["get" ,"watch", "list"] # 允许的对资源对象的你叫什么方法列表
+```
+
+```yaml
+# ClusterRole可以对集群范围内资源，跨namespaces的范围资源，非资源类型进行授权
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: authorization-clusterrole
+rules:
+- apigroups: [""] 
+  resources: ["pods"] 
+  verbs: ["get" ,"watch", "list"] 
+```
+
+需要说细说明的是，rules的参数：
+
+- apiGroups: 支持的API组列表
+
+```sh
+"","apps","autoscaling", "batch"
+```
+
+- resources: 支持的资源对象列表
+
+```sh
+"services", "endpoints", "pods","secrets", "configmaps", "crontabs", "deployments", "jobs", "nodes", "rolebindings", "clusterroles", "daemonsets", "replicasets","statefulsets", "hozizontalpodautoscalers", "replicatioincontrollers", "cronjobs"
+```
+
+- verbs：对资源对象的操作方法列表
+
+```sh
+"get", "list", "watch", "create", "update", "patch", "delete", "exec"
+```
+
+
+
+**RoleBinding， ClusterRoleBinding**
+
+角色绑定用来把一个角色绑定到一个目标对象上，绑定目标可以是User，Group或者ServiceAccount
+
+```yaml
+# RoleBinding可以将同一namespace上的subject绑定到某个Role下，则此subject即具有该role定义的权限
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: authorization-role-binding
+  namespace: dev
+subjects:
+- kind: User
+  name: heima
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role	
+  name: authorization-role	# 将authorization-role的角色赋予heima的用户
+  apiGroup: rbac.authorization.k8s.io
+```
+
+```yaml
+# ClusterRoleBinding在整个集群级别和所有namespaces将特定的subject与ClusterRole绑定，授予权限
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: authorization-clusterrole-binding
+subjects:
+- kind: User
+  name: heima
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: authorization-role
+  apiGroup: rbac.authorization.k8s.io
+```
+
+**RoleBinding 引用ClusterRole进行授权**
+
+RoleBinding可以引用ClusterRole，对属于同一命名空间内ClusterRole定义的资源主体进行授权。
+
+```sh
+#  一种很常用的做法是，集群管理员为集群范围预定义好一组角色（ClusterRole），然后在多个命名空间中重复使用这些ClusterRole。这可以大幅度提高授权管理工作效率，也使得各个命名空间下的基础性授权规则与使用体验保持一致。
+```
+
+```yaml
+# 虽然authorization-clusterrole是一个集群角色 ，但是因为使用了RoleBinding
+# 所以heima只能读取dev命名空间中的资源
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: authorization-role-binding-ns
+  namespace: dev
+subjects:
+- kind: User
+  name: heima
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole	
+  name: authorization-clusterrole	# 将authorization-role的角色赋予heima的用户
+  apiGroup: rbac.authorization.k8s.io
+```
+
+**实战：创建一个只能管理dev空间下pods资源的账号**
+
+1、创建账号
+
+```sh
+# 1. 创建证书
+cd /etc/kubernetes/pki/
+
+(umask 077;openssl genrsa -out devman.key 2048)
+
+# 2. 用apiserver的证书签署
+# 2.1 签名申请，申请的用户是devman，组是devgroup
+openssl req -new -key devman.key -out devman.csr -subj "/CN=devman/O=devgroup"
+
+# 2.2 签署证书
+openssl x509 -req -in devman.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out devman.crt -days 3650
+
+# 3. 设置集群，用户，上下文信息
+kubectl config set-cluster kubernetes --embed-certs=true --certificate-authority=/etc/kubernetes/pki/ca.crt --server=https://192.168.132.31:6443
+
+kubectl config set-credentials devman --embed-certs=true --client-certificate=/etc/kubernetes/pki/devman.crt --client-key=/etc/kubernetes/pki/devman.key
+
+kubectl config set-context devman@kubernetes --cluster=kubernetes --user=devman
+
+# 切换到devman
+kubectl config use-context devman@kubernetes
+
+# 查看dev下权限，发现没有权限
+kubectl get pods -n dev
+Error from server (Forbidden): pods is forbidden: User "devman" cannot list resource "pods" in API group "" in the namespace "dev"
+
+# 切换到admin账户
+kubectl config use-context kubernetes-admin@kubernetes
+```
+
+2、创建Role和RoleBinding，为devman用户授权
+
+dev-role.yaml
+
+```yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: dev
+  name: dev-role
+rules:
+- apiGroups: [""]  
+  resources: ["pods"] 
+  verbs: ["get" ,"watch", "list"] 
+  
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: dev
+  name: authorization-role-binding
+subjects:
+- kind: User
+  name: devman
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: dev-role
+  apiGroup: rbac.authorization.k8s.io
+
+```
+
+```sh
+kubectl create -f dev-role.yaml
+```
+
+3、切换账户，再次验证
+
+```sh
+# 切换账户到devman
+kubectl config use-context devman@kubernetes
+Switched to context "devman@kubernetes".
+
+
+# 再次检查
+kubectl get pods -n dev
+
+# 为了不影响后面的学习，切回到admin账户
+kubectl config use-context kubernetes-admin@kubernetes
+Switched to context "kubernetes-admin@kubernetes".
+
+```
+
 ## P83-安全认证-- 准入控制
+
+通过了前面的认证和授权之后，还需要经过准入控制处理通过之后，apiserver才会处理这个请求。
+
+准入控制是一个可配置的控制器列表，可以通过在api-server上通过命令行设置选择执行哪些准入控制器：
+
+```sh
+--admission-control=NamespaceLifecycle, LimmitRanger, ServiceAccount, PersistentVolumeLabel, DefaultStorageClass, ResourceQuota, DefaultTolerationSeconds
+```
+
+只有当所有的准入控制器都检查通过之后，apiserver才执行该请求，否则返回拒绝。
+
+当前可配置的Admission Control准入控制如下：
+
+- AlwaysAdmit：允许接收所有请求
+- AlwaysDeny：禁止所有请求，一般用于测试
+- AlwaysPullImages：在启动容器之前总去下载镜像
+- DenyExecOnPrivileged：会拦截所有想在Privileged Container上执行命令的请求
+- ImagePolicyWebhook：这个插件将允许后端的一个webhook程序来完成admission controller的功能
+- Service Account：实现serviceAccount自动化
+- SecurityContextDeny：将使用SecurityContext的pod中的定义全部失效
+- ResourceQuota：用于资源配额管理目的，观察所有请求，确保在namespace上的配额不会超标
+- LimitRanger：用于资源限制管理，作用于namespace上，确保对pod进行资源限制
+- InitialResources：为未设置资源请求与限制的pod，根据其镜像的历史资源的使用情况进行设置
+- NamespaceLifecycle：如果尝试在一个不存在的namespace中创建资源对象，则该创建请求将被拒绝。当删除一个namespace时，系统将会删除该namespace中所有对象。
+- DefaultStorageClass：为了实现共享存储的动态供应，为未指定StorageClass或PV的PVC尝试匹配默认的StorageClass，尽可能减少用户在申请 PVC时所需了解的后端在座细节
+- DefaultTolerationSeconds：为那些没有设置forgiveness toleratioins并具有notreay:NoExecute和unreachable:NoExecute两种taints的pod设置默认的”容忍“时间，为5min
+- PodSecurityPolicy：用于在创建或修改pod时决定是否根据pod的security context和可用的podSecurityPolicy对pod的安全策略进行控制。
 
 # 第10章 DashBoard
 

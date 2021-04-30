@@ -34,6 +34,14 @@ shift+ZZ
 :wq
 ```
 
+## 到行尾行首
+
+```sh
+0 , shift+6, home   # 行首
+shift+4, end # 行尾
+shift+a   # 行尾并转到编辑mo'shi
+```
+
 
 
 # 末行状态

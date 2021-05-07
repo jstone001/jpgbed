@@ -675,3 +675,136 @@ kubectl create secret docker-registry secret_name --namespace=default \
       - name: secret_name
 ```
 
+# jar包制作docker镜像（dockerfile）
+
+```dockerfile
+FROM openjdk:8-jdk-alpine	
+VOLUME /tmp
+ADD ./target/demojenkins.jar demojenkins.jar
+ENTRYPOINT ["java","-jar","/demojenkins.jar", "&"]
+```
+
+测试
+```sh
+# 在jar包路径下制作镜像
+docker build -t java-demo-01:1.0 . 
+# 检查image
+docker images
+# 运行docker
+docker run -d -p 8111:8111 java-demo-01:1.0 -t
+# 浏览器访问
+ipaddress:8111/user
+```
+
+3. 上传到镜像服务器（阿里云）
+
+```sh
+# 1. 登录阿里云Docker Registry
+$ sudo docker login --username=cather****@163.com registry.cn-shanghai.aliyuncs.com
+
+# 用于登录的用户名为阿里云账号全名，密码为开通服务时设置的密码。
+
+#您可以在访问凭证页面修改凭证密码。
+#2. 从Registry中拉取镜像
+$ sudo docker pull registry.cn-shanghai.aliyuncs.com/jstone01/javademo1:[镜像版本号]
+
+#3. 将镜像推送到Registry
+$ sudo docker login --username=cather****@163.com registry.cn-shanghai.aliyuncs.com
+$ sudo docker tag [ImageId] registry.cn-shanghai.aliyuncs.com/jstone01/javademo1:[镜像版本号]
+# 例
+sudo docker tag [ImageId] registry.cn-shanghai.aliyuncs.com/jstone01/javademo1:1.0.1
+
+$ sudo docker push registry.cn-shanghai.aliyuncs.com/jstone01/javademo1:[镜像版本号]
+# 例
+sudo docker push registry.cn-shanghai.aliyuncs.com/jstone01/javademo1:1.0.1
+
+#请根据实际镜像信息替换示例中的[ImageId]和[镜像版本号]参数。
+#4. 选择合适的镜像仓库地址
+#从ECS推送镜像时，可以选择使用镜像仓库内网地址。推送速度将得到提升并且将不会损耗您的公网流量。
+
+#如果您使用的机器位于VPC网络，请使用 registry-vpc.cn-shanghai.aliyuncs.com 作为Registry的域名登录。
+#5. 示例
+#使用"docker tag"命令重命名镜像，并将它通过专有网络地址推送至Registry。
+$ sudo docker images
+REPOSITORY                                                         TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+registry.aliyuncs.com/acs/agent                                    0.7-dfb6816         37bb9c63c8b2        7 days ago          37.89 MB
+
+$ sudo docker tag 37bb9c63c8b2 registry-vpc.cn-shanghai.aliyuncs.com/acs/agent:0.7-dfb6816
+
+#使用 "docker push" 命令将该镜像推送至远程。
+$ sudo docker push registry-vpc.cn-shanghai.aliyuncs.com/acs/agent:0.7-dfb6816
+```
+
+4. 部署
+
+```sh
+kubectl create deploy javademo01 --image=registry.cn-shanghai.aliyuncs.com/jstone01/javademo1:1.0.1 --dry-run -o yaml > javademo1.yaml
+kubectl apply -f javademo1.yaml
+```
+
+5. 暴露应用
+
+```sh
+kubectl scale deploy javademo01 --replicas=3	#扩容
+kubectl expose deploy javademo01 --port=8111 --target-port=8111 --type=NodePort # 暴露端口
+kubectl get svc
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+javademo01   NodePort    10.104.23.232   <none>        8111:31274/TCP   37s
+
+```
+
+# Grafana+Prometheus+node_exporter监控，Grafana无法显示数据的问题
+
+from: 
+
+https://blog.csdn.net/weixin_40391011/article/details/113177767
+
+环境搭建：
+
+被测linux机器上部署了Grafana，Prometheus，node_exporter,并成功启动了它们。
+
+Grafana中已经创建了Prometheus数据源，并测试通过，并且导入了监控面板，将对被测机器的CPU，内存，网络和磁盘进行监控。
+
+问题：
+
+使用windows机器登录Grafana监控被测的Linux机器，右上角时间调整为最近的12个小时，无数据显示，显示为NA，如下图：
+
+ 
+
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/afef3f629e0f5ecec36e087196326a98.png)
+
+分析原因：
+
+Prometheus这个时序数据库对时间要求很严格，Linux服务器与Windows监控机的日期，时间，时区不一致导致Grafana中监控不到数据。
+
+解决办法：
+
+把linux服务器时间调整为与windows监控机一样即可，调整步骤如下：
+
+方案一：临时修改centos时间（不推荐），重启后将恢复到原来的时间，参考链接：
+
+https://jingyan.baidu.com/article/597a0643a082a9712a52435a.html?qq-pf-to=pcqq.c2c
+
+方案二：永久修改centos时间
+
+1.Centos上安装ntpdate：命令 yum install ntpdate -y
+
+2.输入命令：ntpdate ntp1.aliyun.com
+
+3.输入命令：hwclock --sysohc
+
+4.输入命令：timedatectl
+
+5.重新查看一下日期，输入命令：date
+
+6.删除原来的Prometheus，重新安装配置一下
+
+7.输入命令：reboot，重启centos
+
+8.先检查一下日期：输入命令date，保证时间与windows监控机一致
+
+9.关闭防火墙，重新启动grafana，prometheus，node_exporter
+
+10.windows登录grafana，进入监控面板，已经可以监控到数据了，问题完美解决
+
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/4aa243e765b3570dd2f8338a9d53cd59.png)

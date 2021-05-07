@@ -127,3 +127,20 @@ grep -10 'patten'  xxx   #打印匹配的前后10行
 ## sed
 
 ## awk
+
+# linux 修改时区
+
+from: https://blog.csdn.net/robertsong2004/article/details/42268701
+
+```sh
+cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+```
+
+# yum查看已安装的程序 
+
+from: https://blog.csdn.net/rentian1/article/details/93768557
+
+```sh
+yum list installed 
+```
+

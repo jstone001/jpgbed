@@ -220,7 +220,7 @@ kubeadm init  --apiserver-advertise-address=192.168.132.31  --kubernetes-version
 mkdir -p $HOME/.kube 
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
 sudo chown $(id -u):$(id -g) $HOME/.kube/config 
-$ kubectl get nodes
+kubectl get nodes
 ```
 
 ### node下
@@ -240,8 +240,9 @@ kubeadm join 192.168.132.31:6443 --token vxthmk.y58aankfjbuflzi4 \
 # 获取fannel的配置文件
 wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
-# 修改文件中quay.io仓库为quay-mirror.qiniu.com （现在不用这样做了）
-sed -i 's#quay.io#quay-mirror.qiniu.com#g' kube-flannel.yml
+（现在不用这样做了）
+# 修改文件中quay.io仓库为quay-mirror.qiniu.com 
+#sed -i 's#quay.io#quay-mirror.qiniu.com#g' kube-flannel.yml
 
 # 使用配置文件启动fannel
 kubectl apply -f kube-flannel.yml

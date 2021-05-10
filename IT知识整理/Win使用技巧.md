@@ -1030,7 +1030,7 @@ Win10「搜索」功能不可用了
 
 试了，还是不行
 
-# 2018最新win10激活密匙 win10各版本永久激活序列号 win10正式版激活码分享
+## 2018最新win10激活密匙 win10各版本永久激活序列号 win10正式版激活码分享
 
 from:http://www.ylmfwin100.com/ylmf/8643.html
 
@@ -1116,7 +1116,43 @@ Win10专业版密钥：NKJFK-GPHP7-G8C3J-P6JXR-HQRJR
 当然也欢迎朋友们下载本站的免激活win10系统进行安装，安装完后自动永久激活，十分方便。
 ```
 
-# Win10此电脑视频、图片等7个文件夹怎么去除
+## 解决win10中Compatibility Telemetry占用CPU的方法
+
+from: http://www.pc0359.cn/article/win10/69109.html
+
+最近小编发现使用win10的时候会特别的卡，有的时候只开几个网页也会将电脑直接卡死机，而且在运行软件的时候也会卡顿，有的时候双击某一软件图标需要很久才能正常的将它打开。在查看了电脑的任务管理之后，排查出来了一个占用电脑CPU使用率非常高的程序“Microsoft Compatibility Telemetry”。这个程序在看见之前小编没有接触过它，它是做什么的呢？又该如何解决CPU被大量占用的问题呢？
+
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170648_93541058.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:150%;" />
+
+### 方法步骤：
+
+　　一、Microsoft Compatibility Telemetry是什么？
+
+　　简单的说，这个程序是微软用来检测我们收集数据的。小编举个例子吧！若是某个软件有客户的反馈，俺么这个反馈就会被集中到这个程序中！然后由它来向微软集体反馈。
+
+　　二、如何解决它占用系统CPU的问题呢？
+
+　　1、在开始菜单中搜索“计划任务”。
+
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170644_14379568.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:150%;" />
+
+　　2、打开计划任务之后，使用鼠标依次点击以下的文件夹：MicrosoftWindowsApplication Experience
+
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170645_79864268.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:150%;" />
+
+　　3、打开最后一个文件夹之后，使用鼠标右键单击右上方的Microsoft Compatibility Telemetry Microsoft，紧接着就会弹出选项，选择“禁用”即可！
+
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170646_57654060.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:150%;" />
+
+　　4、完成程序的禁用之后就不会再因为它而出现电脑卡顿的现象了！
+
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170648_93541058.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:150%;" />
+
+　　
+
+以上就是小编解决win10中Compatibility Telemetry占用CPU使用率的方法，在电脑出现卡顿的时候大家一定不要觉得是自己正在使用的软件造成的，很多时候都是由于电脑中的某些程序自动运行并占用大量使用率产生的！需要的朋友赶紧试试吧！
+
+## Win10此电脑视频、图片等7个文件夹怎么去除
 
 使用Windows10电脑的时候，很多朋友发现，我们打开此电脑以后，在此电脑中默认是显示6个文件夹的，如“视频、图片、文档、下载、音乐、桌面”那么我们怎么快速的去除这6个文件夹，让他们不显示出来呢，当然我们需要的时候怎么让这六个文件夹再次快速显示出来呢，基本的方法是操作注册表，但是很多朋友不知道怎么操作，有没有更简单的方法呢，其实我们可以创作一个注册表文件，然后直接快速的操作，希望帮助朋友们参考。
 

@@ -808,3 +808,10 @@ https://jingyan.baidu.com/article/597a0643a082a9712a52435a.html?qq-pf-to=pcqq.c2
 10.windows登录grafana，进入监控面板，已经可以监控到数据了，问题完美解决
 
 ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/4aa243e765b3570dd2f8338a9d53cd59.png)
+
+# master去污点
+
+```sh
+kubectl taint node ma node-role.kubernetes.io/master-
+```
+

@@ -91,6 +91,32 @@ tree -Ld 1  # 显示当前目录下，第1层级的目录
 
 ## rmdir
 
+# 进程命令
+
+## lsof
+
+lsof(list open files)是一个列出当前系统打开文件的工具。
+
+```sh
+# lsof -i:8000
+COMMAND   PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
+nodejs  26993 root   10u  IPv4 37999514      0t0  TCP *:8000 (LISTEN)
+```
+
+### 参数
+
+```sh
+lsof -i:8080：	# 查看8080端口占用
+lsof abc.txt：	#显示开启文件abc.txt的进程
+lsof -c abc：	# 显示abc进程现在打开的文件
+lsof -c -p 1234：	# 列出进程号为1234的进程所打开的文件
+lsof -g gid：	#显示归属gid的进程情况
+lsof +d /usr/local/：	# 显示目录下被进程开启的文件
+lsof +D /usr/local/：	#同上，但是会搜索目录下的目录，时间较长
+lsof -d 4：				# 显示使用fd为4的进程
+lsof -i -U：			# 显示所有打开的端口和UNIX domain文件
+```
+
 # 过滤3剑客grep, sed, awk
 
 ## grep
@@ -142,5 +168,22 @@ from: https://blog.csdn.net/rentian1/article/details/93768557
 
 ```sh
 yum list installed 
+rpm ng
 ```
+
+# 防火墙开放某个端口
+
+```sh
+# 查看开放的端口
+firewall-cmd --list-all
+
+# 设置开放的端口
+firewall-cmd --add-service=http --permanent
+sudo firewall-cmd --add-port=80/tcp --permanent
+
+# 重启服务墙
+firewall-cmd --reload
+```
+
+
 

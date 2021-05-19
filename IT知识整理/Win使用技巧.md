@@ -1134,7 +1134,7 @@ from: http://www.pc0359.cn/article/win10/69109.html
 
 　　1、在开始菜单中搜索“计划任务”。
 
-<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170644_14379568.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:150%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/170644_14379568.png" alt="解决win10中Compatibility Telemetry占用CPU的方法" style="zoom:100%;" />
 
 　　2、打开计划任务之后，使用鼠标依次点击以下的文件夹：MicrosoftWindowsApplication Experience
 

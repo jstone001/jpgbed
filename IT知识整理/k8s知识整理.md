@@ -815,3 +815,6 @@ https://jingyan.baidu.com/article/597a0643a082a9712a52435a.html?qq-pf-to=pcqq.c2
 kubectl taint node ma node-role.kubernetes.io/master-
 ```
 
+# k8s和SpringCloud谁更胜一筹
+
+from: https://cloud.tencent.com/developer/article/1776313

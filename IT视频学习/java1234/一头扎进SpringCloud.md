@@ -1629,6 +1629,79 @@ SpringCloud Bus
 
 ## 29 Config Server基本使用
 
+http://blog.java1234.com/blog/articles/503.html
+
+### 1. github建立一个仓库
+
+- 这里GIT仓库，我们一般选用GitHub https://github.com/，或者码云 https://gitee.com/ 
+- 建个仓库 microservice-config 然后 Git下载本地；
+- 上传一个配置文件上到git仓库，application.yml 记住要utf-8编码，否则乱码，解析各种问题；
+
+```yaml
+profile: hello
+```
+
+### 2. 新建module：microservice-config-server-4001
+
+pom.xml
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-config-server</artifactId>
+</dependency>
+```
+
+ConfigServerApplication_4001.java
+
+```java
+package com.java1234;
+ 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.config.server.EnableConfigServer;
+ 
+@SpringBootApplication
+@EnableConfigServer		//important
+public class ConfigServerApplication_4001 {
+ 
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServerApplication_4001.class, args);
+    }
+}
+```
+
+application.yml
+
+```yaml
+server: 
+  port: 4001 
+   
+spring:
+  application:
+    name:  microservice-config
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/java1234/microservice-config
+```
+ ### 3.  然后我们本地请求：http://configserver.java1234.com:4001/application-xx.yml
+
+返回结果了正确的文本结果；
+
+至于请求路径，有匹配规则：
+
+The HTTP service has resources in the form:
+
+```properties
+/{application}/{profile}[/{label}]
+/{application}-{profile}.yml
+/{label}/{application}-{profile}.yml
+/{application}-{profile}.properties
+/{label}/{application}-{profile}.properties
+```
+
 
 
 ## 30 Config Client基本使用

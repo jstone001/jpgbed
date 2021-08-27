@@ -441,10 +441,11 @@ DELIMITER ;
 call test('gg',@id);
 ￼
 ￼
-方法四:使用@@identity
+#方法四:使用@@identity
 select @@IDENTITY
     @@identity是表示的是最近一次向具有identity属性(即自增列)的表插入数据时对应的自增列的值，是系统定 义的全局变量。一般系统定义的全局变量都是以@@开头，用户自定义变量以@开头。比如有个表A，它的自增列是id，当向A表插入一行数据后，如果插入数据 后自增列的值自动增加至101，则通过select @@identity得到的值就是101。使用@@identity的前提是在进行insert操作后，执行select @@identity的时候连接没有关闭，否则得到的将是NULL值。
-方法五:是使用getGeneratedKeys()
+    
+# 方法五:是使用getGeneratedKeys()
 ￼
 ￼
 Connection conn = ;

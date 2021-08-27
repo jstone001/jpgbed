@@ -12,7 +12,7 @@ http://blog.java1234.com/blog/articles/508.html
 
 http://blog.java1234.com/blog/articles/509.html
 
-搜索 unknown HTML tag attributes ,将下面的指令复制到点开的窗口里
+idea setting下：搜索 unknown HTML tag attributes ,将下面的指令复制到点开的窗口里
 
 ```js
 v-text
@@ -99,9 +99,11 @@ http://blog.java1234.com/blog/articles/526.html
     <p>{{message}}</p>
     <p>{{message.toUpperCase()}}</p>
     <p v-html="message"></p>
+    
+    <!-- 数据绑定 --> 
     <h2>数据绑定</h2>	
     <div id="dynamicId"></div>
-    <div v-bind:id="dynamicId"></div>	<!-- 数据绑定 --> 
+    <div v-bind:id="dynamicId"></div>	
     <div :id="dynamicId"></div>
     <button v-bind:disabled="isButtonDisabled">Button</button>
     
@@ -217,13 +219,27 @@ v-on 缩写
 
 ```html
 <template v-if="loginType === 'username'">
-  <label>Username</label>
-  <input placeholder="Enter your username">
+    <label>Username</label>
+    <input placeholder="Enter your username" key="username-input">
 </template>
 <template v-else>
-  <label>Email</label>
-  <input placeholder="Enter your email address">
+    <label>Email</label>
+    <input placeholder="Enter your email address" key="email-input">
 </template>
+<button @click="toggle()">点我</button>
+
+<script>
+    toggle(){
+        this.loginType=this.loginType=='username'?'email':'username'
+    }
+</script>
+```
+
+### v-show
+
+```html
+<h1 v-show="ok">Hello!</h1>	<!--<h1 style="display: none;">Hello!</h1>   -->
+只是改变css样式	
 ```
 
 
@@ -234,6 +250,27 @@ http://blog.java1234.com/blog/articles/530.html
 
 ### 遍历数组
 
+```html
+<div id="app">
+    <ui>
+        <li v-for="item in items">
+            {{item.name}}
+        </li>
+    </ui>
+</div>
+<script>
+     new Vue({
+        el: '#app',
+        data: {
+            message: "vue大爷你好",
+            items:[{name:'北京'},{name:'南京'},{name:'东京'}]
+    })
+        
+</script>
+```
+
+### 索引参数
+
 ### 遍历对象
 
 ```html
@@ -242,6 +279,13 @@ http://blog.java1234.com/blog/articles/530.html
         {{index}} -{{name}}: {{ value }}
     </li>
 </ul>
+<script>
+            object: {
+                title: 'How to do lists in Vue',
+                author: 'Jane Doe',
+                publishedAt: '2016-04-10'
+            }
+</script>
 ```
 
 ## 08_vue计算属性.mp4
@@ -313,42 +357,47 @@ var vm = new Vue({
 ### 计算属性set
 
 ```html
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script type="text/javascript" src="js/vue2.6.js"></script>
+<body>
 <div id="example">
     <h2>计算属性set</h2>
-    <p>Computed reversed message:"{{reveredInfo}}"</p>
+    <p>Computed reversed message:"{{reversedInfo}}"</p>
     <button @click="change2()">改变</button>
 </div>
+</body>
 <script type="text/javascript">
- 	let count=1;
-    new Vue({
+    let count=1;
+    vm=new Vue({
         el:"#example",
         data:{
-           info:'Hello'           
+            info:'Hello'
         },
         computed:{
-            reversedMessage(){
-                count++;
-                return count+' '+this.message.split('').reverse().join('')
-            },
             reversedInfo:{
+                //getter
                 get(){
                     return this.info.split('').reverse().join('')
                 },
+                //setter
                 set(newValue){
-                   console.log(newValue);
-                   console.log('重新做一些计算处理')
+                    // this.reversedInfo(newValue);    //会报错
+                    console.log(newValue);
+                    console.log('重新做一些计算处理')
                 }
             }
         },
         methods:{
-           change(){
-               this.message='abcd';
-           },
-           change2(){
-              vm.reversedInfo="abcd哈哈"; 
-           }
+            change(){
+                this.message='abcd';
+            },
+            change2(){
+                vm.reversedInfo="abcd哈哈";
+            }
         }
-        
     })
 </script>
 ```
@@ -362,8 +411,6 @@ var vm = new Vue({
 </body>
 
 <script type="text/javascript">
-
-    let count=1;
     new Vue({
         el:'#app',
         data:{
@@ -377,23 +424,23 @@ var vm = new Vue({
                 this.result=newN*newN;
             }
         }
-    })
+    });
 </script>
 ```
 
 ```js
-let vm=new Vue({
-    el: "#app",
-    data:{
-        n:1,
-        result:1
-    },
-    
-});
-vm.$watch("n",function(new N,oldN){
-    console.log(newN,oldN);
-    this.result=newN*newN;
-});
+    let vm=new Vue({
+        el:'#app',
+        data:{
+            n:1,
+            result:1
+        },
+    });
+
+    vm.$watch("n",function(newN,oldN){
+        console.log(newN,oldN);
+        this.result=newN*newN;
+    });
 ```
 
 ## 10_vue样式属性Class与Style绑定.mp4
@@ -441,11 +488,6 @@ vm.$watch("n",function(new N,oldN){
             activeColor: 'blue',
             fontSize: 20
 
-        },
-        methods:{
-            change(){
-                this.a=(this.a=='aClass'?'bClass':'aClass')
-            }
         }
     })
 </script>
@@ -556,7 +598,7 @@ vm.$watch("n",function(new N,oldN){
 
 ```html
 <div id="example-3">
-   <a @click.prevent="doThis" href="http://java1234.com">java1234</a>
+   <a @click.stop.prevent="doThis" href="http://java1234.com">java1234</a>	<!-- 修饰符可串联   -->
 </div>
 
 </body>
@@ -599,13 +641,34 @@ vm.$watch("n",function(new N,oldN){
 </script>
 ```
 
+### 按键修饰符
 
+```html
+<!-- 只有在 `key` 是 `Enter` 时调用 `vm.submit()` -->
+<input v-on:keyup.enter="submit">
+```
+
+### 系统修饰符
+
+### .exact修饰符
 
 ## 12_vue表单处理.mp4
 
 #### 文本
 
+```html
+<input v-model="message" placeholder="edit me">
+<p>Message is: {{ message }}</p>
+```
+
 ### 多行文本4
+
+```html
+<span>Multiline message is:</span>
+<p style="white-space: pre-line;">{{ message }}</p>
+<br>
+<textarea v-model="message" placeholder="add multiple lines"></textarea>
+```
 
 #### 复选框
 
@@ -857,7 +920,7 @@ App.vue
   export default {
     name: 'App',
     components: {
-      HelloWorld: HelloWorld //映射组件标签
+      HelloWorld: HelloWorld   //映射组件-> 标签
     }
   }
 </script>
@@ -924,8 +987,6 @@ App.vue
 ```vue
 <template>
   <div>
-
-
    <Menu :menus="menus" :website="website"></Menu>
   </div>
 </template>
@@ -1008,6 +1069,9 @@ Menu.vue
 
 
 ## 17_父子组件方法传递及回调.mp4
+
+http://blog.java1324.com/blog/articles/551.html
+
 ## 18_自定义事件实现父子组件交互.mp4
 ## 19_消息订阅与发布组件Pubsub.mp4
 ## 20_slot插槽.mp4

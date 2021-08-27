@@ -15,7 +15,7 @@
 11. 使用OpenFeign进行微服务之间的http调用；
 12. 使用Gateway作为分布式微服务网关，用Gateway来进行网关限流；
 
-![image-20210705162143893](E:\JS\booknote\jpgBed\image-20210705162143893.png)
+![image-20210705162143893](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210705162143893.png)
 
 # 环境准备
 
@@ -1635,7 +1635,7 @@ export default {
 
 ## 37_项目分布式拆分
 
-![image-20210723110018439](E:\JS\booknote\jpgBed\image-20210723110018439.png)
+![image-20210723110018439](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210723110018439.png)
 
 端口分配：
 
@@ -1653,7 +1653,405 @@ export default {
 - 使用Gateway作为分布式微服务网关，用Gateway来进行网关限流；
 
 ## 38_Nacos服务注册与发现
+
+application.yml
+
+```yaml
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.132.25:3306/db_miaosha?serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.132.111:8848
+  application:
+    name: miaosha-goods
+
+  redis:  # redis配置
+    host: 192.168.132.111 # IP
+    port: 6379  # 端口
+    password:  # 密码
+    connect-timeout: 10s  # 连接超时时间
+    lettuce: # lettuce redis客户端配置
+      pool:  # 连接池配置
+        max-active: 8  # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-wait: 200s  # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-idle: 8 # 连接池中的最大空闲连接 默认 8
+        min-idle: 0 # 连接池中的最小空闲连接 默认 0
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true  # 开启驼峰功能  userName  - >  user_name
+    auto-mapping-behavior: full  # 自动mapping映射
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mybatis/mapper/*.xml
+
+```
+
+
+
 ## 39_Nacos配置中心实现
+
+rabbitmq.yml
+
+```yaml
+spring: 
+  rabbitmq: 
+    host: 192.168.132.111
+    port: 5672
+    username: admin
+    password: admin
+```
+
+mybatis-plus.yml
+
+```yaml
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true  # 开启驼峰功能  userName  - >  user_name
+    auto-mapping-behavior: full  # 自动mapping映射
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mybatis/mapper/*.xml
+```
+
+miaosha-user/sys.yml
+
+```yaml
+spring: 
+  jackson: 
+    time-zone: Asia/Shanghai
+  cloud: 
+    nacos: 
+      discovery: 
+        server-addr: 192.168.132.111:8848
+  application: 
+    name: miaosha-user
+```
+
+redis.yml
+
+```yaml
+spring:
+  redis:  # redis配置
+    host: 192.168.132.111  # IP
+    port: 6379   # 端口
+    password:  # 密码
+    connect-timeout: 10s  # 连接超时时间
+    lettuce: # lettuce redis客户端配置
+      pool:  # 连接池配置
+        max-active: 8  # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-wait: 200s  # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-idle: 8 # 连接池中的最大空闲连接 默认 8
+        min-idle: 0 # 连接池中的最小空闲连接 默认 0
+```
+
+
+
 ## 40_openfeign远程调用
+
+### 1 将service写下在miaosha-order中，并在controller下暴露http地址
+
+### 2 在miaosha-miaosha下
+
+pom.xml 加上
+
+```xml
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+```
+
+添加feign包
+
+OrderFeignService.java
+
+```java
+package com.java1234.miaosha.feign;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@FeignClient("miaosha-order")
+public interface OrderFeignService {
+
+
+    @RequestMapping("/order/getMiaoShaResult")
+    String getMiaoShaResult(@RequestParam("userId") Integer useId, @RequestParam("miaoShaGoodsId") Integer miaoShaGoodsId);
+}
+```
+
+在MiaoshaMiaoshaApplication.java启动类加上@EnableFeignClients(basePackages = "com.java1234.miaosha.feign") 
+
+```java
+package com.java1234.miaosha;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+
+
+@EnableFeignClients(basePackages = "com.java1234.miaosha.feign")        //开启Feign客户端
+@SpringBootApplication
+@MapperScan("com.java1234.miaosha.mapper")
+@EnableDiscoveryClient
+public class MiaoshaMiaoshaApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MiaoshaMiaoshaApplication.class, args);
+    }
+
+}
+
+```
+
+原来的MiaoShaController修改下
+
+```java
+    /**
+     * 秒杀结果查询
+     * @param request
+     * @param miaoShaGoodsId
+     * @return  >0 返回orderId 订单ID  -1 秒杀失败  0 排队中
+     */
+    @RequestMapping("/result")
+    public R result(HttpServletRequest request,Integer miaoShaGoodsId){
+        String token = request.getHeader("token");
+        System.out.println("token:"+token);
+        User user=(User)redisUtil.get(Constant.REDIS_TOKEN_PREFIX,token);
+        System.out.println(user);
+        String result=orderFeignService.getMiaoShaResult(user.getId(),miaoShaGoodsId);
+        Map<String,Object> resultMap=new HashMap<>();
+        resultMap.put("result",result);
+        return R.ok(resultMap);
+    }
+```
+
+### 3 建权
+
+WebAppConfigurer.java  
+
+```java
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        String[] patterns=new String[]{"/login","/order/getMiaoShaResult","verifyCode/get"};
+        registry.addInterceptor(sysInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns(patterns);
+    }
+```
+
+
+
 ## 41_多实例集群
 ## 42_gateway网关限流
+
+注意点：
+
+- org.springframework.http.codec.ServerCodecConfigurer‘ that could not be found 报错；
+
+> 出现该错误是因为Spring Cloud Gateway依赖了spring-boot-starter-web包
+>
+>  因为spring cloud gateway是基于webflux的，如果非要web支持的话需要导入spring-boot-starter-webflux而不是spring-boot-start-web。
+>
+>  我们这里的话 ，gateway模块单独引入依赖，不引入common模块；
+>
+> 新建miaosha-gateway模块
+
+- gateway网关里面我们配置了跨域，所以项目里不用重复再配置了；
+
+pom.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>miaoshasys33</artifactId>
+        <groupId>com.java1234</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>miaosha-gateway</artifactId>
+    <dependencies>
+        <!-- 服务注册/发现-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!-- 配置中心 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+
+        <!-- spring boot redis 缓存引入 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <!-- lettuce pool 缓存连接池 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
+    </dependencies>
+</project>
+
+```
+
+application.yml
+
+```yaml
+server:
+  port: 88
+  servlet:
+      context-path: "/"
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.132.25:3306/db_miaosha?serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+  redis:  # redis配置
+    host: 192.168.132.111 # IP
+    port: 6379  # 端口
+    password:  # 密码
+    connect-timeout: 10s  # 连接超时时间
+    lettuce: # lettuce redis客户端配置
+      pool:  # 连接池配置
+        max-active: 8  # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-wait: 200s  # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-idle: 8 # 连接池中的最大空闲连接 默认 8
+        min-idle: 0 # 连接池中的最小空闲连接 默认 0
+  jackson:
+    time-zone: Asia/Shanghai
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.132.111:8848
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+              allowCredentials: true
+              allowedHeaders: "*"
+              allowedOrigins: "*"
+              allowedMethods: "*"
+      routes:
+        - id: user_router
+          uri: lb://miaosha-user
+          predicates:
+            - Path=/user/**
+
+        - id: goods_router
+          uri: lb://miaosha-goods
+          predicates:
+            - Path=/goods/**
+
+        - id: miaoShaGoods_router
+          uri: lb://miaosha-goods
+          predicates:
+            - Path=/miaoShaGoods/**
+
+        - id: miaosha_router
+          uri: lb://miaosha-miaosha
+          predicates:
+            - Path=/miaoSha/**, /verifyCode/**
+          filters:
+            - name: RequestRateLimiter  # 限流过滤器
+              args:
+                redis-rate-limiter.replenishRate: 1   # 令牌桶每秒填充速率
+                redis-rate-limiter.burstCapacity: 2   # 令牌桶总容量
+                redis-rate-limiter.requestedTokens: 1  # 一个请求需要消费的令牌数
+                key-resolver: "#{@pathKeyResolver}"
+
+        - id: order_router
+          uri: lb://miaosha-order
+          predicates:
+            - Path=/order/**
+
+
+  application:
+    name: miaosha-gateway
+
+```
+
+MiaoshaGatewayApplication.java
+
+```java
+package com.java1234.miaosha;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+@EnableDiscoveryClient
+@SpringBootApplication
+public class MiaoshaGatewayApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MiaoshaGatewayApplication.class, args);
+    }
+
+}
+```
+
+KeyResolverConfiguration.java
+
+```java
+package com.java1234.miaosha.config;
+
+import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import reactor.core.publisher.Mono;
+
+/**
+ * 限流规则配置类
+ * @author java1234_小锋
+ * @site www.java1234.com
+ * @company Java知识分享网
+ * @create 2021-01-23 11:16
+ */
+@Configuration
+public class KeyResolverConfiguration {
+
+    @Bean
+    public KeyResolver pathKeyResolver(){
+
+        /*return new KeyResolver() {
+            @Override
+            public Mono<String> resolve(ServerWebExchange exchange) {
+                return Mono.just(exchange.getRequest().getURI().getPath());
+            }
+        };*/
+
+
+        return exchange -> Mono.just(exchange.getRequest().getURI().getPath());
+    }
+}
+
+```
+

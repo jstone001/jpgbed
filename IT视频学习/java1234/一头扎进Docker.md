@@ -735,7 +735,7 @@ docker run -d --name 容器名称 -p 80:8080 -v /home/tomcat/conf/:/usr/local/to
 
 ```sh
 docker cp 容器id:/etc/mysql/conf.d /home/mysql/
-docker cp 容器id::/var/log /home/mysql/
+docker cp 容器id:/var/log /home/mysql/
 docker cp 容器id::/var/lib/mysql /home/mysql/ 
 ```
 

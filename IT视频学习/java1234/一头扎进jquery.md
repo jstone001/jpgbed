@@ -1,14 +1,12 @@
 # 第1讲
 jquery 2.0 不支持ie 6,7,8
 ```html
-<body onload="init()">  //文档加载完毕，执行init()
+<body onload="init()">  <!--  文档加载完毕，执行init()  -
 ```
 
 ```js
 	$(document).ready(function(){
-		
 		$("#button01").click(function(){
-			
 			alert($('#content').val());	
 		});
 	});

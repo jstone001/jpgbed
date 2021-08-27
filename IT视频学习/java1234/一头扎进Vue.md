@@ -1070,10 +1070,72 @@ Menu.vue
 
 ## 17_父子组件方法传递及回调.mp4
 
-http://blog.java1324.com/blog/articles/551.html
+http://blog.java1234.com/blog/articles/551.html
 
 ## 18_自定义事件实现父子组件交互.mp4
+$emit 方式
+
+```js
+this.$emit('addMenu',menu);
+```
+
+$ref 方式
+
+```vue
+<Menu :menus="menus" :website="website" ref="menu"></Menu>
+<script>
+    mounted () {
+        this.$refs.menu.$on('addMenu',this.addMenu);  //$refs 获取所有引用
+    }
+</script>
+
+```
+
+
+
 ## 19_消息订阅与发布组件Pubsub.mp4
+
+http://blog.java1234.com/blog/articles/554.html
+
+```sh
+npm install --save pubsub-js	# 安装
+```
+父组件
+
+```vue
+<script>
+    import PubSub from 'pubsub-js'
+
+    mounted () {
+        console.log('mounted')
+        // this.$refs.menu.$on('addMenu',this.addMenu);
+
+        PubSub.subscribe('add',(msg,data)=> {
+            console.log(msg)
+            this.addMenu(data);
+        })
+    }
+
+</script>
+```
+
+子组件
+
+```js
+methods:{
+    add(){
+        const content=this.content.trim();
+        if(!content){
+            alert('菜单不能为空');
+        }
+        let menu={id:5, name: content}
+        PubSub.publish('add', menu);
+    }
+}
+```
+
+
+
 ## 20_slot插槽.mp4
 ## 21_Ajax框架vue-resource&axios.mp4
 ## 22_过渡&动画.mp4

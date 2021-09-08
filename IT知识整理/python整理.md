@@ -156,6 +156,36 @@ pip3 -V
 
  ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1730174-20190718165523975-1547139881.png)
 
+# pip 升级
+
+```sh
+/applications/python3/bin/python3 -m pip install --upgrade pip -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+```
+
+# pip 换源安装
+
+```sh
+pip3 install MIMEText -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+```
+
+# python打印报错信息
+
+```python
+    try:
+        server = smtplib.SMTP_SSL(stmpServer, 465)  # 发件人邮箱中的SMTP服务器，端口是25
+        server.login(mailAddr, password)  # 括号中对应的是发件人邮箱账号、邮箱密码
+        print("Start send email...")
+        mailto.extend(cc)  # 发送时还是要加上抄送者
+        server.sendmail(mailAddr, mailto, msg.as_string())  # 括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
+        server.quit()  # 关闭连接
+        print("Send End！")
+    except Exception as e:  # 如果 try 中的语句没有执行，则会执行下面的 ret=False
+
+        print(e)
+```
+
+
+
 # lxml
 
 ## xpath文档

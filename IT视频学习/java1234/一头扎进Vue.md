@@ -1137,7 +1137,50 @@ methods:{
 
 
 ## 20_slot插槽.mp4
+
+http://blog.java1234.com/blog/articles/556.html
+
+Foot.vue
+
+```html
+    <div>
+      <slot name="f">默认插槽值 </slot>
+    </div>
+```
+
+App.vue
+
+```html
+<Foot>
+    <div slot="f">
+        版权所有  &nbsp;&nbsp;&nbsp;{{site}}
+    </div>
+</Foot>
+```
+
+ 
+
 ## 21_Ajax框架vue-resource&axios.mp4
+
+http://blog.java1234.com/blog/articles/558.html
+
+main.js
+
+### vue-resource
+
+https://github.com/pagekit/vue-resource
+
+```js
+import VueResource from 'vue-resource'
+
+// 声明使用插件 底层会给vm和组件对象添加一个属性 $http
+Vue.use(VueResource)
+```
+
+### **axios**
+
+https://github.com/axios/axios
+
 ## 22_过渡&动画.mp4
 
 # Vue Router

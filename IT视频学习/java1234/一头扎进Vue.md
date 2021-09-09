@@ -24,6 +24,7 @@ v-else
 v-for
 v-on
 v-bind
+v-slot
 v-model
 v-ref
 v-el

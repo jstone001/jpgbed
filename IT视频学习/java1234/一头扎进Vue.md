@@ -86,6 +86,8 @@ D:\vue-devtools\packages\shell-chrome\manifest.json
 
 http://blog.java1234.com/blog/articles/526.html
 
+### 数据绑定，js表达式，事件绑定
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -98,8 +100,9 @@ http://blog.java1234.com/blog/articles/526.html
     <h2>插入显示</h2>
     <input type="text" v-model="message">
     <p>{{message}}</p>
+    <p v-once>{{message}}</p>    <!-- 只渲染1次  -->
     <p>{{message.toUpperCase()}}</p>
-    <p v-html="message"></p>
+    <p v-html="message"></p>		<!--  解析成html -->
     
     <!-- 数据绑定 --> 
     <h2>数据绑定</h2>	
@@ -155,7 +158,7 @@ http://blog.java1234.com/blog/articles/526.html
 </html>
 ```
 
-**缩写**
+### **缩写**
 
 v-bind 缩写
 
@@ -230,9 +233,14 @@ v-on 缩写
 <button @click="toggle()">点我</button>
 
 <script>
+  data: {
+    loginType: 'username'
+  },
+  methods: {
     toggle(){
         this.loginType=this.loginType=='username'?'email':'username'
     }
+  }
 </script>
 ```
 

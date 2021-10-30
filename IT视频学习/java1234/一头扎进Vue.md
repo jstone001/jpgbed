@@ -1202,4 +1202,4 @@ https://github.com/axios/axios
 
 # Vuex
 
-## 28_Vuex状态集中式管理.mp4
+## 28_Vuex状态集中式管理.mp4     

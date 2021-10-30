@@ -80,12 +80,16 @@ set /a dd=-dd+e+1,mm=-m/10,mm*=12,mm+=m+3,yy=b*100+d-4800+m/10
 endlocal&set %2=%yy%&set %3=%mm%&set %4=%dd%&goto :EOF
 ```
 
-# dos下看进程，杀进程
+# dos下看端口占用，看进程，杀进程
 
 ```cmd
-在DOS 下输入 
-tasklist /m eclipse* 查看eclipse所占用进程，得到pid 
-taskkill /pid 117464 /F  强行杀掉该进程 
+#在DOS 下输入 
+tasklist /m eclipse* #查看eclipse所占用进程，得到pid 
+taskkill /pid 117464 /F  #强行杀掉该进程 
+
+netstat -amo | findstr 3306
+tasklist | findstr "4836"
+taskkill /im mysqld.exe -f
 ```
 
 dos命令大全

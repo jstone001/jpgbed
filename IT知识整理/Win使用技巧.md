@@ -153,6 +153,34 @@ wupdmgr--------windows更新程序
 
 ## bug
 
+### win10 运行VMware会蓝屏
+
+from: https://daniuwo.com/t/23155.html
+
+关于运行VMware等虚拟机导致win10蓝屏死机（终止代码：SYSTEM_SERVICE_EXCEPTION） 
+
+之前可以正常打开虚拟机的，但今天突然运行虚拟机系统时就死机了，通过重装软件，恢复系统备份等方式都无效，最后查出来是因为更新了Windows的相关补丁导致的，Hyper-V被默认开启
+
+以下方法同样适用于win10家庭中文版
+升级高版本的VMware16似乎能解决该冲突的问题
+win10家庭中文版因为在（控制面板–>程序–>程序和功能–>启用或关闭windows功能）中没有 Hyper-V选项，因此需要在新建的记事本中输入：
+
+```cmd
+pushd "%~dp0"
+
+dir /b %SystemRoot%\servicing\Packages\*Hyper-V*.mum >hyper-v.txt
+
+for /f %%i in ('findstr /i . hyper-v.txt 2^>nul') do dism /online /norestart /add-package:"%SystemRoot%\servicing\Packages\%%i"
+
+del hyper-v.txt
+
+Dism /online /enable-feature /featurename:Microsoft-Hyper-V-All /LimitAccess /ALL
+```
+
+然后将文件名改成Hyper-V.bat，运行该文件，等待配置成功后按提示输入y，重启电脑后，就可以在（启用或关闭windows功能）中看到Hyper-V选项了，然后将该选项取消即可
+
+
+
 ### 完美解决无Internet但能正常上网的问题
 
 from: https://www.bilibili.com/read/cv5292887/
@@ -257,6 +285,26 @@ Win10「搜索」功能不可用了
 伟坤刘
 
 试了，还是不行
+
+## Win10 家庭版没有gpedit.msc
+
+建一个cmd文件
+
+```cmd
+@echo off
+
+pushd "%~dp0"
+
+dir /b C:\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientExtensions-Package~3*.mum >List.txt
+
+dir /b C:\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientTools-Package~3*.mum >>List.txt
+
+for /f %%i in ('findstr /i . List.txt 2^>nul') do dism /online /norestart /add-package:"C:\Windows\servicing\Packages\%%i"
+
+pause
+```
+
+
 
 ## 2018最新win10激活密匙 win10各版本永久激活序列号 win10正式版激活码分享
 

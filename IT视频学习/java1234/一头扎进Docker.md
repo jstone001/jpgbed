@@ -736,7 +736,7 @@ docker run -d --name 容器名称 -p 80:8080 -v /home/tomcat/conf/:/usr/local/to
 ```sh
 docker cp 容器id:/etc/mysql/conf.d /home/mysql/
 docker cp 容器id:/var/log /home/mysql/
-docker cp 容器id::/var/lib/mysql /home/mysql/ 
+docker cp 容器id:/var/lib/mysql /home/mysql/ 
 ```
 
 第三步：把容器里的tomcat里的webapp，logs，conf挂载到宿主机tomcat目录下，方便上传代码，同步持久化日志，以及方便配置tomcat；关掉容器，启动容器；

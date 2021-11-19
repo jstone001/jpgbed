@@ -10,6 +10,40 @@ SELECT AUTO_INCREMENT  FROM INFORMATION_SCHEMA.`TABLES` WHERE table_name='tb_epi
 
 # 报错
 
+## mysql查询出现In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregate...
+
+from: https://my.oschina.net/u/4341223/blog/3767910
+
+出现原因：
+
+在MySQL5.7.5后，默认开启了ONLY_FULL_GROUP_BY，所以导致了之前的一些SQL无法正常执行，其实，是我们的SQL不规范造成的，因为group by 之后，返回的一些数据是不确定的，所以才会出现这个错误。
+
+解决方案，两种：
+
+方案一：修改SQL，因为出现这个问题，基本都是因为这个问题造成的，不确定返回字段可以使用ANY_VALUE(column_name)。
+
+方案二：关闭ONLY_FULL_GROUP_BY，我的是Linux环境，我就说一下Linux的解决步骤：
+
+①、登录进入MySQL，linux登录的：mysql -u username -p ，然后输入密码，输入SQL：show variables like '%sql_mode';
+
+编辑my.cnf文件，文件地址一般在：/etc/my.cnf，<font color='red'>/etc/mysql/my.cnf</font>，找到sql-mode的位置，去掉ONLY_FULL_GROUP_BY，然后重启MySQL；有的my.cnf中没有sql-mode，需要加入：
+
+my.cnf
+
+```properties
+[mysqld]
+
+sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+```
+
+sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION，注意要加入到[mysqld]下面，我就是加入到其他地方，重启后也不生效，具体的如下图：
+
+修改成功后重启MySQL服务，service mysql restart，重启好后，再登录mysql，*输入SQL：show variables like '%sql_mode'; 如果没有ONLY_FULL_GROUP_BY，就说明已经成功了。*
+
+<img src="E:\JS\booknote\jpgBed\image-20211117171647113.png" alt="image-20211117171647113" style="zoom:80%;" />
+
+
+
 ## Mysql 错误代码： 1093, 对一个表的字段查询并修改
 
 from:https://blog.csdn.net/qq_29672495/article/details/72668008
@@ -358,7 +392,102 @@ set time_zone = '+8:00';
 flush privileges; 
 ```
 
-# 字符集乱码问题
+# 字符集
+
+##  更改MySQL数据库的编码为utf8mb4
+
+from:https://www.cnblogs.com/shihaiming/p/5855616.html
+
+utf-8编码可能2个字节、3个字节、4个字节的字符，但是[MySQL](http://lib.csdn.net/base/14)的utf8编码只支持3字节的数据，而移动端的表情数据是4个字节的字符。如果直接往采用utf-8编码的[数据库](http://lib.csdn.net/base/14)中插入表情数据，[Java](http://lib.csdn.net/base/17)程序中将报SQL异常：
+
+> java.sql.SQLException: **Incorrect string value**: ‘\xF0\x9F\x92\x94’ for column ‘name’ at row 1
+> at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1073) 
+> at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3593) 
+> at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3525) 
+> at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1986) 
+> at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2140) 
+> at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2620) 
+> at com.mysql.jdbc.StatementImpl.executeUpdate(StatementImpl.java:1662) 
+> at com.mysql.jdbc.StatementImpl.executeUpdate(StatementImpl.java:1581)
+
+可以对4字节的字符进行编码存储，然后取出来的时候，再进行解码。但是这样做会使得任何使用该字符的地方都要进行编码与解码。
+
+utf8mb4编码是utf8编码的超集，兼容utf8，并且能存储4字节的表情字符。 
+采用utf8mb4编码的好处是：存储与获取数据的时候，不用再考虑表情字符的编码与解码问题。
+
+**更改数据库的编码为utf8mb4:**
+
+**1. MySQL的版本**
+
+utf8mb4的最低mysql版本支持版本为5.5.3+，若不是，请升级到较新版本。
+
+**2. MySQL驱动**
+
+5.1.34可用,最低不能低于5.1.13
+
+**3.修改MySQL配置文件**
+
+```properties
+# 修改mysql配置文件my.cnf（windows为my.ini） 
+# my.cnf一般在etc/mysql/my.cnf位置。找到后请在以下三部分里添加如下内容： 
+[client] 
+default-character-set = utf8mb4 
+[mysql] 
+default-character-set = utf8mb4 
+[mysqld] 
+character-set-client-handshake = FALSE 
+character-set-server = utf8mb4 
+collation-server = utf8mb4_unicode_ci 
+init_connect='SET NAMES utf8mb4'
+```
+
+**4. 重启数据库，检查变量**
+
+```sql
+SHOW VARIABLES WHERE Variable_name LIKE 'character_set_%' OR Variable_name LIKE 'collation%';
+```
+
+| Variable_name            | Value              |
+| ------------------------ | ------------------ |
+| character_set_client     | utf8mb4            |
+| character_set_connection | utf8mb4            |
+| character_set_database   | utf8mb4            |
+| character_set_filesystem | binary             |
+| character_set_results    | utf8mb4            |
+| character_set_server     | utf8mb4            |
+| character_set_system     | utf8               |
+| collation_connection     | utf8mb4_unicode_ci |
+| collation_database       | utf8mb4_unicode_ci |
+| collation_server         | utf8mb4_unicode_ci |
+
+collation_connection 、collation_database 、collation_server是什么没关系。
+
+但必须保证
+
+| 系统变量                 | 描述                         |
+| ------------------------ | ---------------------------- |
+| character_set_client     | (客户端来源数据使用的字符集) |
+| character_set_connection | (连接层字符集)               |
+| character_set_database   | (当前选中数据库的默认字符集) |
+| character_set_results    | (查询结果字符集)             |
+| character_set_server     | (默认的内部操作字符集)       |
+
+这几个变量必须是utf8mb4。
+
+**5. 数据库连接的配置**
+
+数据库连接参数中: 
+characterEncoding=utf8会被自动识别为utf8mb4，也可以不加这个参数，会自动检测。 
+而autoReconnect=true是必须加上的。
+
+**6. 将数据库和已经建好的表也转换成utf8mb4**
+
+更改数据库编码：ALTER DATABASE caitu99 CHARACTER SET `utf8mb4` COLLATE `utf8mb4_general_ci`;
+
+更改表编码：ALTER TABLE `TABLE_NAME` CONVERT TO CHARACTER SET `utf8mb4` COLLATE`utf8mb4_general_ci`; 
+如有必要，还可以更改列的编码
+
+## 表字符集乱码问题
 
 ```sql
 from: https://www.cnblogs.com/yanzi-meng/p/9184139.html
@@ -469,5 +598,30 @@ return ret;
 其实在ibtias框架里使用selectkey这个节点，并设置insert返回值的类型为integer，就可以返回这个id值。
 SelectKey在Mybatis中是为了解决Insert数据时不支持主键自动生成的问题，他可以很随意的设置生成主键的方式。
 不管SelectKey有多好，尽量不要遇到这种情况吧，毕竟很麻烦。
+```
+
+# Docker 部署 MySql 并修改为大小写不敏感
+
+编辑/etc/mysql/mysql.conf.d/mysqld.cnf 文件
+
+```bash
+#[mysqld]后添加 
+lower_case_table_names=1
+```
+
+重启应用
+
+```bash
+#容器中执行
+service mysql restart
+
+#或者退出容器直接重启mysql容器
+docker restart mysql
+```
+
+# 生产环境启动mysql
+
+```sh
+docker run --name mysql1 --restart=always  -p 3306:3306  -v /etc/mysql/conf.d/:/home/mysql/conf.d/ -v /var/log:/home/mysql/log/  -e MYSQL_ROOT_PASSWORD=123456 -e TZ=Asia/Shanghai -d 938b57d64674 --lower-case-table-names=1
 ```
 

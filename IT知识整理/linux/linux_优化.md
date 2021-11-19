@@ -56,6 +56,7 @@ for oldboy in `chkconfig --list| grep "3:on"|awk '{print $1}'| grep -vE "crond|n
 ulimit -n  	# 查看系统描述符
 ulimit -HSn 65535   # 临时增加文件描述符
 echo '*         - nofile        65535'>> /etc/security/limits.conf     #退出，永久长效
+sysctl -p
 ```
 
 # 定时清理clietmqueue目录垃圾文件（老男孩_linux）

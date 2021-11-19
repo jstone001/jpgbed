@@ -19,7 +19,8 @@ mkdir /etc/docker
 $ cat > /etc/docker/daemon.json << EOF
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
-  "registry-mirrors": ["https://b9pmyelo.mirror.aliyuncs.com"]
+  "registry-mirrors": ["https://b9pmyelo.mirror.aliyuncs.com"],
+  "graph": "/opt/upload/docker"
 }
 EOF
 
@@ -30,6 +31,25 @@ Docker version 18.06.3-ce, build e68fc7a
 
 
 ```
+
+# daemon.json的配置
+
+```json
+{
+  "graph": "/data/docker",        //docker的工作目录。会自动生成一些文件夹
+  "storage-driver": "overlay2",       //存储驱动。使用overlay2
+  "insecure-registries": ["registry.access.r示例edhat.com","quay示例.io"],        //不安全的registries。自己的私有仓库也填在里边
+  "registry-mirrors": ["https://q2gr04ke.mirror.aliyuncs.com"],     //镜像加速源。这里是阿里的
+  "bip": "172.7.22.1/24",       //docker的网络地址
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "live-restore": true
+}
+————————————————
+版权声明：本文为CSDN博主「ultralinux」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/Flag2920/article/details/114377815
+```
+
+
 
 # 阿里云docker镜像仓库推送时报错:requested access to the resource is denied
 
@@ -52,3 +72,14 @@ docker tag 0e5574283393 myregistryhost:5000/fedora/httpd:version1.0
 # Docker容器中用户权限管理
 
 from: https://www.cnblogs.com/zhouzhifei/p/11557118.html
+
+# Docker内bash 没有vim
+
+```sh
+#更新安装源 
+apt-get update 
+#如果下载过程中卡在[waiting for headers] 删除/var/cache/apt/archives/下的所有文件 
+#安装vim 
+apt-get install vim
+```
+

@@ -49,6 +49,7 @@
 
 ```sh
 ll -rt  # 根据时间倒序排列，能看到最新生成的文件
+ls |wc -w 	# 查看文件夹有多少个文件
 ```
 
 ## tree
@@ -124,6 +125,46 @@ lsof +D /usr/local/：	#同上，但是会搜索目录下的目录，时间较�
 lsof -d 4：				# 显示使用fd为4的进程
 lsof -i -U：			# 显示所有打开的端口和UNIX domain文件
 ```
+
+### 生产环境实例
+
+```sh
+# lsof 命令来查看端口是否开放
+lsof -i:1025 #如果有显示说明已经开放了，如果没有显示说明没有开放
+```
+
+
+
+## ps
+
+### 生产环境实例
+
+#### 批量删除进程
+
+```sh
+kill -9 `ps -ef | grep xxx|awk '{print $2}' ` 	# 翻译过来就是 列出进程，找到包含xxx的行，并删除，输出pid的列。awk的作用是输出某一列，{print $2}就是输出第二列，因为第二列是pid的列
+```
+
+```sh
+ps -ef | grep xxx | grep -v root | awk '{print $2}' | xargs kill -9   # grep -v这个参数的作用是排除某个字符。所以这里排除了root执行的命令。
+from: https://blog.csdn.net/weixin_36453829/article/details/116614988
+```
+
+
+
+
+
+# 网络
+
+## netstat
+
+### 生产环境
+
+```sh
+ss -tnulp | grep java
+```
+
+
 
 # 过滤3剑客grep, sed, awk
 

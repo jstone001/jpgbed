@@ -375,6 +375,10 @@ quit
 
 
 
+# MySQL中interactive_timeout和wait_timeout的区别
+
+from:　https://www.cnblogs.com/ivictor/p/5979731.html
+
 # 修改mysql时区
 
 from:  https://blog.csdn.net/qq_41070393/article/details/105731300

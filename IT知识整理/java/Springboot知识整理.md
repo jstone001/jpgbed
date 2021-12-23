@@ -95,6 +95,33 @@ pom.xml去掉 <packaging>pom</packaging>
 
 
 
+# IDEA中设置Run Dashboard
+
+workspace.xml
+
+```xml
+<component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+————————————————
+版权声明：本文为CSDN博主「chinoukin」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/chinoukin/article/details/80577890
+```
+
 
 
 

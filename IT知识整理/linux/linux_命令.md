@@ -56,7 +56,7 @@ ls |wc -w 	# 查看文件夹有多少个文件
 
 以树状图列出目录的内容
 
-## 参数
+### 参数
 
 ```sh
 # -L  level 限制目录显示层级。
@@ -64,6 +64,8 @@ ls |wc -w 	# 查看文件夹有多少个文件
 ```
 
 ### 生产环境实例
+
+#### 显示当前目录下，第1层级的目录
 
 ```sh
 tree -Ld 1  # 显示当前目录下，第1层级的目录
@@ -128,8 +130,9 @@ lsof -i -U：			# 显示所有打开的端口和UNIX domain文件
 
 ### 生产环境实例
 
+#### lsof 命令来查看端口是否开放
+
 ```sh
-# lsof 命令来查看端口是否开放
 lsof -i:1025 #如果有显示说明已经开放了，如果没有显示说明没有开放
 ```
 
@@ -139,13 +142,23 @@ lsof -i:1025 #如果有显示说明已经开放了，如果没有显示说明没
 
 ### 生产环境实例
 
-#### 批量删除进程
+## kill
+
+### 生产环境实例
+
+#### 批量Kill多个进程
 
 ```sh
+ps -ef|grep php|grep -v grep|cut -c 9-15|xargs kill -9  #批量Kill多个进程
+
+#几个命令：
+#"ps - ef"是linux 里查看所有进程的命令。这时检索出的进程将作为下一条命令"grep mcfcm_st"的输入。
+#"grep mcfcm_st"的输出结果是，所有含有关键字"mcfcm_st"的进程，这是Oracle数据库中远程连接进程的共同特点。
+#"grep -v grep"是在列出的进程中去除含有关键字"grep"的进程。
+#"cut -c 9-15"是截取输入行的第9个字符到第15个字符，而这正好是进程号PID。
+#"xargs kill -9"中的xargs命令是用来把前面命令的输出结果（PID）作为"kill -9"命令的参数，并执行该令。
+
 kill -9 `ps -ef | grep xxx|awk '{print $2}' ` 	# 翻译过来就是 列出进程，找到包含xxx的行，并删除，输出pid的列。awk的作用是输出某一列，{print $2}就是输出第二列，因为第二列是pid的列
-```
-
-```sh
 ps -ef | grep xxx | grep -v root | awk '{print $2}' | xargs kill -9   # grep -v这个参数的作用是排除某个字符。所以这里排除了root执行的命令。
 from: https://blog.csdn.net/weixin_36453829/article/details/116614988
 ```

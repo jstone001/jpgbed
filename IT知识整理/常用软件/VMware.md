@@ -98,7 +98,7 @@ from: https://linzyjx.com/archives/65.html
 
 升级到VMware16以后，首选项菜单里的共享虚拟机被砍了，但是它的功能没有被禁用。甚至于如果15禁用过这个功能的，升级到16又自动开启了。但是开启以后GUI里都没地方关了啊摔，我本地服务器跑都跑不起来了啊。坑爹呢这是！
 
-要禁用就不能指望GUI了，可以修改配置文件解决。管理员权限打开`C:\ProgramData\VMware\hostd\proxy.xml`文件，并将`httpsPort`字段设置为`-1`即可禁用。然后在Windows服务里重启`VMware Workstation Server`服务即可。
+要禁用就不能指望GUI了，可以修改配置文件解决。管理员权限打开`	\proxy.xml`文件，并将`httpsPort`字段设置为`-1`即可禁用。然后在Windows服务里重启`VMware Workstation Server`服务即可。
 
 ![配置文件修改示意](https://gitee.com/jstone001/booknote/raw/master/jpgBed/2667336790.png)
 

@@ -49,7 +49,7 @@ from: https://blog.csdn.net/vtopqx/article/details/79034835
 # maven引入oracle
 
 ```sh
-mvn install:install-file -Dfile=ojdbc6.jar -Dpackaging=jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0.1.0　　
+mvn install:install-file -Dfile=ojdbc6.jar -Dpackaging=jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0.4.0　　
 
 # 命令解释：mvn install:install-file -Dfile="jar包的绝对路径" -Dpackaging="文件打包方式" -DgroupId=groupid名 -DartifactId=artifactId名 -Dversion=jar版本 （artifactId名对应之后maven配置的依赖名）。
 

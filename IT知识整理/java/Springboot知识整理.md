@@ -59,17 +59,7 @@ spring:
       show-sql: true
 ```
 
-# Cannot determine embedded database driver class for database type NONE
 
-from: https://blog.csdn.net/Master_Shifu_/article/details/80420099
-
-```xml
-<dependency>
-        <groupId>com.h2database</groupId> 
-        <artifactId>h2</artifactId>
-        <scope>runtime</scope> 
-</dependency>
-```
 
 # application.yml文件不起作用
 
@@ -122,7 +112,48 @@ workspace.xml
 原文链接：https://blog.csdn.net/chinoukin/article/details/80577890
 ```
 
+# 报错
 
+## Cannot determine embedded database driver class for database type NONE
+
+from: https://blog.csdn.net/Master_Shifu_/article/details/80420099
+
+```xml
+<dependency>
+        <groupId>com.h2database</groupId> 
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope> 
+</dependency>
+```
+## 关于热部署Devtools出现同一个类型进行类型转换失败的问题
+
+from： https://www.cnblogs.com/biaogejiushibiao/p/10135850.html
+
+报错截图：
+
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1399348-20181218103726680-1151961593-16424001299711.png)
+
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1399348-20181218104204707-213913021-16424001477715.png)
+
+https://www.cnblogs.com/biaogejiushibiao/p/10135850.html#_labelTop)
+
+**解决方法：**
+
+1.如果不是必须使用Devtools的热部署，可以将相关依赖去掉即可
+
+2.如果必须使用热部署，可以将要强制类型转换的对象先转换成json格式在进行转换即可
+
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1399348-20181218104606058-264264867-16424001770949.png)
+
+3.参考官方文档进行配置：
+
+在resources目录下面创建META_INF文件夹，然后创建spring-devtools.properties文件，文件加上类似下面的配置：
+restart.exclude.companycommonlibs=/mycorp-common-[\w-]+.jar
+restart.include.projectcommon=/mycorp-myproj-[\w-]+.jar
+
+**原因：**
+
+为了实现热部署，Devtools原有自己的类加载器，进行更新，由于类加载器的不同导致类型转换失败
 
 
 

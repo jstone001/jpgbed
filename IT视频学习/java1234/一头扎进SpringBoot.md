@@ -2,28 +2,34 @@
 
 http://blog.java1234.com/blog/articles/329.html
 
+```
 1. 创建独立的Spring应用程序
 2. 嵌入的Tomcat，无需部署WAR文件
 3. 简化Maven配置
 4. 自动配置Spring
 5. 提供生产就绪型功能，如指标，健康检查和外部配置
 6. 绝对没有代码生成和对XML没有要求配置
+```
+
+```java
+@ResponseBody
+@RestController
+```
 
 # 第2讲 项目属性配置
 
 ## 第1节 项目内置配置
 application.properties下
 ## 第2节 系统内置
-```yml
+```properties
 server.context-path=/HelloWorld		#开始页
 server.port=8080
 
 helloworld=spring root
+helloworld=springboot大爷你好
 ```
 ## 第3节 自定义配置
 ```java
-helloworld=springboot大爷你好
-
 @Value("${helloworld}")
 private String helloworld;
 ```
@@ -34,12 +40,13 @@ private String helloworld;
 private String helloWorld;
         
 ```
-```java
+```properties
 mysql.jdbcName=com.mysql.jdbc.Driver
 mysql.dbUrl=jdbc:mysql://localhost:3306/db_root
 mysql.userName=root
 mysql.password=123
-
+```
+```java
 //程序内的调用
     @Value("${mysql.jdbcName}")
     private String jdbcName;
@@ -265,7 +272,7 @@ public class Book {
 }
 
 ```
-BookDao
+BookDao.java
 ```java
 package com.sw.dao;
 
@@ -640,6 +647,16 @@ public class StudentController {
 
 # 第8讲 Springboot切面AOP
 
+http://blog.java1234.com/blog/articles/337.html
+
+```java
+@Aspect注解是切面注解类
+@Pointcut切点定义
+@Before是方法执行前调用
+@After是方法执行后调用
+@AfterReturning方法执行返回值调用
+```
+
 RequestAspect.java
 ```java
 package com.sw.aspect;
@@ -662,7 +679,7 @@ public class RequestAspect {
 
     private Logger logger = Logger.getLogger(RequestAspect.class);
 
-    @Pointcut("execution(public * com.sw.controller.*.*(..))")
+    @Pointcut("execution(public * com.sw.controller.*.*(..))")	//任意出参的任意类的任意方法，任意入参
     public void log(){
 
     }
@@ -674,8 +691,8 @@ public class RequestAspect {
         logger.info("url: " + request.getRequestURI());
         logger.info("ip: " + request.getRemoteHost());
         logger.info("method: " + request.getMethod());
-        logger.info("class_method: " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
-        logger.info("args: "+joinPoint.getArgs());
+        logger.info("class_method: " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());		//.getDeclaringTypeName获取类名， getSignature获取方法名
+        logger.info("args: "+joinPoint.getArgs());	//获取参数
         Student student= (Student) joinPoint.getArgs()[0];
         System.out.println(student);
 

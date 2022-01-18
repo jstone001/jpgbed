@@ -978,7 +978,7 @@ public class StudentConsumerDashBoardApplication_90 {
 
 ### 2. 然后浏览器输入：http://localhost:90/hystrix
 
-![image-20210618141646784](E:\JS\booknote\jpgBed\image-20210618141646784.png)
+![image-20210618141646784](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210618141646784.png)
 
 ### 3. 我们启动三个eureka，然后再启动microservice-student-provider-hystrix-1004
 
@@ -988,15 +988,15 @@ public class StudentConsumerDashBoardApplication_90 {
 
 图形化：
 
-![image-20210618141722276](E:\JS\booknote\jpgBed\image-20210618141722276.png)
+![image-20210618141722276](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210618141722276.png)
 
 指标含义：
 
-![image-20210618141757717](E:\JS\booknote\jpgBed\image-20210618141757717.png)
+![image-20210618141757717](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210618141757717.png)
 
 各种情况：
 
-![image-20210618141830693](E:\JS\booknote\jpgBed\image-20210618141830693.png)
+![image-20210618141830693](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210618141830693.png)
 
 ## 21 Hystrix集群监控turbine
 
@@ -1289,20 +1289,8 @@ hystrix:
             timeoutInMilliseconds: 3000
 
 ribbon:
-  ReadTimeout: 10000
+  ReadTimeout: 10000   # 这2个时间要大于hystrix的时间
   ConnectTimeout: 9000
-```
-
-原provider端的已无用
-
-```yaml
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 3000	# 无用了
 ```
 
 # Zuul
@@ -1621,11 +1609,11 @@ SpringCloud Config简介
 
 ​        Spring Cloud Config 是 Spring  Cloud  团队创建的一个全新项目，用来为分布式系统中的基础设施和微服务应用提供集中化的外部配置支持，它分为服务端与客户端两个部分。其中服务端也称为分布式配置中心，它是一个独立的微服务应用，用来连接配置仓库并为客户端提供获取配置信息、加密 /  解密信息等访问接口；而客户端则是微服务架构中的各个微服务应用或基础设施，它们通过指定的配置中心来管理应用资源与业务相关的配置内容，并在启动的时候从配置中心获取和加载配置信息。Spring Cloud Config 实现了对服务端和客户端中环境变量和属性配置的抽象映射，所以它除了适用于 Spring  构建的应用程序之外，也可以在任何其他语言运行的应用程序中使用。由于 Spring Cloud Config 实现的配置中心默认采用 Git  来存储配置信息，所以使用 Spring Cloud Config 构建的配置服务器，天然就支持对微服务应用配置信息的版本管理，并且可以通过  Git 客户端工具来方便的管理和访问配置内容。当然它也提供了对其他存储方式的支持，比如：GIT仓库、SVN 仓库、本地化文件系统。
 
-![image-20210624094446657](E:\JS\booknote\jpgBed\image-20210624094446657.png)
+![image-20210624094446657](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210624094446657.png)
 
 SpringCloud Bus
 
-![image-20210624094522825](E:\JS\booknote\jpgBed\image-20210624094522825.png)
+![image-20210624094522825](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210624094522825.png)
 
 ## 29 Config Server基本使用
 

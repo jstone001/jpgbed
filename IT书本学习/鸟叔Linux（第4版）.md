@@ -15,6 +15,81 @@
 - 主存储器
 ### 0.1.2 CPU架构
 
+- 精简指令集
+
+- 复杂指令集
+
+   多媒体微指令集：MMX, SSE, SSE2, SSE3, SSE4, AMD-3DNow!
+
+   虚拟化微指令集：Intel-VT, AMD-SVM
+
+   省电功能：Intel-SpeedStep, AMD-PowerNow!
+
+   64/32 位兼容技术：AMD-AMD64, Intel-EM64T
+
+### 0.1.3 其他单元设备
+
+### 0.1.4 运作流程
+
+### 0.1.5 **计算机用途的分类**
+
+### **0.1.6** 计算机上面常用的计算单位
+
+1 Byte = 8 bits
+
+> 一般来说，文件容量使用的是二进制的方式，所以 1 GBytes 的文件大小实际上为：1024x1024x1024 
+>
+> Bytes 这么大！ 速度单位则常使用十进制，例如 1GHz 就是 1000x1000x1000 Hz 的意思。
+
+网络传输：20M 单位是bit。 除以8是bytes，2.5M Bytes。
+
+## **0.2** **个人计算机架构与相关设备组件**
+
+### **0.2.1** **执行脑袋运算与判断的** **CPU**
+
+### 0.2.2 内存
+
+### **0.2.4** **硬盘与储存设备**
+
+#### 传输接口
+
+- sata
+
+- Sas: 服务器硬盘
+
+  
+
+| 版本  | **带宽 (Gbit/s)** | 速度 (Mbyte/s) |
+| ----- | ----------------- | -------------- |
+| SAS 1 | 3                 | 300            |
+| SAS 2 | 6                 | 600            |
+| SAS 3 | 12                | 1200           |
+
+- USB: 
+
+| 版本    | 带宽 (Mbit/s) | 速度 (Mbyte/s) |
+| ------- | ------------- | -------------- |
+| USB 1.0 | 12            | 1.5            |
+| USB 2.0 | 480           | 60             |
+| USB 3.0 | 5G            | 500            |
+| USB 3.1 | 10G           | 1000           |
+
+- SSD（固态硬盘）
+
+### **0.2.6** **主板**
+
+## **0.3** 数据表示方式
+
+### **0.3.2** 文字编码系统
+
+- ASCII ：1byte
+- Big5: 2bytes
+- uft-8: 3bytes
+
+## 0.4 软件程序运作
+
+
+
 # 第1章、Linux是什么与如何学习
 
 ## 1.1 Linux 是什么
@@ -24,6 +99,11 @@
 ## 1.3 Linux当前应用的角色
 
 ## 1.4 Linux 该如何学习
+
+### **1.4.1** **从头学习** **Linux** 基础
+
+- 计算机基础 (http://www.study-area.org/compu/compu.htm)
+- 网络基础 (http://www.study-area.org/network/network.htm)
 
 ## 1.5 重点回顾
 
@@ -37,24 +117,24 @@
 
 ### **2.1.3** **各硬件装置在** **Linux** 中的文件名
 
-| 装置                 | 装置在 Linux 内的文件名                              |
-| -------------------- | ---------------------------------------------------- |
-| SCSI/SATA/USB 硬盘机 | <font color='red'>/dev/sd[a-p]</font>                |
-| USB 快闪碟           | /dev/sd[a-p] (与 SATA 相同)                          |
-| VirtI/O 界面         | /dev/vd[a-p] (用于虚拟机内)                          |
-| 软盘驱动器           | /dev/fd[0-7]                                         |
-| 打印机               | /dev/lp[0-2] (25 针打印机)                           |
-|                      | /dev/usb/lp[0-15] (USB 界面)                         |
-| 鼠标                 | /dev/input/mouse[0-15] (通用)                        |
-|                      | /dev/psaux (PS/2 界面)                               |
-|                      | /dev/mouse (当前鼠标)                                |
-| CDROM/DVDROM         | /dev/scd[0-1] (通用)                                 |
-|                      | /dev/sr[0-1] (通用，CentOS 较常见)                   |
-|                      | /dev/cdrom (当前 CDROM)                              |
-| 磁带机               | /dev/ht0 (IDE 界面)                                  |
-|                      | /dev/st0 (SATA/SCSI 界面)                            |
-|                      | /dev/tape (当前磁带)                                 |
-| IDE 硬盘机           | <font color='red'>/dev/hd[a-d] (旧式系统才有)</font> |
+| 装置                 | 装置在 Linux 内的文件名                                 |
+| -------------------- | ------------------------------------------------------- |
+| SCSI/SATA/USB 硬盘机 | <font color='red'>/dev/sd[a-p]</font>                   |
+| USB 快闪碟           | /dev/sd[a-p] (与 SATA 相同)                             |
+| VirtI/O 界面         | /dev/vd[a-p] (用于虚拟机内)                             |
+| 软盘驱动器           | /dev/fd[0-7]                                            |
+| 打印机               | /dev/lp[0-2] (25 针打印机)                              |
+|                      | /dev/usb/lp[0-15] (USB 界面)                            |
+| 鼠标                 | /dev/input/mouse[0-15] (通用)                           |
+|                      | /dev/psaux (PS/2 界面)                                  |
+|                      | /dev/mouse (当前鼠标)                                   |
+| CDROM/DVDROM         | /dev/scd[0-1] (通用)                                    |
+|                      | /dev/sr[0-1] (通用，CentOS 较常见)                      |
+|                      | /dev/cdrom (当前 CDROM)                                 |
+| 磁带机               | /dev/ht0 (IDE 界面)                                     |
+|                      | /dev/st0 (SATA/SCSI 界面)                               |
+|                      | /dev/tape (当前磁带)                                    |
+| IDE 硬盘机           | <font color='orange'>/dev/hd[a-d] (旧式系统才有)</font> |
 
 > 时至今日，由于 IDE 界面的磁盘驱动器几乎已经被淘汰，太少见了！因此现在连 IDE 界面的磁盘文件名也都被仿真成 /dev/sd[a-p] 了！此外， 如果你的机器使用的是跟因特网供货商 (ISP) 申请使用的云端机器，这时可能会得到的是虚拟机。为了加速，虚拟机内的磁盘是使用仿真器产生， 该仿真器产生的磁盘文件名为 /dev/vd[a-p] 系列的文件名喔！要注意！要注意！
 
@@ -71,17 +151,29 @@
 
 #### **MSDOS (MBR)** **分区表格式与限制**
 
-- 主要启动记录区(Master Boot Record, MBR)：可以安装开机管理程序的地方，有 446 bytes 
+- <font color='orange'>主要启动记录区(Master Boot Record, MBR)</font>：可以安装开机管理程序的地方，有 446 bytes 
+- 老系统1个扇区512kb。
 - 分区表(partition table)：记录整颗硬盘分区的状态，有 64 bytes
 
 446+4*16=510
 
-- 怎么装置文件名没有/dev/sda3 与/dev/sda4 呢？因为前面四个号码都是保留给 Primary 或Extended 用的嘛
+- 446kb是开机管理程序
+- 64是分区表
+
+<font color='orange'>分区类型：</font>
+
+- P: primary 主分区 
+- E: Extended 延伸分区
+- L:  Logic 逻辑分区 
+
+sd1~sd4 是给主分区和延伸分区
+
+- <font color='orange'>怎么装置文件名没有/dev/sda3 与/dev/sda4 呢？因为前面四个号码都是保留给 Primary 或Extended 用的嘛</font>
 - 逻辑分区从5开始
-- 主要分区与延伸分区最多可以有<font color='red'>四笔(硬盘的限制)  3P+1E</font>
-- <font color='red'>延伸分区最多只能有一个(操作系统的限制)</font>
+- 主要分区与延伸分区最多可以有<font color='orange'>四笔(硬盘的限制)  3P+1E</font>
+- **<font color='orange'>延伸分区最多只能有一个(操作系统的限制)</font>**
 - 逻辑分区是由延伸分区持续切割出来的分区槽
-- 能够被格式化后，作为数据存取的分区槽为主要分区与逻辑分区。<font color='red'>延伸分区无法格式化</font>
+- 能够被格式化后，作为数据存取的分区槽为主要分区与逻辑分区。<font color='orange'>延伸分区无法格式化</font>
 - 逻辑分区的数量依操作系统而不同，在 Linux 系统中 SATA 硬盘已经可以突破 63 个以上的分区限制
 
 MBR存在的问题：
@@ -98,7 +190,7 @@ MBR存在的问题：
 - LBA0 (MBR 相容区块)
 - LBA1 (GPT 表头纪录)
 - LBA2-33 (实际纪录分区信息处)
-  	最大8ZB  （1ZB=2的30次TB)
+  	<font color='orange'>最大8ZB  （1ZB=2的30次TB)</font>
 
 ### 2.2.3 开机流程中的BIOS与UEFI开机检测程序
 
@@ -107,7 +199,7 @@ MBR存在的问题：
 - CMOS是主板上的储存器（硬件）
 - BIOS是软件
 
-开机流程
+开机流程：
 
 1. BIOS：开机主动执行的韧体，会认识第一个可开机的装置；
 2. MBR：第一个可开机装置的第一个扇区内的主要启动记录区块，内含开机管理程序；

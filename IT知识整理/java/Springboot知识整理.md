@@ -1,4 +1,112 @@
-# Springboot开发console程序
+
+
+# Springboot 一般开发
+
+## 包扫描要注意的问题
+
+```java
+// 如果扫描了不是Application下的包，注意要复写下，自己本包下的路径
+@SpringBootApplication(scanBasePackages ={"com.wondersgroup.yss.common", "com.wondersgroup.yss.xxljob"})  //xxljob 本包下的路径
+```
+
+
+
+## SpringBoot 的Test类
+
+```java
+@RunWith(SpringRunner.class)
+//@SpringBootTest(classes = GeneratorApp.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = GeneratorApp.class)
+public class UserTest {
+}
+————————————————
+版权声明：本文为CSDN博主「灰太狼_cxh」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/weixin_39220472/article/details/87714756
+```
+
+
+
+##  @responseBody 中文乱码解决方法
+
+from: https://blog.csdn.net/syslbjjly/article/details/88952269
+
+## 显示Spring Boot加载的所有bean
+
+from: https://blog.csdn.net/cyan20115/article/details/106549716
+
+1. CommandLineRunner作为界面
+
+```java
+package com.mkyong;
+ 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+ 
+import java.util.Arrays;
+ 
+@SpringBootApplication
+public class Application implements CommandLineRunner {
+ 
+    @Autowired
+    private ApplicationContext appContext;
+ 
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(Application.class, args);
+    }
+ 
+    @Override
+    public void run(String... args) throws Exception {
+ 
+        String[] beans = appContext.getBeanDefinitionNames();
+        Arrays.sort(beans);
+        for (String bean : beans) {
+            System.out.println(bean);
+        }
+ 
+    }
+ 
+}
+```
+
+2. CommandLineRunner作为Bean 
+
+```java
+    package com.mkyong;
+     
+    import org.springframework.boot.CommandLineRunner;
+    import org.springframework.boot.SpringApplication;
+    import org.springframework.boot.autoconfigure.SpringBootApplication;
+    import org.springframework.context.ApplicationContext;
+    import org.springframework.context.annotation.Bean;
+     
+    import java.util.Arrays;
+     
+    @SpringBootApplication
+    public class Application {
+     
+        public static void main(String[] args) throws Exception {
+            SpringApplication.run(Application.class, args);
+        }
+     
+        @Bean
+        public CommandLineRunner run(ApplicationContext appContext) {
+            return args -> {
+     
+                String[] beans = appContext.getBeanDefinitionNames();
+                Arrays.stream(beans).sorted().forEach(System.out::println);
+     
+            };
+        }
+     
+    }
+```
+
+
+
+## Springboot开发console程序
 
 Hztj1Application.java
 
@@ -40,23 +148,11 @@ public class Hztj1Application implements CommandLineRunner {
 
 
 
-# SpringBoot 热部署
-
-```xml
-        <!-- 修改后立即生效，热部署 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>springloaded</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-        </dependency>
-```
 
 
 
-# IDEA中设置Run Dashboard
+
+## IDEA中设置Run Dashboard
 
 workspace.xml
 
@@ -83,14 +179,16 @@ workspace.xml
 原文链接：https://blog.csdn.net/chinoukin/article/details/80577890
 ```
 
-# application.yml的配置
+
+
+# application.yml 的常用配置
 
 ## yml设置项目起始页
 
 ```yaml
 server:
   servlet:
-    context-path: /index.html
+    context-path: /ysxt-ws	# 地址上配项目名
 ```
 ## 自定义参数Configuration配置
 
@@ -111,6 +209,22 @@ public class MysqlProperties {
     private String userName;
     private String password;
 ```
+## SpringBoot 热部署
+
+```xml
+        <!-- 修改后立即生效，热部署 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>springloaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+```
+
+# Spring集成其他组件
+
 ## 集成jpa
 
 pom.xml
@@ -143,7 +257,13 @@ pom.xml
     database-platform: org.hibernate.dialect.MySQL5Dialect 
 ```
 
+查询
 
+```java
+    @Query(value = "select * from tb_book order by rand() limit ?1", nativeQuery = true)
+        //nativeQuery本地sql. 默认false为HQL
+    List<Book> randomList(Integer n);
+```
 
 ## 集成Sqlite
 
@@ -302,16 +422,589 @@ spring.thymeleaf.prefix=classpath:/templates/
 版权声明：本文为CSDN博主「水越帆」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 原文链接：https://blog.csdn.net/qq_41618510/article/details/86034046
 
-# 一些注解
+## 集成logback
 
-## jpa
+logback.xml
 
-```java
-    @Query(value = "select * from tb_book order by rand() limit ?1", nativeQuery = true)
-        //nativeQuery本地sql. 默认false为HQL
-    List<Book> randomList(Integer n);
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
+<!-- scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true -->
+<!-- scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。 -->
+<!-- debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration scan="true" scanPeriod="10 seconds">
+    <!--<include resource="org/springframework/boot/logging/logback/base.xml"
+        /> -->
+    <contextName>Logback For CxfDemo</contextName>
+    <!-- name的值是变量的名称，value的值时变量定义的值。通过定义的值会被插入到logger上下文中。定义变量后，可以使“${}”来使用变量。 -->
+    <!--    <property name="log.path" value="D:/Test/log/logback-test/log"/>-->
+    <!-- 定义日志文件 输入位置 -->
+    <!--    <property name="logDir" value="D:/Test/log/logback-test/log"/>-->
+    <!-- 日志最大的历史 30天 -->
+    <property name="maxHistory" value="30"/>
+
+
+    <!-- 控制台输出日志 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Shanghai} [%thread] %-5level %logger : %msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+    </appender>
+
+
+    <!--&lt;!&ndash; ERROR级别日志 &ndash;&gt;
+    <appender name="ERROR"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}\%d{yyyyMMdd}\error.log</fileNamePattern>
+            <maxHistory>${maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger-%msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+        <append>false</append>
+        <prudent>false</prudent>
+    </appender>
+
+    &lt;!&ndash; WARN级别日志 &ndash;&gt;
+    <appender name="WARN"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}\%d{yyyyMMdd}\warn.log</fileNamePattern>
+            <maxHistory>${maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger-%msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+        <append>false</append>
+        <prudent>false</prudent>
+    </appender>
+
+    &lt;!&ndash; INFO级别日志 &ndash;&gt;
+    <appender name="INFO"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}\%d{yyyyMMdd}\info.log</fileNamePattern>
+            <maxHistory>${maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger-%msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+        <append>false</append>
+        <prudent>false</prudent>
+    </appender>
+
+    &lt;!&ndash; DEBUG级别日志 &ndash;&gt;
+    <appender name="DEBUG"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}\%d{yyyyMMdd}\debug.log</fileNamePattern>
+            <maxHistory>${maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger-%msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+        <append>false</append>
+        <prudent>false</prudent>
+    </appender>-->
+
+    <appender name="LOG"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>log/%d{yyyyMMdd}\%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Shanghai} [%thread] %-5level %logger : %msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+        <append>false</append>
+        <prudent>false</prudent>
+    </appender>
+
+    <!--文件日志， 按照每天生成日志文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>log/%d{yyyyMMdd}/boss.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Shanghai} [%thread] %-5level %logger{50} : %msg%n</pattern>
+        </encoder>
+        <!--日志文件最大的大小-->
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>10MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <!-- 异步输出 -->
+    <appender name="dayLogAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <includeCallerData>true</includeCallerData>
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+        <queueSize>512</queueSize>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <!--专为 spring 定制
+     -->
+    <logger name="org.springframework" level="info"/>
+    <!-- show parameters for hibernate sql 专为 Hibernate 定制 -->
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicExtractor" level="DEBUG"/>
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.hibernate.engine.QueryParameters" level="DEBUG"/>
+    <logger name="org.hibernate.engine.query.HQLQueryPlan" level="DEBUG"/>
+
+    <!--myibatis log configure-->
+    <!--
+    <logger name="com.apache.ibatis" level="TRACE"/>
+    <logger name="java.sql.Connection" level="DEBUG"/>
+    <logger name="java.sql.Statement" level="DEBUG"/>
+    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+     -->
+    <!-- root级别 INFO -->
+    <root level="INFO">
+        <!-- 控制台输出 -->
+        <appender-ref ref="STDOUT"/>
+        <!-- 文件输出 -->
+        <appender-ref ref="LOG"/>
+    </root>
+</configuration>
 ```
 
+## 集成redis
+
+```xml
+        <!-- redis依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+```
+
+### 与RedisCacheManager整合
+
+from: https://rstyro.github.io/blog/2019/04/16/SpringBoot%E4%B8%8ERedisCacheManager%E6%95%B4%E5%90%88/
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+
+<!-- redis -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+<dependency>
+	<groupId>org.apache.commons</groupId>
+	<artifactId>commons-pool2</artifactId>
+</dependency>
+```
+
+RedisConfig.java
+
+```java
+package com.example.config;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import javax.annotation.Resource;
+import java.time.Duration;
+
+/**
+ *
+ * @author rstyro
+ * @time 2018-07-31
+ *
+ */
+@Configuration
+@EnableCaching // 开启缓存支持
+public class RedisConfig extends CachingConfigurerSupport {
+    @Resource
+    private LettuceConnectionFactory lettuceConnectionFactory;
+
+
+    /**
+     * 配置CacheManager
+     * @return
+     */
+    @Override
+    @Bean
+    public CacheManager cacheManager() {
+        RedisSerializer<String> redisSerializer = new StringRedisSerializer();
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+
+        //解决查询缓存转换异常的问题
+        ObjectMapper om = new ObjectMapper();
+        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        jackson2JsonRedisSerializer.setObjectMapper(om);
+
+        // 配置序列化（解决乱码的问题）
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+//                .entryTtl(Duration.ZERO)
+                .entryTtl(Duration.ofSeconds(20))   //设置缓存失效时间
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
+                .disableCachingNullValues();
+
+        RedisCacheManager cacheManager = RedisCacheManager.builder(lettuceConnectionFactory)
+                .cacheDefaults(config)
+                .build();
+        return cacheManager;
+    }
+
+
+    /**
+     * RedisTemplate配置
+     */
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory lettuceConnectionFactory) {
+        // 设置序列化
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(
+                Object.class);
+        ObjectMapper om = new ObjectMapper();
+        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        jackson2JsonRedisSerializer.setObjectMapper(om);
+        // 配置redisTemplate
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<String, Object>();
+        redisTemplate.setConnectionFactory(lettuceConnectionFactory);
+        RedisSerializer<?> stringSerializer = new StringRedisSerializer();
+        redisTemplate.setKeySerializer(stringSerializer);// key序列化
+        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);// value序列化
+        redisTemplate.setHashKeySerializer(stringSerializer);// Hash key序列化
+        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);// Hash value序列化
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
+}
+```
+
+注解解析
+
+```java
+//指定缓存组件的名字
+@AliasFor("cacheNames")
+String[] value() default {};
+
+//指定缓存组件的名字
+@AliasFor("value")
+String[] cacheNames() default {};
+
+// 缓存数据使用的Key,
+String key() default "";
+
+// key的生成器，可以自己指定key的生成组件id; 
+// key 与 keyGenerator 两个只能选一个，不能同时指定
+String keyGenerator() default "";
+
+// 指定缓存管理器，
+String cacheManager() default "";
+
+//指定获得解析器，cacheManager、cacheResolver 两者取其一
+String cacheResolver() default "";
+
+// 符合condition条件,才缓存
+String condition() default "";
+
+// 和 codition 条件相反才成立
+String unless() default "";
+
+// 是否使用异步模式
+boolean sync() default false;
+
+// 只有@CacheEvict 有这个属性
+// 清空所有缓存信息
+boolean allEntries() default false;
+
+// 只有@CacheEvict 有这个属性
+// 缓存的清除是否在方法之前执行
+// beforeInvocation=false  默认是在方法之后执行
+boolean beforeInvocation() default false;
+
+
+    @Cacheable
+    //先查询缓存中是否存在，存在则返回缓存内容，反正执行方法后返回并把返回结果缓存起来
+    @CacheEvict
+    //删除指定缓存
+    @CachePut
+    //更新并刷新缓存,先执行方法内容，然后更新缓存
+    @EnableCaching
+    //这个是一个复合注解，可以拥有同时配置上面3个注解的功能
+
+```
+
+实例：
+
+```java
+@CacheConfig(cacheNames = "act")  //这个注解表示类中共同放入到act 模块中
+@Service
+public class ActicleService implements IActicleService {
+
+    @Autowired
+    private ActicleMapper acticleMapper;
+
+    /**
+     * @Cacheable
+     * 1、先查缓存，
+     * 2、若没有缓存，就执行方法
+     * 3、若有缓存。则返回，不执行方法
+     *
+     * 所以@Cacheable 不能使用result
+     *
+     * @return
+     * @throws Exception
+     */
+    @Cacheable(key = "#root.methodName")
+    public List<Acticle> list() throws Exception {
+        return acticleMapper.getActicleList();
+    }
+
+    /**
+     * @CachePut 更新并刷新缓存
+     * 1、先调用目标方法
+     * 2、把结果缓存
+     * @param acticle
+     * @return
+     * @throws Exception
+     */
+    @CachePut(key = "#result.id" ,unless = "#result.id == null" )
+    public Acticle save(Acticle acticle) throws Exception {
+        acticle.setCreateBy(1l);
+        acticle.setCreateTime(LocalDateTime.now());
+        acticle.setModifyBy(1l);
+        acticle.setModifyTime(LocalDateTime.now());
+        acticleMapper.save(acticle);
+        System.out.println("acticle="+acticle);
+        return acticle;
+    }
+
+    /**
+     * 删除指定key 的缓存
+     * beforeInvocation=false  缓存的清除是否在方法之前执行
+     * 默认是在方法之后执行
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    @CacheEvict(key = "#id",beforeInvocation = true)
+    public int del(Long id) throws Exception {
+        int isDel = 0;
+        isDel = acticleMapper.del(id);
+        return isDel;
+    }
+
+    /**
+     * 删除所有缓存
+     * @return
+     * @throws Exception
+     */
+    @CacheEvict(allEntries = true)
+    public int delAll() throws Exception {
+        return 1;
+    }
+
+    @CachePut(key = "#result.id" ,unless = "#result.id == null" )
+    public Acticle update(Acticle acticle) throws Exception {
+        acticle.setModifyBy(1l);
+        acticle.setModifyTime(LocalDateTime.now());
+        return acticleMapper.update(acticle);
+    }
+
+    @Cacheable(key = "#id",condition = "#id > 0")
+    public Acticle queryById(Long id) throws Exception {
+        return acticleMapper.queryById(id);
+    }
+
+    /**
+     * @Caching复杂组合缓存注解
+     *
+     * @param title
+     * @return
+     * @throws Exception
+     */
+    @Caching(cacheable = { @Cacheable(key = "#title")},
+            put = {@CachePut(key = "#result.id"),
+//            @CachePut(key = "T(String).valueOf(#page).concat('-').concat(#pageSize)")
+            @CachePut(key = "T(String).valueOf('tag').concat('-').concat(#result.tagId)")
+    })
+    public Acticle queryByTitle(String title) throws Exception {
+        return acticleMapper.queryByTitle(title);
+    }
+
+    @Cacheable(key = "T(String).valueOf('tag').concat('-').concat(#tagId)")
+    public Acticle queryByTag(Long tagId) throws Exception {
+        return null;
+    }
+}
+```
+
+缓存工作原理：
+
+```java
+当我们引入缓存的时候，SpringBoot的缓存自动配置CacheAutoConfiguration就会生效
+    在CacheAutoConfiguration 中的CacheConfigurationImportSelector会导入很多缓存组件配置类
+    通过debug看源码,知道imports 的内容如下
+
+    static class CacheConfigurationImportSelector implements ImportSelector {
+    	CacheConfigurationImportSelector() {
+    	}
+
+    	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+    		CacheType[] types = CacheType.values();
+    		String[] imports = new String[types.length];
+
+    		for(int i = 0; i < types.length; ++i) {
+    			imports[i] = CacheConfigurations.getConfigurationClass(types[i]);
+    		}
+
+    		return imports;
+    	}
+    }
+
+    /**
+    imports 如下
+
+    0 = "org.springframework.boot.autoconfigure.cache.GenericCacheConfiguration"
+    1 = "org.springframework.boot.autoconfigure.cache.JCacheCacheConfiguration"
+    2 = "org.springframework.boot.autoconfigure.cache.EhCacheCacheConfiguration"
+    3 = "org.springframework.boot.autoconfigure.cache.HazelcastCacheConfiguration"
+    4 = "org.springframework.boot.autoconfigure.cache.InfinispanCacheConfiguration"
+    5 = "org.springframework.boot.autoconfigure.cache.CouchbaseCacheConfiguration"
+    6 = "org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration"
+    7 = "org.springframework.boot.autoconfigure.cache.CaffeineCacheConfiguration"
+    8 = "org.springframework.boot.autoconfigure.cache.SimpleCacheConfiguration"		
+    9 = "org.springframework.boot.autoconfigure.cache.NoOpCacheConfiguration"
+    */
+
+    如果没有引Redis， 则SimpleCacheConfiguration这个就是默认的配置类
+    在SimpleCacheConfiguration注入了一个ConcurrentMapCacheManager
+    ConcurrentMapCacheManager 实现了CacheManager 接口
+    ConcurrentMapCacheManager 通过 ConcurrentHashMap 把数据缓存起来
+    在 CacheManager 有一个Cache getCache(String var1) 方法换取缓存
+    流程大概就这里，感兴趣的同学可以打断点阅读源码
+
+```
+
+
+
+# 一些注解
+
+## @ControllerAdvice
+
+from: https://blog.csdn.net/m0_37607679/article/details/103949069
+
+- 结合方法型注解@ExceptionHandler，用于捕获Controller中抛出的指定类型的异常，从而达到不同类型的异常区别处理的目的；
+
+- 结合方法型注解@InitBinder，用于request中自定义参数解析方式进行注册，从而达到自定义指定格式参数的目的；
+
+- 结合方法型注解@ModelAttribute，表示其标注的方法将会在目标Controller方法执行之前执行。
+
+### @ExceptionHandler
+
+```java
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface ExceptionHandler {
+    // 指定需要捕获的异常的Class类型
+	Class<? extends Throwable>[] value() default {};
+}
+
+
+   如下是我们使用@ExceptionHandler捕获RuntimeException异常的例子：
+
+@ControllerAdvice(basePackages = "mvc")
+public class SpringControllerAdvice {
+  @ExceptionHandler(RuntimeException.class)
+  public ModelAndView runtimeException(RuntimeException e) {
+    e.printStackTrace();
+    return new ModelAndView("error");
+  }
+}
+
+
+   这里我们模拟一个访问user/detail的接口，在该接口中抛出了RuntimeException，那么，这里的异常捕获器就会捕获该异常，然后返回默认的error试图。如下是UserController的代码：
+
+@Controller
+@RequestMapping("/user")
+public class UserController {
+
+  @Autowired
+  private UserService userService;
+
+  @RequestMapping(value = "/detail", method = RequestMethod.GET)
+  public ModelAndView detail(@RequestParam("id") long id) {
+    ModelAndView view = new ModelAndView("user");
+    User user = userService.detail(id);
+    view.addObject("user", user);
+    throw new RuntimeException("mock user detail exception.");
+  }
+}
+
+
+   启动上述服务，在浏览器中访问http://localhost:8080/user/detail?id=1之后，可以看到页面展示的是我们定义的异常视图。
+————————————————
+版权声明：本文为CSDN博主「Java晋升」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/m0_37607679/article/details/103949069
+```
+
+### @InitBinder
+
+### @ModelAttribute
 
 
 ##  表单验证

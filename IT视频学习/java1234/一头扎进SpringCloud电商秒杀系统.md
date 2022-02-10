@@ -1070,7 +1070,7 @@ public class SysInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String path=request.getRequestURI();
+        String path=request.getRequestURI();	//请求的url
         System.out.println(path);
         if(handler instanceof HandlerMethod){
             String token = request.getHeader("token");
@@ -1094,8 +1094,6 @@ public class SysInterceptor implements HandlerInterceptor {
     }
 }
 ```
-
-# 秒杀接口
 
 ## 11_全局统一异常处理
 
@@ -1131,6 +1129,8 @@ public class GlobalExceptionHanlder {
 }
 
 ```
+
+# 秒杀接口
 
 ## 12_获取所有秒杀商品数据接口实现
 
@@ -1513,6 +1513,54 @@ update t_goods_miaosha set stock=stock-1 where id=#{id} and stock>0
 ## 33_秒杀结果接口开发
 ## 34_前端秒杀结果轮询实现
 ## 35_秒杀商品信息放redis中判断
+
+StartupRunner.java
+
+```java
+package com.java1234.miaosha.run;
+
+import com.java1234.miaosha.constant.Constant;
+import com.java1234.miaosha.service.IMiaoShaGoodsService;
+import com.java1234.miaosha.util.RedisUtil;
+import com.java1234.miaosha.vo.MiaoShaGoodsVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+/**
+ * 启动的时候加载秒杀商品库存信息和是否秒杀完标识
+ * @author java1234_小锋
+ * @site www.java1234.com
+ * @company Java知识分享网
+ * @create 2021-03-01 9:39
+ */
+@Component("startupRunner")
+public class StartupRunner implements CommandLineRunner {
+
+    @Autowired
+    private IMiaoShaGoodsService miaoShaGoodsService;
+
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Override
+    public void run(String... args) throws Exception {
+        List<MiaoShaGoodsVo> miaoShaGoodsList = miaoShaGoodsService.listAll();
+        System.out.println("启动加载秒杀库存信息");
+        for(MiaoShaGoodsVo miaoShaGoodsVo:miaoShaGoodsList){
+            System.out.println(miaoShaGoodsVo.getId()+":"+miaoShaGoodsVo.getStock());
+            redisUtil.set2(Constant.REDIS_STOCK_PREFIX,miaoShaGoodsVo.getId()+"",miaoShaGoodsVo.getStock()+"");
+            redisUtil.set(Constant.REDIS_GOODS_MIAOSHA_OVER_PREFIX,miaoShaGoodsVo.getId()+"",false);
+        }
+    }
+}
+
+```
+
+
+
 ## 36_vue秒杀订单页面实现
 
 OrderInfo.vue

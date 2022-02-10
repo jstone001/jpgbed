@@ -44,7 +44,7 @@ sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 
 
-## Mysql 错误代码： 1093, 对一个表的字段查询并修改
+## 1093, 对一个表的字段查询并修改
 
 from:https://blog.csdn.net/qq_29672495/article/details/72668008
 
@@ -212,6 +212,63 @@ mysqldump -uroot -p123 --databases db_txt > e:\mysql_backup\db_txt.sql
 ```
 
 # Mysql安装
+
+## mysql的win安装 
+
+from: https://www.cnblogs.com/zhangkanghui/p/9613844.html
+
+官网下载win的zip包
+
+**配置环境变量**：
+
+```bat
+%MySql_HOME%
+```
+
+**生成data文件**
+
+```shell
+# 以管理员身份运行cmd
+mysqld --initialize-insecure --user=mysql  在E:\mysql\mysql-8.0.12-winx64目录下生成data目录
+
+mysqld -install  # 安装mysql
+net start MySQL  # 启动服务
+```
+
+**登录MySQL**
+
+```sh
+E:\python\mysql\mysql-8.0.12-winx64\bin>mysql -u root -p
+
+```
+
+**查询用户密码**
+
+```sql
+mysql> select host,user,authentication_string from mysql.user;
+mysql> use mysql;
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+mysql> flush privileges;  
+mysql> quit;
+
+```
+
+**关于修改密码再次登录出现ERROR的解决方案：**
+
+```sh
+net stop mysql
+打开mysql的安装目录，找到data文件夹，将其删除！
+回到cmd命令窗口，输入mysqld -remove
+```
+
+```sql
+接下来按照上面教程，从第二步生成data文件开始执行，一定要注意修改密码那里：
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+```
+
+
 
 ## mysql的Linux安装
 

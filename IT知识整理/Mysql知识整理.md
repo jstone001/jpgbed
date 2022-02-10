@@ -40,7 +40,7 @@ sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 修改成功后重启MySQL服务，service mysql restart，重启好后，再登录mysql，*输入SQL：show variables like '%sql_mode'; 如果没有ONLY_FULL_GROUP_BY，就说明已经成功了。*
 
-<img src="E:\JS\booknote\jpgBed\image-20211117171647113.png" alt="image-20211117171647113" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20211117171647113.png" alt="image-20211117171647113" style="zoom:80%;" />
 
 
 
@@ -166,7 +166,7 @@ MySQL 1130错误，无法远程连接
 
  
 
-![img](E:\JS\booknote\jpgBed\04-209941648.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/04-209941648.png)
 
  
 

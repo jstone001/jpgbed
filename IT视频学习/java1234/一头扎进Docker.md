@@ -11,7 +11,7 @@ Docker官网： https://www.docker.com/
 
 ## 02 Docker架构原理 
 
-![image-20210519095155767](E:\JS\booknote\jpgBed\image-20210519095155767.png)
+![image-20210519095155767](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210519095155767.png)
 
 Docker三要素，镜像，容器，仓库
 
@@ -52,7 +52,7 @@ Docker是一种轻量级的虚拟化技术，比传统的虚拟机性能更好�
 
 ### 虚拟机的体系结构
 
-![img](E:\JS\booknote\jpgBed\B83BF69E-842F-4F07-8ADF-AB452BA58A35.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/B83BF69E-842F-4F07-8ADF-AB452BA58A35.png)
 
 - server - 表示真实电脑。
 - Host OS - 真实电脑的操作系统，例如：Windows，Linux
@@ -62,7 +62,7 @@ Docker是一种轻量级的虚拟化技术，比传统的虚拟机性能更好�
 
 ### Docker的体系结构
 
-![img](E:\JS\booknote\jpgBed\DC0DCC52-57E5-4374-800D-677C92269E90.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/DC0DCC52-57E5-4374-800D-677C92269E90.png)
 
 - server - 表示真实电脑。
 - Host OS - 真实电脑的操作系统，例如：Windows，Linux
@@ -147,7 +147,7 @@ This message shows that your installation appears to be working correctly.
 
 
 
-![img](E:\JS\booknote\jpgBed\94936A0A-B9C5-44CF-BCE0-19F52F80EF3E.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/94936A0A-B9C5-44CF-BCE0-19F52F80EF3E.png)
 
 运行 docker run hello-world
 
@@ -155,11 +155,11 @@ This message shows that your installation appears to be working correctly.
 
 然后我们再执行该命令：
 
-![img](E:\JS\booknote\jpgBed\B3E35C50-23AF-4803-8F91-8BD97F3AD9E3.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/B3E35C50-23AF-4803-8F91-8BD97F3AD9E3.png)
 
 出来了 Helloworld。我们具体来分析下 执行原理和过程；
 
-![image-20210519103030190](E:\JS\booknote\jpgBed\image-20210519103030190.png)
+![image-20210519103030190](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210519103030190.png)
 
 从左到右 client客户端，Docker运行主机，远程仓库；
 
@@ -171,7 +171,7 @@ docker build ,pull，run分别是 构建，拉取，运行命令，后面再细�
 
 执行 docker run hello-world的过程看如下图例：
 
-![img](E:\JS\booknote\jpgBed\4A210FC2-C9CD-4433-95BA-E95134E72FA5.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/4A210FC2-C9CD-4433-95BA-E95134E72FA5.png)
 
 ## 10 Docker配置阿里云镜像仓库 
 
@@ -179,7 +179,7 @@ Docker默认远程仓库是 https://hub.docker.com/
 
 比如我们下载一个大点的东西，龟速
 
-![img](E:\JS\booknote\jpgBed\7BE93DBA-3361-46A9-99A3-14E9B934E886.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/7BE93DBA-3361-46A9-99A3-14E9B934E886.png)
 
 由于是国外主机，类似Maven仓库，慢得一腿，经常延迟，破损；
 
@@ -193,7 +193,7 @@ Docker默认远程仓库是 https://hub.docker.com/
 
 使用你的淘宝账号密码登录
 
-![img](E:\JS\booknote\jpgBed\E1993895-C7A1-443D-AE17-0EA025FCB93E.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/E1993895-C7A1-443D-AE17-0EA025FCB93E.png)
 
 这里我们获取镜像地址；
 
@@ -226,7 +226,7 @@ Live Restore Enabled: false
 
 ```
 
-   ![img](E:\JS\booknote\jpgBed\4B14D1AB-9C6E-4071-8DE6-A34397E36A30.png)
+   ![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/4B14D1AB-9C6E-4071-8DE6-A34397E36A30.png)
 
 
 
@@ -525,7 +525,7 @@ $ docker logs [OPTIONS] CONTAINER
 
 具体未知：/var/lib/docker/containers/
 
-![img](E:\JS\booknote\jpgBed\_CopyPix_14.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/_CopyPix_14.png)
 
 
 
@@ -605,7 +605,7 @@ https://hub.docker.com/ 注册下 得到docker id和密码
 
 我们用docker login登陆hub服务器
 
-![img](E:\JS\booknote\jpgBed\4CB02AD0-543C-4421-B5E9-F801FA832FA5.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/4CB02AD0-543C-4421-B5E9-F801FA832FA5.png)
 
 
 
@@ -615,25 +615,25 @@ docker push推送
 
 docker push java1234/tomcat7:1.1
 
-![img](E:\JS\booknote\jpgBed\95082C76-B6DE-4854-A01C-37C3B6AB5A34.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/95082C76-B6DE-4854-A01C-37C3B6AB5A34.png)
 
 推送成功：
 
 登陆 https://hub.docker.com/  点击 Repositories 菜单
 
-![img](E:\JS\booknote\jpgBed\62003531-876B-44A5-AFFF-7EC86C0C6B4E.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/62003531-876B-44A5-AFFF-7EC86C0C6B4E.png)
 
 已经显示这个镜像；
 
 点击：
 
-![img](E:\JS\booknote\jpgBed\FCD87B32-BB7F-4206-AA34-07E0B2E56B80.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/FCD87B32-BB7F-4206-AA34-07E0B2E56B80.png)
 
 我们加简介和描述信息；
 
 点Tags:
 
-![img](E:\JS\booknote\jpgBed\C921E230-CC4D-439C-BEE3-76166C6E5154.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/C921E230-CC4D-439C-BEE3-76166C6E5154.png)
 
 我们可以删除掉；
 
@@ -649,7 +649,7 @@ docker push java1234/tomcat7:1.1
 
 进入控制台，我们先创建命名空间，再创建镜像；
 
-![img](E:\JS\booknote\jpgBed\1E7313EE-BD92-4E83-85B8-7F80B63A7CC8.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1E7313EE-BD92-4E83-85B8-7F80B63A7CC8.png)
 
 然后我们可以根据阿里云官方提示说明来进行镜像远程登录，提交，以及拉取操作，简单易用；
 
@@ -764,7 +764,7 @@ docker save -o 备份镜像的名称 源镜像名称:tag版本
 docker save -o mytomcat7.1.tar java1234/tomcat7:7.1
 ```
 
-![img](E:\JS\booknote\jpgBed\A0332BBC-95A8-4FFC-B441-1D8F2F4FAD1B.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/A0332BBC-95A8-4FFC-B441-1D8F2F4FAD1B.png)
 
 
 
@@ -775,7 +775,7 @@ docker load -i 镜像文件
 docker load -i mytomcat7.1.tar
 ```
 
-![img](E:\JS\booknote\jpgBed\C8026D64-B6A8-4C17-9A33-16EC55C76549.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/C8026D64-B6A8-4C17-9A33-16EC55C76549.png)
 
 # DockerFile
 
@@ -824,7 +824,7 @@ docker run -di --name=myRegistry -p 5000:5000 registry
 
 http://192.168.1.112:5000/v2/_catalog
 
-![img](E:\JS\booknote\jpgBed\20FF3ED8-D264-4BAA-9045-F18034CED587.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20FF3ED8-D264-4BAA-9045-F18034CED587.png)
 
 看到这个 说明启动OK。因为仓库里还没有镜像，所以就是空的；
 
@@ -832,7 +832,7 @@ http://192.168.1.112:5000/v2/_catalog
 
 "insecure-registries": ["192.168.1.112:5000"]
 
-![img](E:\JS\booknote\jpgBed\0E57691A-0CC5-46AB-AC92-0E2BEF211034.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/0E57691A-0CC5-46AB-AC92-0E2BEF211034.png)
 
 第五步：修改配置后重启docker；
 
@@ -854,7 +854,7 @@ docker tag tomcat:7 192.168.1.112:5000/mytomcat7
 docker push 192.168.1.112:5000/mytomcat7
 ```
 
-![img](E:\JS\booknote\jpgBed\867315BC-2C5F-44A5-8478-F2EA04CAE8B6.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/867315BC-2C5F-44A5-8478-F2EA04CAE8B6.png)
 
 此时私有仓库里已经有了这个镜像；
 
@@ -872,5 +872,5 @@ docker run -it -p 8080:8080 192.168.1.112:5000/mytomcat7
 
 第五步：浏览器运行 http://192.168.1.112:8080 测试
 
-<img src="E:\JS\booknote\jpgBed\15211790-11DB-4666-A98F-A26E566DB951.png" alt="img" style="zoom: 80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/15211790-11DB-4666-A98F-A26E566DB951.png" alt="img" style="zoom: 80%;" />
 

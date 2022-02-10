@@ -27,7 +27,7 @@ zookeeper数据模型的结构与unix文件系统很类似，整体上可以看�
 
 - 统一命名服务
 
-<img src="E:\JS\booknote\jpgBed\image-20210521103806497.png" alt="image-20210521103806497" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521103806497.png" alt="image-20210521103806497" style="zoom:80%;" />
 
 - 统一配置管理
 
@@ -42,7 +42,7 @@ zookeeper数据模型的结构与unix文件系统很类似，整体上可以看�
     2. 各个客户端服务器监听这个znode。
     3. 一旦znode中的数据被 修改，zookeeper将能通知各个客户端服务器。
 
-    ![image-20210521104222958](E:\JS\booknote\jpgBed\image-20210521104222958.png)
+    ![image-20210521104222958](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521104222958.png)
 
 - 统一集群管理 
 
@@ -52,13 +52,13 @@ zookeeper数据模型的结构与unix文件系统很类似，整体上可以看�
 
   - 监听这个znode可获取它的实时状态变化。
 
-    ![image-20210521104611764](E:\JS\booknote\jpgBed\image-20210521104611764.png)
+    ![image-20210521104611764](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521104611764.png)
 
 - 服务器节点动态上下线
 
 - 软负载均衡：在zookeeper中记录每台服务器的访问数，让访问数最少的服务器去处理最新的客户端请求。
 
-  ![image-20210521105038496](E:\JS\booknote\jpgBed\image-20210521105038496.png)
+  ![image-20210521105038496](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521105038496.png)
 
 # 第2章：zookeep安装
 

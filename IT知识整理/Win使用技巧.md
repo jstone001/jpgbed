@@ -191,11 +191,11 @@ from: https://www.bilibili.com/read/cv5292887/
 
 原因分析：经注册表选项比对，发现问题出在连网返回值功能有了变化。原理是每当连网后，系统会自动向微软的dns.msftncsi.com发出请求，然后返回一个NCSI.txt的值，这一值如果正确时，则确认为已连网。而Win10最近的版本中，这个返回服务器和值有了新变化并反映为6个注册表项中。这些变化因国内部分运行商的网络重定向，不能得到正确的反馈，因此出现实际能上网却显示为无internet的问题。下图中第一张图是出错的注册表项：
 
-![img](E:\JS\booknote\jpgBed\12d88c845430c3413a73137c4ae1cccd60efee48.png@900w_497h_progressive.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/12d88c845430c3413a73137c4ae1cccd60efee48.png@900w_497h_progressive.png)
 
 下图中第二张是18362版之前正确的注册表项：
 
-![img](E:\JS\booknote\jpgBed\e0d51e3c1e827abe1cb4211cc4d06c42b13aba9d.png@900w_455h_progressive.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/e0d51e3c1e827abe1cb4211cc4d06c42b13aba9d.png@900w_455h_progressive.png)
 
 其中被选中标成蓝色的项，改回为图中所显示的值，EnableActiveProbing仍恢复为1，重启系统后，网络即能恢复正常，此方法已在多台电脑上测试有效，希望能顺利解决大家的问题！
 

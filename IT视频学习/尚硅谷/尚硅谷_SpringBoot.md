@@ -98,7 +98,7 @@ www.thymeleaf.org
 
 th:text    #改变当前元素 
 
-![image-20210609100934709](E:\JS\booknote\jpgBed\image-20210609100934709.png)
+![image-20210609100934709](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210609100934709.png)
 
 2. #### 5种表达式
 

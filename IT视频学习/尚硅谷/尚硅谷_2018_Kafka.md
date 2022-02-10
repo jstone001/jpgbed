@@ -30,9 +30,9 @@ from:https://www.bilibili.com/video/BV1a4411B7V9
 
 ## P04_Kafka_架构
 
-![image-20210520103159590](E:\JS\booknote\jpgBed\image-20210520103159590.png)
+![image-20210520103159590](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210520103159590.png)
 
-![image-20210520113731056](E:\JS\booknote\jpgBed\image-20210520113731056.png)
+![image-20210520113731056](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210520113731056.png)
 
 - Leader起作用，Follower仅作备份用
 - Producer不与zookeeper打交道

@@ -21,7 +21,7 @@
 
 **框架结构**
 
-![image-20210708110328386](E:\JS\booknote\jpgBed\image-20210708110328386.png)
+![image-20210708110328386](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210708110328386.png)
 
 
 

@@ -117,24 +117,24 @@
 
 ### **2.1.3** **各硬件装置在** **Linux** 中的文件名
 
-| 装置                 | 装置在 Linux 内的文件名                                 |
-| -------------------- | ------------------------------------------------------- |
-| SCSI/SATA/USB 硬盘机 | <font color='red'>/dev/sd[a-p]</font>                   |
-| USB 快闪碟           | /dev/sd[a-p] (与 SATA 相同)                             |
-| VirtI/O 界面         | /dev/vd[a-p] (用于虚拟机内)                             |
-| 软盘驱动器           | /dev/fd[0-7]                                            |
-| 打印机               | /dev/lp[0-2] (25 针打印机)                              |
-|                      | /dev/usb/lp[0-15] (USB 界面)                            |
-| 鼠标                 | /dev/input/mouse[0-15] (通用)                           |
-|                      | /dev/psaux (PS/2 界面)                                  |
-|                      | /dev/mouse (当前鼠标)                                   |
-| CDROM/DVDROM         | /dev/scd[0-1] (通用)                                    |
-|                      | /dev/sr[0-1] (通用，CentOS 较常见)                      |
-|                      | /dev/cdrom (当前 CDROM)                                 |
-| 磁带机               | /dev/ht0 (IDE 界面)                                     |
-|                      | /dev/st0 (SATA/SCSI 界面)                               |
-|                      | /dev/tape (当前磁带)                                    |
-| IDE 硬盘机           | <font color='orange'>/dev/hd[a-d] (旧式系统才有)</font> |
+| 装置                 | 装置在 Linux 内的文件名                              |
+| -------------------- | ---------------------------------------------------- |
+| SCSI/SATA/USB 硬盘机 | <font color='red'>/dev/sd[a-p]</font>                |
+| USB 快闪碟           | /dev/sd[a-p] (与 SATA 相同)                          |
+| VirtI/O 界面         | /dev/vd[a-p] (用于虚拟机内)                          |
+| 软盘驱动器           | /dev/fd[0-7]                                         |
+| 打印机               | /dev/lp[0-2] (25 针打印机)                           |
+|                      | /dev/usb/lp[0-15] (USB 界面)                         |
+| 鼠标                 | /dev/input/mouse[0-15] (通用)                        |
+|                      | /dev/psaux (PS/2 界面)                               |
+|                      | /dev/mouse (当前鼠标)                                |
+| CDROM/DVDROM         | /dev/scd[0-1] (通用)                                 |
+|                      | /dev/sr[0-1] (通用，CentOS 较常见)                   |
+|                      | /dev/cdrom (当前 CDROM)                              |
+| 磁带机               | /dev/ht0 (IDE 界面)                                  |
+|                      | /dev/st0 (SATA/SCSI 界面)                            |
+|                      | /dev/tape (当前磁带)                                 |
+| IDE 硬盘机           | <font color='red'>/dev/hd[a-d] (旧式系统才有)</font> |
 
 > 时至今日，由于 IDE 界面的磁盘驱动器几乎已经被淘汰，太少见了！因此现在连 IDE 界面的磁盘文件名也都被仿真成 /dev/sd[a-p] 了！此外， 如果你的机器使用的是跟因特网供货商 (ISP) 申请使用的云端机器，这时可能会得到的是虚拟机。为了加速，虚拟机内的磁盘是使用仿真器产生， 该仿真器产生的磁盘文件名为 /dev/vd[a-p] 系列的文件名喔！要注意！要注意！
 
@@ -151,7 +151,7 @@
 
 #### **MSDOS (MBR)** **分区表格式与限制**
 
-- <font color='orange'>主要启动记录区(Master Boot Record, MBR)</font>：可以安装开机管理程序的地方，有 446 bytes 
+- <font color='red'>主要启动记录区(Master Boot Record, MBR)</font>：可以安装开机管理程序的地方，有 446 bytes 
 - 老系统1个扇区512kb。
 - 分区表(partition table)：记录整颗硬盘分区的状态，有 64 bytes
 
@@ -160,7 +160,7 @@
 - 446kb是开机管理程序
 - 64是分区表
 
-<font color='orange'>分区类型：</font>
+<font color='red'>分区类型：</font>
 
 - P: primary 主分区 
 - E: Extended 延伸分区
@@ -168,12 +168,12 @@
 
 sd1~sd4 是给主分区和延伸分区
 
-- <font color='orange'>怎么装置文件名没有/dev/sda3 与/dev/sda4 呢？因为前面四个号码都是保留给 Primary 或Extended 用的嘛</font>
+- <font color='red'>怎么装置文件名没有/dev/sda3 与/dev/sda4 呢？因为前面四个号码都是保留给 Primary 或Extended 用的嘛</font>
 - 逻辑分区从5开始
-- 主要分区与延伸分区最多可以有<font color='orange'>四笔(硬盘的限制)  3P+1E</font>
-- **<font color='orange'>延伸分区最多只能有一个(操作系统的限制)</font>**
+- 主要分区与延伸分区最多可以有<font color='red'>四笔(硬盘的限制)  3P+1E</font>
+- **<font color='red'>延伸分区最多只能有一个(操作系统的限制)</font>**
 - 逻辑分区是由延伸分区持续切割出来的分区槽
-- 能够被格式化后，作为数据存取的分区槽为主要分区与逻辑分区。<font color='orange'>延伸分区无法格式化</font>
+- 能够被格式化后，作为数据存取的分区槽为主要分区与逻辑分区。<font color='red'>延伸分区无法格式化</font>
 - 逻辑分区的数量依操作系统而不同，在 Linux 系统中 SATA 硬盘已经可以突破 63 个以上的分区限制
 
 MBR存在的问题：
@@ -190,7 +190,7 @@ MBR存在的问题：
 - LBA0 (MBR 相容区块)
 - LBA1 (GPT 表头纪录)
 - LBA2-33 (实际纪录分区信息处)
-  	<font color='orange'>最大8ZB  （1ZB=2的30次TB)</font>
+  	<font color='red'>最大8ZB  （1ZB=2的30次TB)</font>
 
 ### 2.2.3 开机流程中的BIOS与UEFI开机检测程序
 

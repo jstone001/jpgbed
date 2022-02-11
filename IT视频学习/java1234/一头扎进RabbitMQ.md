@@ -38,7 +38,7 @@ docker run -it --rm --name rabbitmq2 -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_
 
 http://blog.java1234.com/blog/articles/776.html
 
-![image-20210629094521509](E:\JS\booknote\jpgBed\image-20210629094521509.png)
+![image-20210629094521509](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210629094521509.png)
 
 1. Server：Broker，接受client连接，实现AMQP实体服务　　
 
@@ -442,7 +442,7 @@ public class ProducerApplication {
 
 ## 08_Work queues工作模式
 
-![image-20210629141615629](E:\JS\booknote\jpgBed\image-20210629141615629.png)
+![image-20210629141615629](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210629141615629.png)
 
 - 工作模式是一个或者多个消费者共同消费一个队列中的消息；
 - 队列中的每一个消息只可能被其中一个消费者消费；
@@ -514,7 +514,7 @@ public class RabbitMqServiceImpl implements RabbitMqService {
 
 ## 09_订阅发布工作模式利用fanout交换机
 
-![image-20210629143807337](E:\JS\booknote\jpgBed\image-20210629143807337.png)
+![image-20210629143807337](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210629143807337.png)
 
 Pub/Sub订阅模式：
 

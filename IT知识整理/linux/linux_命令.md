@@ -240,6 +240,20 @@ from: https://blog.csdn.net/robertsong2004/article/details/42268701
 cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ```
 
+# linux 修改主机名
+
+```sh
+vim /etc/hosts
+
+127.0.0.1  test1
+
+ping test1
+PING test1 (192.168.132.28) 56(84) bytes of data.
+64 bytes from test2 (192.168.132.28): icmp_seq=1 ttl=64 time=0.508 ms
+```
+
+
+
 # yum查看已安装的程序 
 
 from: https://blog.csdn.net/rentian1/article/details/93768557

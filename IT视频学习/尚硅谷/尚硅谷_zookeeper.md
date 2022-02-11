@@ -6,9 +6,11 @@ from: https://www.bilibili.com/video/BV1PW411r7iP
 
 ## P02_概述
 
+开源，Apache项目
+
 zookeeper人设计模式角度来理解：是一个基于观察者模式设计的分布式服务管理框架，它负责存储和管理大家都产心的数据，然后<font color='red'>接受观察者的注册</font>，一旦这些数据的状态发生变化，zookeep就将负责能和已经在zookper上注册的那些观察者做出相应的反应。
 
-Zookeeper=文件系统+通知机制
+<font color='red'>Zookeeper=文件系统+通知机制</font>
 
 ## P03_特点
 
@@ -16,7 +18,7 @@ Zookeeper=文件系统+通知机制
 2. <font color='red'>集群中只要有半数以上节点存活，zookeeper集群就能正常服务。</font>
 3. 全局数据一致：每个server保存一份相同的数据副本，Client无论连接到哪个server，数据都是一致的。
 4. 更新请求顺序进行，来自同一个client的更新模板请求按其发送顺序依次执行。
-5. 数据更新原子性：一次数据更新要么成功，要么失败。
+5. <font color='red'>数据更新原子性：一次数据更新要么成功，要么失败。</font>
 6. 实时性，在一定时间范围内，client能读到最新数据。
 
 ## P04_数据结构
@@ -25,44 +27,49 @@ zookeeper数据模型的结构与unix文件系统很类似，整体上可以看�
 
 ## P05_应用场景
 
-- 统一命名服务
+### 统一命名服务
 
 <img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521103806497.png" alt="image-20210521103806497" style="zoom:80%;" />
 
-- 统一配置管理
+### 统一配置管理
 
-  - 配置文件同步
+- 配置文件同步
 
-    1. 一般要求一个集群中，所有节点的配置信息是一致的，比如Kafka集群。
-    2. 对配置文件修改后，希望能够快速同步到各个节点上。
+  1. 一般要求一个集群中，所有节点的配置信息是一致的，比如Kafka集群。
+  2. 对配置文件修改后，希望能够快速同步到各个节点上。
 
-  - 配置管理由zookeeper实现
+- 配置管理由zookeeper实现
 
-    1. 可将配置信息写入zookeeper上的一个Znode。
-    2. 各个客户端服务器监听这个znode。
-    3. 一旦znode中的数据被 修改，zookeeper将能通知各个客户端服务器。
+  1. 可将配置信息写入zookeeper上的一个Znode。
+  2. 各个客户端服务器监听这个znode。
+  3. 一旦znode中的数据被 修改，zookeeper将能通知各个客户端服务器。
 
-    ![image-20210521104222958](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521104222958.png)
+  ![image-20210521104222958](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521104222958.png)
 
-- 统一集群管理 
+### 统一集群管理 
 
-  - 可根据节点实时状态做出一些调整。
+- 可根据节点实时状态做出一些调整。
 
-  - 可将节点从息写入zookeeper上的一个znode。
+- 可将节点从息写入zookeeper上的一个znode。
 
-  - 监听这个znode可获取它的实时状态变化。
+- 监听这个znode可获取它的实时状态变化。
 
-    ![image-20210521104611764](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521104611764.png)
+  ![image-20210521104611764](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521104611764.png)
 
-- 服务器节点动态上下线
+### 服务器节点动态上下线
 
-- 软负载均衡：在zookeeper中记录每台服务器的访问数，让访问数最少的服务器去处理最新的客户端请求。
+### 软负载均衡
 
-  ![image-20210521105038496](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521105038496.png)
+<font color='red'>在zookeeper中记录每台服务器的访问数，让访问数最少的服务器去处理最新的客户端请求。</font>
+
+![image-20210521105038496](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210521105038496.png)
 
 # 第2章：zookeep安装
 
 ## P06_下载地址
+
+https://zookeeper.apache.org
+
 ## P07_本地模式安装
 
 1. 下载安装zookeeper
@@ -143,18 +150,18 @@ clientPort=2181
 
 ## P10_节点类型
 
-- 持久（Persistent）：客户端和服务器断开连接后，创建的节点不删除。
+### 持久（Persistent）：客户端和服务器断开连接后，创建的节点不删除。
 
-  - 普通（Persistent）
+- 普通（Persistent）
 
-  - 持久化顺序编号目录节点（Persistent_sequential）：客户端与zookeeper断开连接后，该节点依旧在，只是zookeeper给该节点名称进行顺序编号 
+- 持久化顺序编号目录节点（Persistent_sequential）：客户端与zookeeper断开连接后，该节点依旧在，只是zookeeper给该节点名称进行顺序编号 
 
-     <font color='red'>注意：在分布式系统中，顺序号可以被 用于为所有的事件进行全局排序，这样客户端可以通过顺序号推断事件的顺序</font>
+   <font color='red'>注意：在分布式系统中，顺序号可以被 用于为所有的事件进行全局排序，这样客户端可以通过顺序号推断事件的顺序</font>
 
-- 短暂（Ephemeral）：客户端和服务器端断开后，创建的节点自己删除。
+### 短暂（Ephemeral）：客户端和服务器端断开后，创建的节点自己删除。
 
-  - 一般
-  - 临时顺序编号目录节点：客户端与zookeeper断开连接后，该节点被删除，只是zookeeper给该节点名称进行顺序编号 
+- 一般
+- 临时顺序编号目录节点：客户端与zookeeper断开连接后，该节点被删除，只是zookeeper给该节点名称进行顺序编号 
 
 ## P11_分布式安装
 
@@ -167,13 +174,14 @@ echo 1 >/Software/zookeeper-3.4.13/zkData/myid
 
 # 配置zoo.cfg
 ###########cluster##############
-server.2=hadoop102:2888:3888
-server.3=hadoop103:2888:3888
-server.4=hadoop104:2888:3888
+server.2=test1:2888:3888
+server.3=test2:2888:3888
+server.4=test3:2888:3888
 # server.A=B:C:D
 # A 是myid的值
 # B 是这穿上服务器的ip
 # C 是这个服务器与集群中的Leader服务器交换信息的端口
+# D 选举信息
 
 # 启动各个zookeeper
 ../bin/zkServer.sh start
@@ -182,7 +190,7 @@ server.4=hadoop104:2888:3888
 [root@localhost zookeeper-3.4.13]# ./bin/zkServer.sh status
 ZooKeeper JMX enabled by default
 Using config: /Software/zookeeper-3.4.13/bin/../conf/zoo.cfg
-Mode: follower
+Mode: follower	# 重要
 
 [root@localhost bin]# ./zkServer.sh status
 ZooKeeper JMX enabled by default

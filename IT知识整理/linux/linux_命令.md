@@ -195,6 +195,201 @@ ss -tnulp | grep java
 
 
 
+# 查看cpu型号
+
+https://www.jianshu.com/p/a0ab0ccb8051
+
+## 1.查看CPU详细信息
+
+在Linux服务器上查看CPU详细信息：
+ cat /proc/cpuinfo
+ 输出结果：
+
+```sh
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 6
+model           : 62
+model name      : Intel(R) Xeon(R) CPU E5-2650 v2 @ 2.60GHz
+stepping        : 4
+microcode       : 0x428
+cpu MHz         : 1200.062
+cache size      : 20480 KB
+physical id     : 0
+siblings        : 16
+core id         : 0
+cpu cores       : 8
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 13
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt
+bogomips        : 5200.34
+clflush size    : 64
+cache_alignment : 64
+address sizes   : 46 bits physical, 48 bits virtual
+power management:
+```
+
+上面只截取了一部分信息，
+ 完整的CPU信息请参考文末附录，
+ 这个命令输出了太多的冗余信息不方便查看，
+ 下面介绍的命令以该Linux输出的CPU信息为例,
+ 可以很方便的知道当前系统CPU的特定信息。
+
+## 2.基本概念
+
+请参考以下文章了解CPU的一些基本概念：
+ [物理CPU，物理CPU内核，逻辑CPU概念详解](https://www.jianshu.com/p/6a53819fa89b)
+
+## 3.查看物理CPU的个数
+
+```sh
+cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l
+ #输出结果：
+ 2
+ #表示Linux服务器上面实际安装了2个物理CPU芯片>
+```
+
+## 4.查看物理CPU内核的个数
+
+```sh
+cat /proc/cpuinfo | grep "cpu cores" | uniq
+输出结果：
+ cpu cores : 8
+ # 表示1个物理CPU里面有8个物理内核。
+```
+
+## 5.查看所有逻辑CPU的个数
+
+```sh
+cat /proc/cpuinfo | grep "processor" | wc -l
+ # 输出结果：
+ 32
+ # 表示Linux服务器一共有32个逻辑CPU。
+```
+
+## 6.查看每个物理CPU中逻辑CPU的个数
+
+```sh
+cat /proc/cpuinfo | grep 'siblings' | uniq
+# 输出结果：
+ siblings : 16
+# 表示每个物理CPU中有16个逻辑CPU，
+# 一共有2个物理CPU，
+# 所以总共有32个逻辑CPU，
+# 和第5步中查看的结果一致。
+```
+
+## 7.查询CPU是否启用超线程
+
+```sh
+cat /proc/cpuinfo | grep -e "cpu cores"  -e "siblings" | sort | uniq
+# 输出结果：
+ cpu cores : 8
+ siblings  : 16
+# 看到cpu cores数量是siblings数量一半，说明启动了超线程。
+# 如果cpu cores数量和siblings数量一致，则没有启用超线程。
+```
+
+## 8.输出项的含义
+
+cpuinfo输出了详细的信息，
+ 可以看到CPU具体型号等各种参数，
+ 下面说明各个输出项的含义：
+
+| 输出项          | 含义                                                         |
+| --------------- | ------------------------------------------------------------ |
+| processor       | 系统中逻辑处理核的编号。对于单核处理器，则课认为是其CPU编号，对于多核处理器则可以是物理核、或者使用超线程技术虚拟的逻辑核 |
+| vendor_id       | CPU制造商                                                    |
+| cpu family      | CPU产品系列代号                                              |
+| model           | CPU属于其系列中的哪一代的代号                                |
+| model name      | CPU属于的名字及其编号、标称主频                              |
+| stepping        | CPU属于制作更新版本                                          |
+| cpu MHz         | CPU的实际使用主频                                            |
+| cache size      | CPU二级缓存大小                                              |
+| physical id     | 单个CPU的标号                                                |
+| siblings        | 单个CPU逻辑物理核数                                          |
+| core id         | 当前物理核在其所处CPU中的编号，这个编号不一定连续            |
+| cpu cores       | 该逻辑核所处CPU的物理核数                                    |
+| apicid          | 用来区分不同逻辑核的编号，系统中每个逻辑核的此编号必然不同，此编号不一定连续 |
+| fpu             | 是否具有浮点运算单元（Floating Point Unit）                  |
+| fpu_exception   | 是否支持浮点计算异常                                         |
+| cpuid level     | 执行cpuid指令前，eax寄存器中的值，根据不同的值cpuid指令会返回不同的内容 |
+| wp              | 表明当前CPU是否在内核态支持对用户空间的写保护（Write Protection） |
+| flags           | 当前CPU支持的功能                                            |
+| bogomips        | 在系统内核启动时粗略测算的CPU速度（Million Instructions Per Second） |
+| clflush size    | 每次刷新缓存的大小单位                                       |
+| cache_alignment | 缓存地址对齐单位                                             |
+| address sizes   | 可访问地址空间位数                                           |
+
+## 9.参考文章
+
+[14、/proc/cpuinfo 文件(查看CPU信息)](https://links.jianshu.com/go?to=https%3A%2F%2Fwww.cnblogs.com%2Frenping%2Fp%2F7289473.html)
+ [Linux CPU数量判断，通过/proc/cpuinfo.](https://links.jianshu.com/go?to=https%3A%2F%2Fwww.cnblogs.com%2Fzengkefu%2Fp%2F5579354.html)
+
+# 查看内存 free
+
+```sh
+[shaoer@host-1707b51f8f4 ~]$ free
+              total        used        free      shared  buff/cache   available
+Mem:       32779656    22013572      746628     1671940    10019456     8691320
+Swap:             0           0           0
+
+第一列
+# Mem 内存的使用信息
+# Swap 交换空间的使用信息
+第一行
+# total 系统总的可用物理内存大小
+# used 已被使用的物理内存大小
+# free 还有多少物理内存可用
+# shared 被共享使用的物理内存大小
+# buff/cache 被 buffer 和 cache 使用的物理内存大小
+# available 还可以被 应用程序 使用的物理内存大小
+
+其中有两个概念需要注意
+# free 与 available 的区别
+
+# free 是真正尚未被使用的物理内存数量。
+# available 是应用程序认为可用内存数量，available = free + buffer + cache (注：只是大概的计算方法)
+
+Linux 为了提升读写性能，会消耗一部分内存资源缓存磁盘数据，对于内核来说，buffer 和 cache 其实都属于已经被使用的内存。但当应用程序申请内存时，如果 free 内存不够，内核就会回收 buffer 和 cache 的内存来满足应用程序的请求。这就是稍后要说明的 buffer 和 cache。
+```
+
+## buff 和 cache 的区别
+
+from: https://www.cnblogs.com/M18-BlankBox/p/5326484.html
+
+从字面上和语义来看，buffer名为缓冲，cache名为缓存。我们知道各种硬件存在制作工艺上的差别，所以当两种硬件需要交互的时候，肯定会存在速度上的差异，而且只有交互双方都完成才可以各自处理别的其他事务。假如现在有两个需要交互的设备A和B，A设备用来交互的接口速率为1000M/s，B设备用来交互的接口速率为500M/s，那他们彼此访问的时候都会出现以下两种情况：（以A来说）
+
+一.A从B取一个1000M的文件结果需要2s，本来需要1s就可以完成的工作，却还需要额外等待1s,B设备把剩余的500M找出来，这等待B取出剩下500M的空闲时间内(1s)其他的事务还干不了
+
+二.A给B一个1000M的文件结果也需要2s，本来需要也就1s就可以完成的工作，却由于B，1s内只能拿500M，剩下的500M还得等下一个1sB来取，这等待下1s的时间还做不了其他事务。
+
+那有什么方法既可以让A在‘取’或‘给’B的时候既能完成目标任务又不浪费那1s空闲等待时间去处理其他事务呢？我们知道产生这种结果主要是因为B跟不上A的节奏，但即使这样A也得必须等B处理完本次事务才能干其他活（单核cpu来说），除非你有三头六臂。那有小伙伴可能会问了，能不能在A和B之间加一层区域比如说ab，让ab既能跟上A的频率也会照顾B的感受，没错我们确实可以这样设计来磨合接口速率上的差异，你可以这样想象，在区域ab提供了两个交互接口一个是a接口另一个是b接口，a接口的速率接近A，b接口的速率最少等于B，然后我们把ab的a和A相连，ab的b和B相连，ab就像一座桥把A和B链接起来，并告知A和B通过他都能转发给对方，文件可以暂时存储，最终拓扑大概如下：
+
+![img](E:\JS\booknote\jpgBed\917695-20160327123829839-630260780.png)
+
+**示例**
+
+现在我们再来看上述两种情况：
+
+对于第一种情况A要B：当A从B取一个1000M的文件，他把需求告诉了ab，接下来ab通过b和B进行文件传送，由于B本身的速率，传送第一次ab并没有什么卵用，对A来说不仅浪费了时间还浪费了感情，ab这家伙很快感受到了A的不满，所以在第二次传送的时候，ab背着B偷偷缓存了一个一模一样的文件，而且只要从B取东西，ab都会缓存一个拷贝下来放在自己的大本营，如果下次A或者其他C来取B的东西，ab直接就给A或C一个货真价实的赝品，然后把它通过a接口给了A或C，由于a的速率相对接近A的接口速率，所以A觉得不错为他省了时间，最终和ab的a成了好基友，说白了此时的ab提供的就是一种缓存能力，即cache，绝对的走私！因为C取的是A执行的结果。所以在这种工作模式下，怎么取得的东西是最新的也是我们需要考虑的，一般就是清cache。例如cpu读取内存数据，硬盘一般都提供一个内存作为缓存来增加系统的读取性能
+
+对于第二种情况A给B：当A发给B一个1000M的文件，因为A知道通过ab的a接口就可以转交给B，而且通过a接口要比通过B接口传送文件需要等待的时间更短，所以1000M通过a接口给了ab  ，站在A视图上他认为已经把1000M的文件给了B，但对于ab并不立即交给B，而是先缓存下来，除非B执行sync命令，即使B马上要，但由于b的接口速率最少大于B接口速率，所以也不会存在漏洞时间，但最终的结果是A节约了时间就可以干其他的事务，说白了就是推卸责任，哈哈而ab此时提供的就是一种缓冲的能力，即buffer，它存在的目的适用于当速度快的往速度慢的输出东西。例如内存的数据要写到磁盘，cpu寄存器里的数据写到内存。
+
+看了上面这个例子，那我们现在看一下在计算机领域，在处理磁盘IO读写的时候，cpu，memory，disk基于这种模型给出的一个实例。我们先来一幅图：（我从别家当来的，我觉得，看N篇文档 不如瞄此一图）
+
+![img](E:\JS\booknote\jpgBed\webp.webp)
+
+**示例**
+
+page  cache：文件系统层级的缓存，从磁盘里读取的内容是存储到这里，这样程序读取磁盘内容就会非常快，比如使用grep和find等命令查找内容和文件时，第一次会慢很多，再次执行就快好多倍，几乎是瞬间。但如上所说，如果对文件的更新不关心，就没必要清cache，否则如果要实施同步，必须要把内存空间中的cache clean下
+
+buffer  cache：磁盘等块设备的缓冲，内存的这一部分是要写入到磁盘里的。这种情况需要注意，位于内存buffer中的数据不是即时写入磁盘，而是系统空闲或者buffer达到一定大小统一写到磁盘中，所以断电易失，为了防止数据丢失所以我们最好正常关机或者多执行几次sync命令，让位于buffer上的数据立刻写到磁盘里。
+
 # 过滤3剑客grep, sed, awk
 
 ## grep

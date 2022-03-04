@@ -1,6 +1,9 @@
 from: https://www.bilibili.com/video/BV1Qv41167ck
 
-​		http://yun.itheima.com/course/640.html
+```
+http://yun.itheima.com/course/640.html
+```
+
 
 # 第1章 k8s介绍
 
@@ -12,16 +15,26 @@ from: https://www.bilibili.com/video/BV1Qv41167ck
 
 ### 安装方式：kubeadm, minikube, 二进制包
 
-​	minikube: 一个用于快速搭建单节点k8s的工具
+```
+minikube: 一个用于快速搭建单节点k8s的工具
+```
 
-​	kubeadm: 一个用于快速搭建k8s集群的工具
 
-​	二进制包: 官网下载每个组件的2进制包
+```
+kubeadm: 一个用于快速搭建k8s集群的工具
+```
+
+
+```
+二进制包: 官网下载每个组件的2进制包
+```
+
 
 ### 主机规划
 
+
 | 作用   | IP地址          | 操作系统  | 配置                  |
-| ------ | --------------- | --------- | --------------------- |
+| -------- | ----------------- | ----------- | ----------------------- |
 | master | 192.168.109.101 | centos7.5 | 2颗CPU 2g内存 50g硬盘 |
 | node1  | 192.168.109.102 | centos7.5 | 2颗CPU 2g内存 50g硬盘 |
 | node2  | 192.168.109.103 | centos7.5 | 2颗CPU 2g内存 50g硬盘 |
@@ -115,8 +128,6 @@ lsmod | grep -e ip_vs -e nf_conntrack_ipv4
 reboot
 ```
 
-
-
 ## P8-环境搭建--集群所需组件安装
 
 安装docker: 18.06.3， kubeadm,kubelet, kubectl: 1.17.4
@@ -178,7 +189,7 @@ KUBE_PROXY_MODE="ipvs"
 EOF
 
 # 4. 开机启动
-$ systemctl enable kubelet    
+$ systemctl enable kubelet  
 ```
 
 ## P9-环境搭建--集群安装
@@ -229,8 +240,6 @@ kubectl get nodes
 kubeadm join 192.168.132.31:6443 --token vxthmk.y58aankfjbuflzi4 \
     --discovery-token-ca-cert-hash sha256:e176a6c8f39fd190f515617c4be04e653b2ff15b70d7f1dd82d9645adea13fa4
 ```
-
-
 
 ## P10-环境搭建--网络插件安装
 
@@ -288,11 +297,8 @@ http://192.168.132.32:32434/	# 是否有nginx主页
 #### 1、语法
 
 - 大小写敏感
-
 - 不允许使用tab, 只允许空格
-
 - 给进的空格不重要，只要相同层级的元素左对齐即可
-
 - #表示注释
 
 #### 2、数据类型：纯量、对象
@@ -306,7 +312,7 @@ http://192.168.132.32:32434/	# 是否有nginx主页
 
 对象：键值对集合 mapping/hash/dictionary
 
-  对象：
+对象：
 
 ```yaml
 形式1：
@@ -317,7 +323,7 @@ heima:
 heima: {age: 15, address: Beijing}
 ```
 
-  数组：
+数组：
 
 ```yml
 形式1：
@@ -334,40 +340,51 @@ address: [顺义, 昌平]
 - 书写yaml切记：后面要加一个空格
 - 如果需要将多段yaml配置放在一个文件中，中章要使用---分隔
 - https://www.json2yaml.com/convert-yaml-to-json 校验
+
 ## P14-资源管理方式-介绍
 
 1. 命令式对象管理：直接使用命令去操作k8s资源
+
 ```bash
 kubectl run nginx-pod --image-nginx:1.17.1 --port=80
 ```
-2. 命令式对象配置：通过命令配置和配置文件去操作k8s资源 
+
+2. 命令式对象配置：通过命令配置和配置文件去操作k8s资源
+
 ```bash
 kubectl create/patch -f nginx-pod.yaml
 ```
+
 3. 声明式对象配置：通过apply命令和配置文件去操作k8s资源
+
 ```bash
 kubectl apply -f nginx-pod.yaml  #只用于创建和更新资源
 ```
 
 优缺点：
 
-| 类型 | 操作对象 | 适用环境 | 优点 | 缺点 |
-| :--: | :--:| :--: |:--: |:--:|
-| 命令式对象管理 | 对象 | 测试 | 简单 | 只能操作活动对象，  <br />无法审计，跟踪 |
-| 命令式对象配置 | 文件 | 开发 | 可以审计，跟踪 | 项目大时，<br />配置文件多，操作麻烦 |
-| 声明式对象配置 | 目录 | 开发 | 支持目录操作 | 意外情况下难以调试 |
 
-
+|      类型      | 操作对象 | 适用环境 |      优点      |                  缺点                  |
+| :--------------: | :--------: | :--------: | :--------------: | :--------------------------------------: |
+| 命令式对象管理 |   对象   |   测试   |      简单      | 只能操作活动对象，<br />无法审计，跟踪 |
+| 命令式对象配置 |   文件   |   开发   | 可以审计，跟踪 |  项目大时，<br />配置文件多，操作麻烦  |
+| 声明式对象配置 |   目录   |   开发   |  支持目录操作  |           意外情况下难以调试           |
 
 ## P15-资源管理方式-1：命令式对象管理
 
 ### kubectl 命令的语法
 
-​	kubectl [command] [type] [name] [flags]
+```
+kubectl [command] [type] [name] [flags]
+```
+
 
 #### 1、comand
 
-​	指定要对资源执行的操作，例如 create、get、describe 和 delete
+```
+指定要对资源执行的操作，例如 create、get、describe 和 delete
+```
+
 
 - 基本命令
 
@@ -416,26 +433,24 @@ kubectl apply -f nginx-pod.yaml  #只用于创建和更新资源
     </tr>
 </table>
 
-
-
-
 - 运行和调试
-
 - 高级命令
-
 - 其他命令
 
 #### 2、type
 
-  指定资源类型，资源类型是大小写敏感的，开发者能够以单数、复数和缩略的 形式
+指定资源类型，资源类型是大小写敏感的，开发者能够以单数、复数和缩略的 形式
 
 #### 3、name
 
-  指定资源的名称，名称也大小写敏感的。如果省略名称，则会显示所有的资源
+指定资源的名称，名称也大小写敏感的。如果省略名称，则会显示所有的资源
 
 #### 4、flags
 
-​	指定可选的参数。例如，可用-s 或者–server 参数指定 Kubernetes API server 的地址和端口
+```
+指定可选的参数。例如，可用-s 或者–server 参数指定 Kubernetes API server 的地址和端口
+```
+
 
 ### 例
 
@@ -458,8 +473,6 @@ kubectl delete pod pod_name
 #删除指定的namespace
 kubectl delete ns dev
 ```
-
-
 
 ## P16-资源管理方式-2：命令式对象配置
 
@@ -510,8 +523,6 @@ pod/nginxpod created
 kubectl apply -f nginxpod.yaml
 ```
 
-
-
 ## P18-资源管理方式-小结
 
 kubectl的运行是需要配置文件的，文件是$HOME/.kube，如果相要在node上运行些命令，需要将master上的.kube复制到node上
@@ -536,21 +547,20 @@ kubectl get(describe) 资源名称		#查询资源
 namespace: 它的主要作用是用来实现**多套环境的资源隔离**或者**多租户的资源隔离**
 
 - 空间隔离
-
 - 还可以结合k8s的资源配额机制，限定不同租户能占用的资源，例如cpu使用量，内存使用量等，来实现租户可用资源的管理。
 
 ```bash
 [root@m1 ~]# kubectl get ns
 NAME              STATUS   AGE
 default           Active   13d	# 所有未指定namespace的对象都会被分配在default中
-dev               Active   18h	
-kube-node-lease   Active   13d	# 集群节点之间的心跳维护，v1.13开始引入	
+dev               Active   18h
+kube-node-lease   Active   13d	# 集群节点之间的心跳维护，v1.13开始引入
 kube-public       Active   13d	# 此命名空间下的资源可以被所有人访问（包括未认证用户）
 kube-system       Active   13d	# 所有由k8s系统创建的资源都处于这个命名空间
   
 ```
 
-###   查看
+### 查看
 
 ```bash
 # 1、查看所有的ns
@@ -649,8 +659,6 @@ kube-proxy-rf6lf             1/1     Running   0          13d
 kube-scheduler-m1            1/1     Running   0          13d	#调度
 ```
 
-
-
 ### 命令行
 
 #### 创建并运行pod
@@ -731,8 +739,6 @@ kubectl create -f pod-nginx.yaml  #创建
 kubectl delete -f pod-nginx.yaml  #删除
 ```
 
-
-
 ## P21-实战入门-Label
 
 #### label
@@ -748,35 +754,52 @@ kubectl delete -f pod-nginx.yaml  #删除
 > 一些常用的label示例如下：
 >
 > - 版本标签："version":"release", "version":"stable"
->
 > - 环境标签：“environment": "dev", "environment":"test"
->
 > - 架构标签：”tier": "frontend", "tier": "backend"
->
->   
 
 #### label selector
 
-​	label用于给某个资源对象定义标识
+```
+label用于给某个资源对象定义标识
+```
 
-​	label selector用于查询和筛选拥有某引起标签的资源对象
+
+```
+label selector用于查询和筛选拥有某引起标签的资源对象
+```
+
 
 ##### 2种label selector
 
-- ​	基于等式的label selector
+- ```
+  基于等式的label selector
+  ```
 
-  ​	name=slave: 选择所有包含label中key='name'且value="slave"的对象
 
-  ​	env!=production: 选择所有包括label中的key="env" 且value不等于"production"的对象
+  ```
+  name=slave: 选择所有包含label中key='name'且value="slave"的对象
+  ```
 
-- ​	基于集合的label selector
 
-  ​	name in (master, slave): 选择所有包含label中key="name"且value="master"或"slave"对象
+  ```
+  env!=production: 选择所有包括label中的key="env" 且value不等于"production"的对象
+  ```
+- ```
+  基于集合的label selector
+  ```
 
-  ​	name not in(frontend): 选择所有包含label中的key="name" 且value不等于"frontend"的对象
 
-  
+  ```
+  name in (master, slave): 选择所有包含label中key="name"且value="master"或"slave"对象
+  ```
+
+
+  ```
+  name not in(frontend): 选择所有包含label中的key="name" 且value不等于"frontend"的对象
+  ```
+
 #### 命令方式
+
 ```bash
 # 为pod资源打标签
 kubectl label pod pod_name version=1.0 -n dev
@@ -794,6 +817,7 @@ kubectl get pod -n dev -l version!=2.0 --show-labels
 # 删除标签
 kubectl label pod pod_name version- -n dev
 ```
+
 #### 基于yaml
 
 ```yaml
@@ -815,8 +839,6 @@ spec:
       containerPort: 80
       protocol: TCP
 ```
-
-
 
 ## P22-实战入门-Deployment
 
@@ -970,13 +992,16 @@ kubectl delete -f svc-nginx.yaml
 
 #### 5.1.1 pod结构
 
-Pause容器 
+Pause容器
 
 作用：
 
-- ​	可以以它为依据，评估整个pod的健康状态
-
-- ​	可以在根容器上设置ip地址，其它窗口都以此为ip，以实现pod内部的通信
+- ```
+  可以以它为依据，评估整个pod的健康状态
+  ```
+- ```
+  可以在根容器上设置ip地址，其它窗口都以此为ip，以实现pod内部的通信
+  ```
 
 > 这里是pod内部的通讯，pod之间的通讯采用虚拟2层风络技术来实现，我们当前用flannel
 
@@ -1180,8 +1205,6 @@ echo $username
 echo $password
 ```
 
-
-
 ## P29-Pod详解-端口设置
 
 #### 5.2.5  端口设置
@@ -1209,7 +1232,7 @@ spec:		#必选，pod中容器的详细定义
     image: nginx:1.17.1  	#必选，容器的镜像名称（docker配置的镜像源）
     ports:
     - name: nginx-port
-      containerPort: 80	
+      containerPort: 80
       protocol: TCP
 ```
 
@@ -1252,24 +1275,17 @@ spec:		#必选，pod中容器的详细定义
 >
 > memory: 内存大小，可以使用Gi，Mi，G，M等形式
 
-
-
 ## P31-Pod详解-生命周期-概述
 
 ### 5.3 生命周期
 
 - pod创建过程
-
 - 运行初始化容器(init container) 过程
-
 - 运行主容器(main container) 过程
 
   - 容器启动后钩子(post start), 容器终止前钩子(pre stop)
   - 容器的存活性控沙漠风暴(liveness probe), 就绪性控测(readiness probe)
-
 - pod终止过程
-
-  
 
 5种状态（相位）：
 
@@ -1353,8 +1369,6 @@ ifconfig ens33:1 192.168.109.201 netmask 255.255.255.0 up	#给网卡地址
 ifconfig ens33:2 192.168.109.202 netmask 255.255.255.0 up
 ```
 
-
-
 ## P34-Pod详解-生命周期-钩子函数
 
 #### 5.3.3 钩子函数
@@ -1393,7 +1407,7 @@ lifecycle:
       path: /  #url地址
       port: 80
       host: 192.168.109.100  #主机地址，（拼接后：192.168.109.100:80/ ）
-      scheme: HTTP	#支持的协议，http或者https      
+      scheme: HTTP	#支持的协议，http或者https    
 ```
 
 pod-hook-exec.yaml
@@ -1443,8 +1457,6 @@ kubectl explain pod.spec.containers.lifecycle.postStart
 - readiness probes: 就绪性探针，用于检测应用实例当前是否可以接收请求，如果 不能，k8s不会转发流量
 
 > livenessProbe 决定是否重启容器，readinessProbe决定是否将请求转发给容器。
-
-
 
 - exec命令：在容器内执行一次命令，如果 命令执行的退出码为0，，则认为程序正常，否则不正常
 
@@ -1615,8 +1627,6 @@ spec:
     restartPolicy: Never
 ```
 
-
-
 ## P38-Pod详解-调度-概述
 
 ### 5.4 pod调度
@@ -1711,7 +1721,7 @@ requiredDuringSchedulingIgnoredDuringExecution	<Object>	# node节点必须满足
   nodeSelectorTerms		#节点选择列表
     matchFields 		#按节点字段列出的节点选择器要求列表
     matchExpressions	#按节点标签列出的节点选择器要求列表（推荐）
-      key 	
+      key 
       values
       operator		# 关系符。 支持Exists, DoesNotExist, In,, NotIn, Gt, Lt
 
@@ -1719,12 +1729,13 @@ preferredDuringSchedulingIgnoredDuringExecution	<[]Object>	# 优先调度到满�
   preference  #一个节点选择器项，与相应的权重相关联
     matchFields 		#按节点字段列出的节点选择器要求列表
     matchExpressions	#按节点标签列出的节点选择器要求列表（推荐）
-      key 	
+      key 
       values
       operator		# 关系符。 支持Exists, DoesNotExist, In,, NotIn, Gt, Lt
   weight	# 倾向权重，在1~100范围
 
 ```
+
 ```yaml
 # 关系符的使用说明：
 - matchExpressions:
@@ -1764,6 +1775,7 @@ spec:
 # 看node标签
 kubectl get nodes --show-labels
 ```
+
 pod-nodeaffinity-preferred.yaml
 
 ```yaml
@@ -1922,13 +1934,13 @@ kubectl taint nodes node1 key:effect-
 # 去除所有污点
 kubectl taint nodes node1 key
 ```
+
 案例：
 
 1. 准备node1（为了演示效果更加明显，暂时停止node2节点）
 2. 为node1节点设置一个污点：tag=heima:PreferNoSchedule；然后创建pod1（可以）
 3. 修改node1节点设置一个污点：tag=heima:NoSchedule；然后创建pod2（pod1正常，pod2失败）
 4. 修改为node1节点设置一个污点：tag=heima:NoExecute；然后创建pod3
-
 
 ```sh
 # 案例
@@ -2020,7 +2032,7 @@ pod的创建方式可以分为2类：
 
 **什么是pod控制器**：
 
-  pod控制器是管理pod的中间层，使用了pod控制器之后，我们只需要告诉pod控制器，想要多少个什么样的pod就可以了。它就会创建出满足条件的pod并确保每一个pod处于用户期望的状态，如果pod在运行中出现故障，控制器会指定策略重启动或者重建pod。
+pod控制器是管理pod的中间层，使用了pod控制器之后，我们只需要告诉pod控制器，想要多少个什么样的pod就可以了。它就会创建出满足条件的pod并确保每一个pod处于用户期望的状态，如果pod在运行中出现故障，控制器会指定策略重启动或者重建pod。
 
 **pod控制器类型：**
 
@@ -2037,7 +2049,7 @@ pod的创建方式可以分为2类：
 
 ### 6.2 ReplicaSet（RS）
 
-  主要作用是保证一定数量的pod能够正常运行，它会持续监听这些pod的运行状态，一旦pod发生帮障，就会重启或重建。同时它还支持对pod数量的扩缩容和版本镜像的升级。
+主要作用是保证一定数量的pod能够正常运行，它会持续监听这些pod的运行状态，一旦pod发生帮障，就会重启或重建。同时它还支持对pod数量的扩缩容和版本镜像的升级。
 
 ```yaml
 apiVersion: v1
@@ -2125,7 +2137,7 @@ kubectl set image rs rs_name 容器=镜像版本 -n namespace
 kubectl set image rs pc-replicaset nginx=nginx:1.17.1 -n dev
 ```
 
-####  删除ReplicaSet
+#### 删除ReplicaSet
 
 ```sh
 # k8s删除rs前，会将replicasclear调整为0，等待所有pod被删除后，再执行rs对象删除
@@ -2140,7 +2152,10 @@ kubectl delete -f pc-replicaset.yaml
 
 ## P48-Pod控制器--Deployment-基础
 
-​		为了更好的解决服务器编排的问题，k8s在v1.2开始，引入Deployment控制器。值得一提的是，这种控制器并不直接管理pod，而是通过管理ReplicaSet来间接管理pod。Deployment的功能更强大。
+```
+为了更好的解决服务器编排的问题，k8s在v1.2开始，引入Deployment控制器。值得一提的是，这种控制器并不直接管理pod，而是通过管理ReplicaSet来间接管理pod。Deployment的功能更强大。
+```
+
 
 主要功能有：
 
@@ -2346,9 +2361,15 @@ kubectl rollout undo deployment pc-deployment --to-revision=1 -n dev
 
 #### 金丝雀发布
 
-​		Deployment支持更新过程中的控制，如“暂停（pause)”或“继续(resume)"更新操作
+```
+Deployment支持更新过程中的控制，如“暂停（pause)”或“继续(resume)"更新操作
+```
 
-​		比如有一批新的pod资源创建完成后立即暂停更新过程，此时，仅存在一部分新版本的应用，主体部分还是旧的版本。然后，再筛选一小部分的用户请求路由到新版本的pod应用，继续观察能否稳定地按期望的方式运行。确定没问题之后再继续完成余下的pod资源滚动更新，否则立即回滚更新操作。这就是金丝雀发布。
+
+```
+比如有一批新的pod资源创建完成后立即暂停更新过程，此时，仅存在一部分新版本的应用，主体部分还是旧的版本。然后，再筛选一小部分的用户请求路由到新版本的pod应用，继续观察能否稳定地按期望的方式运行。确定没问题之后再继续完成余下的pod资源滚动更新，否则立即回滚更新操作。这就是金丝雀发布。
+```
+
 
 ```sh
 # 更新版本，并暂停
@@ -2381,9 +2402,15 @@ kubectl delete -f pc-deployment.yaml
 
 ### 5.4 HPA（Horizontal Pod Autoscaler）
 
-​		k8s期望可以通过监测pod的使用情况，实现pod数量的自动调整，于是就产生了HPA控制器。
+```
+k8s期望可以通过监测pod的使用情况，实现pod数量的自动调整，于是就产生了HPA控制器。
+```
 
-​		HPA可以获取每个pod利用率，然后和HPA中定义的指标进行对比，同时计算出需要伸缩的具体值，最后实现pod数量的调整。其实HPA与之前的Deployment一样，也属于一种k8s资源对象，它通过追踪分析目标pod负载变化情况，来确定是否需要针对性地调整目标pod副本数。
+
+```
+HPA可以获取每个pod利用率，然后和HPA中定义的指标进行对比，同时计算出需要伸缩的具体值，最后实现pod数量的调整。其实HPA与之前的Deployment一样，也属于一种k8s资源对象，它通过追踪分析目标pod负载变化情况，来确定是否需要针对性地调整目标pod副本数。
+```
+
 
 #### 1. 安装metrics-server
 
@@ -2462,16 +2489,16 @@ kubectl get pod -n kube-system
 #使用kubectl top node 想提资源使用情况
 kubectl top node
 NAME   CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
-m1     150m         3%     1056Mi          61%       
-n1     29m          1%     924Mi           53%       
+m1     150m         3%     1056Mi          61%     
+n1     29m          1%     924Mi           53%     
 n2     29m          1%     809Mi           47% 
 
 kubectl top pod -n kube-system
 NAME                              CPU(cores)   MEMORY(bytes)   
-coredns-6955765f44-6rzqx          0m           0Mi             
-coredns-6955765f44-ztfz7          5m           5Mi             
-etcd-m1                           19m          80Mi            
-kube-apiserver-m1                 47m          323Mi           
+coredns-6955765f44-6rzqx          0m           0Mi           
+coredns-6955765f44-ztfz7          5m           5Mi           
+etcd-m1                           19m          80Mi          
+kube-apiserver-m1                 47m          323Mi         
 kube-controller-manager-m1        29m          65Mi  
 ...
 # 至此，metrics-server安装完成
@@ -2517,7 +2544,7 @@ spec:
   targetCPUUtilizationPercentage: 3	# cpu使用率指标
   scaleTargetRef: 	# 指定要控制的nginx信息
     apiVersion: apps/v1
-    kind: Deployment	
+    kind: Deployment
     name: nginx		# 管理一个叫nginx的Deployment
 
 ```
@@ -2551,11 +2578,14 @@ kubectl get pod -n dev -w
 kubectl get deploy -n dev -w
 ```
 
-## P55-Pod控制器--DaemonSet 
+## P55-Pod控制器--DaemonSet
 
 ### 5.5 DaemonSet（DS）
 
-​		DaemonSet类型的控制器可以保证集群中的每一台（或指定）节点上都运行一个副本，一般适用于日志收集，节点监控等场景。也就是说，如果一个pod提供的功能是节点级别的（每个节点都需要且只需要一个），那么这类pod就适合使用DaemonSet类型的控制哭喊创建。
+```
+DaemonSet类型的控制器可以保证集群中的每一台（或指定）节点上都运行一个副本，一般适用于日志收集，节点监控等场景。也就是说，如果一个pod提供的功能是节点级别的（每个节点都需要且只需要一个），那么这类pod就适合使用DaemonSet类型的控制哭喊创建。
+```
+
 
 特点：
 
@@ -2606,9 +2636,13 @@ kubectl get ds -n dev -o wide
 
 ### 6.6 Job
 
-​		主要负责**批量处理**短暂的**一次性**任务。Job的特点：
+```
+主要负责
+```
 
-- 当Job创建的Pod执行成功结束时，Job将记录成功结束的pod数量 
+**批量处理**短暂的**一次性**任务。Job的特点：
+
+- 当Job创建的Pod执行成功结束时，Job将记录成功结束的pod数量
 - 当成功结束的pod达到指定的数量时，Job将完成执行
 
 资源清单
@@ -2672,16 +2706,17 @@ spec:
       containers:
       - name: counter
         image: busybox:1.30
-        command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 2; done"]      
+        command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 2; done"]    
 ```
-
-
 
 ## P57-Pod控制--CronJob
 
 ### 6.7 CronJob（CJ）
 
-​		CronJob可以类似于Linux操作系统的周期性任务。
+```
+CronJob可以类似于Linux操作系统的周期性任务。
+```
+
 
 资源清单文件
 
@@ -2776,9 +2811,16 @@ kubectl get jobs -n dev
 
 ### 7.1 Service介绍
 
-​	    pod的IP地址不是固定的。所以k8s提供Service资源。Service对同一个服务的多个pod进行聚合，并且提供一个统一的入口地址。通过访问service的入口地址就访问后面的pod服务。
+```
+pod的IP地址不是固定的。所以k8s提供Service资源。Service对同一个服务的多个pod进行聚合，并且提供一个统一的入口地址。通过访问service的入口地址就访问后面的pod服务。
+```
 
-​        Serice在很多情况下只是一个概念，真正起作用的是kube-proxy服务进程，每个node节点上都运行着一个kube-proxy服务进程。当创建Service的时候会通过api-server向etcd写入创建的service的信息，而kube-proxy会基于监听的机制发现这种Service的变动，然后**它会将最新的service信息转换成对应的访问规则**。
+
+```
+Serice在很多情况下只是一个概念，真正起作用的是kube-proxy服务进程，每个node节点上都运行着一个kube-proxy服务进程。当创建Service的时候会通过api-server向etcd写入创建的service的信息，而kube-proxy会基于监听的机制发现这种Service的变动，然后
+```
+
+**它会将最新的service信息转换成对应的访问规则**。
 
 ```sh
 ipvsadm -Ln
@@ -2790,23 +2832,37 @@ ipvsadm -Ln
 
 - **userspace模式**
 
-  ​		该模式下，kube-proxy会为每一个service创建一个监听端口，发向cluster IP的请求被Iptables规则重定向到kube-proxy监听的端口上，kube-proxy根据LB算法选择一个提供服务的pod并和其建立链接，以将请求转发到pod上。
+  ```
+  该模式下，kube-proxy会为每一个service创建一个监听端口，发向cluster IP的请求被Iptables规则重定向到kube-proxy监听的端口上，kube-proxy根据LB算法选择一个提供服务的pod并和其建立链接，以将请求转发到pod上。
+  ```
 
-  ​		该模式下，kube-proxy充当一个四层负责均衡器的角色。由于Kube-proxy运行在userspace中，在进行转发处理时会增加内核和用户之间的数据拷贝，虽然比较稳定，但是效率比较低。
+
+  ```
+  该模式下，kube-proxy充当一个四层负责均衡器的角色。由于Kube-proxy运行在userspace中，在进行转发处理时会增加内核和用户之间的数据拷贝，虽然比较稳定，但是效率比较低。
+  ```
+
 
   ![image-20210420140411460](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210420140411460.png)
-
 - **iptables模式**
 
-  ​		iptables模式下，kube-proxy为service**后端的每个pod创建对应的iptables规则**，直接将发向cluster IP的请求重定向到一个Pod IP。
+  ```
+  iptables模式下，kube-proxy为service
+  ```
 
-  ​		该模式下Kube-proxy不承担四层负责均衡器的角色，只负责创建iptables规则。该模式的优点是较userspace模式效率更高，但不能提供灵活的LB策略，当后端pod不可用时也无法进重重试。（LB：负载均衡）
+  **后端的每个pod创建对应的iptables规则**，直接将发向cluster IP的请求重定向到一个Pod IP。
+
+  ```
+  该模式下Kube-proxy不承担四层负责均衡器的角色，只负责创建iptables规则。该模式的优点是较userspace模式效率更高，但不能提供灵活的LB策略，当后端pod不可用时也无法进重重试。（LB：负载均衡）
+  ```
+
 
   ![image-20210420140505365](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210420140505365.png)
-
 - <font color='red'>**ipvs模式**</font>
 
-  ​	ipvs模式和iptables类似，kube-prox监控pod的变化并创建相应的ipvs规则。ipvs相对iptables转发效率更高。除此以外，ipvs支持更多的LB算法。
+  ```
+  ipvs模式和iptables类似，kube-prox监控pod的变化并创建相应的ipvs规则。ipvs相对iptables转发效率更高。除此以外，ipvs支持更多的LB算法。
+  ```
+
 
   ![image-20210420141118449](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210420141118449.png)
 
@@ -2820,18 +2876,16 @@ ipvsadm -Ln
   Prot LocalAddress:Port Scheduler Flags
     -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
   TCP  127.0.0.1:31274 rr		# rr 轮询
-    -> 10.244.3.138:8111            Masq    1      0          0         
-    -> 10.244.4.23:8111             Masq    1      0          0         
-    -> 10.244.4.24:8111             Masq    1      0          0         
+    -> 10.244.3.138:8111            Masq    1      0          0       
+    -> 10.244.4.23:8111             Masq    1      0          0       
+    -> 10.244.4.24:8111             Masq    1      0          0       
   TCP  127.0.0.1:32434 rr
   TCP  172.17.0.1:31274 rr
-    -> 10.244.3.138:8111            Masq    1      0          0         
-    -> 10.244.4.23:8111             Masq    1      0          0         
-    -> 10.244.4.24:8111             Masq    1      0          0    
+    -> 10.244.3.138:8111            Masq    1      0          0       
+    -> 10.244.4.23:8111             Masq    1      0          0       
+    -> 10.244.4.24:8111             Masq    1      0          0  
     ...
   ```
-
-  
 
 ## P59-Service--资源清单文件介绍
 
@@ -2840,7 +2894,7 @@ ipvsadm -Ln
 service资源清单
 
 ```yaml
-kind: Service	
+kind: Service
 apiVersion: v1
 metadata: 
   name: service
@@ -2913,8 +2967,6 @@ echo '10.244.1.40' > /usr/share/nginx/html/index.html
 # 修改之后，访问测试
 ```
 
-
-
 ## P61-Service--实验--ClusterIP类型
 
 #### 7.3.2 ClusterIP类型的Service
@@ -2951,9 +3003,16 @@ kubectl describe svc service-clusterip -n dev
 
 **Endpoint**
 
-​		Endpoint是K8s中的一个资源对象，存储在etcd中，用来记录一个service对应的所有pod的访问地址，它是根据service三围文件中selector爬藤榕产生的。
+```
+Endpoint是K8s中的一个资源对象，存储在etcd中，用来记录一个service对应的所有pod的访问地址，它是根据service三围文件中selector爬藤榕产生的。
+```
 
-​		一个service由一组pod组成，这些pod通过Endpoints暴露出来，Endpoints是实现实际服务的**端点集合**。换句话说，service和pod之间的联系是通过Endpoints实现的。
+
+```
+一个service由一组pod组成，这些pod通过Endpoints暴露出来，Endpoints是实现实际服务的
+```
+
+**端点集合**。换句话说，service和pod之间的联系是通过Endpoints实现的。
 
 ```sh
 kubectl get endpoints -n dev
@@ -2966,13 +3025,15 @@ while true;do curl 10.97.97.97:80; sleep 5; done;
 
 **负载分发策略**
 
-​		对service的访问被 分发到了后端的pod上，目前k8s提供了两种负载分发策略：
+```
+对service的访问被 分发到了后端的pod上，目前k8s提供了两种负载分发策略：
+```
+
 
 - 如果不定义，默认使用kube-proxy的策略，比较随机、轮询
-
 - 基于客户端地址的会话保持模式，即来自同一个客户端发起的所有请求都会转发到固定的一个pod上
 
-   些塔式可以在spec中添加 sesssionAffinity: ClientIP选项
+  些塔式可以在spec中添加 sesssionAffinity: ClientIP选项
 
 修改发分策略
 
@@ -2989,7 +3050,10 @@ curl 10.97.97.97:80
 
 #### 7.3.3  HeadLiness 类型的Service
 
-​		在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自已来控制负载均衡策略，针对这种情况，k8s提供了HeadLiness，这类service不会分配ClusterIP，如果想要访问service，只能通过service的域名进行查询。
+```
+在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自已来控制负载均衡策略，针对这种情况，k8s提供了HeadLiness，这类service不会分配ClusterIP，如果想要访问service，只能通过service的域名进行查询。
+```
+
 
 service-headliness.yaml
 
@@ -3030,7 +3094,11 @@ dig @10.96.0.10 service-headliness.dev.svc.cluster.local   #dig @10.96.0.10 serv
 
 #### NodePort类型
 
-​		如果希望将service暴露给集群外部使用，就要使用Nodeport类型。NodePort的工作原理其实就是将service的端口**映射到Node的一个端口上**，然后就可以通过NodeIp:NodePort来访问serivce了。
+```
+如果希望将service暴露给集群外部使用，就要使用Nodeport类型。NodePort的工作原理其实就是将service的端口
+```
+
+**映射到Node的一个端口上**，然后就可以通过NodeIp:NodePort来访问serivce了。
 
 创建service-nodeport.yaml
 
@@ -3050,19 +3118,23 @@ spec:
     targetPort: 80
 ```
 
-
-
 ## P64-Service--实验--LoadBalancer类型
 
 #### 6.3.5 LoadBalancer类型
 
-​		与NodePort的区别在于，LoadBalancer会在集群的外部再来一个负载均衡设备，而这个设备需要外部环境支持的，外部服务发送到这个设备上的请求，会被设备负载之后转发到集群中。
+```
+与NodePort的区别在于，LoadBalancer会在集群的外部再来一个负载均衡设备，而这个设备需要外部环境支持的，外部服务发送到这个设备上的请求，会被设备负载之后转发到集群中。
+```
+
 
 ## P65-Service--实验--ExternalName类型
 
 #### 6.3.6 ExternalName类型的Service
 
-​		ExternalName类型的Service用于引 入集群外部的服务，它通过externalName属性指定外部一个服务的地址，然后在集群内部访问此service就可以访问到外部的服务了。
+```
+ExternalName类型的Service用于引 入集群外部的服务，它通过externalName属性指定外部一个服务的地址，然后在集群内部访问此service就可以访问到外部的服务了。
+```
+
 
 <font color='red'>**外部服务引入到pod**</font>
 
@@ -3099,7 +3171,11 @@ Service对集群之外暴露的主要方式有2种：NodePort和LoadBalancer，�
 
 ![image-20210422110458684](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210422110458684.png)
 
-​		实际上，Ingress相当于一个7层负载均衡器，是以k8s对反向代理的一个抽象。它的工作原理类似于Nginx，可以理解成在**Ingress里建立诸多映射规则，Ingress Controller通过监听这些配置规则并转化成Nginx的配置，然后对外部提供服务**。在这里有2个核心概念：
+```
+实际上，Ingress相当于一个7层负载均衡器，是以k8s对反向代理的一个抽象。它的工作原理类似于Nginx，可以理解成在
+```
+
+**Ingress里建立诸多映射规则，Ingress Controller通过监听这些配置规则并转化成Nginx的配置，然后对外部提供服务**。在这里有2个核心概念：
 
 - Ingress: k8s中的一个对象，作用是定义请求如何转发到service的规则
 - Ingress controller: 具体实现反向代理及负载均衡的程序，对Ingress定义的规则进行解析，根据配置的规则来实现请求转发，实现方式有很多，比如Nginx, Contour, Haproxy等。
@@ -3112,8 +3188,6 @@ Ingress（以Nginx为例）的工作原理如下：
 4. 到此为止，其实真正在工作的就是一个Nginx了，内部配置了用户定义的请求转发规则
 
 ![image-20210422113902373](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210422113902373.png)
-
-  
 
 ## P67-Ingress案例--环境准备
 
@@ -3176,7 +3250,7 @@ spec:
         image: nginx:1.17.1
         ports:
         - containerPort: 80
-        
+      
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -3198,7 +3272,7 @@ spec:
         image: tomcat:8.5-jre10-slim
         ports:
         - containerPort: 8080
-        
+      
 ---
 
 apiVersion: v1
@@ -3214,7 +3288,7 @@ spec:
   ports:
   - port: 80
     targetPort: 80
-    
+  
 ---
 
 apiVersion: v1
@@ -3270,7 +3344,7 @@ spec:
         backend:
           serviceName: tomcat-service
           servicePort: 8080
-    
+  
 ```
 
 ```sh
@@ -3373,24 +3447,31 @@ Volume 支持多种哦打，常见有：
 - 高级存储：PV， PVC
 - 配置存储：ConfigMap, Secret
 
- 
-
 ## P71-基本存储--EmptyDir
 
 ### 8.1 基本存储
 
 #### 8.1.1 EmptyDir
 
-​		EmptyDir是最基础的Volume类型，一个EmptyDir就是Host上的一个空目录。
+```
+EmptyDir是最基础的Volume类型，一个EmptyDir就是Host上的一个空目录。
+```
 
-​		EmptyDir是在Pod被分配到Node时创建的，它的初始内容为空，并且无须指定宿主机上对应的目录文件，因为k8s会自动分配一个目录，当pod销毁时，EmptyDir中的数据也会被永久删除。EmptyDir用途如下：
+
+```
+EmptyDir是在Pod被分配到Node时创建的，它的初始内容为空，并且无须指定宿主机上对应的目录文件，因为k8s会自动分配一个目录，当pod销毁时，EmptyDir中的数据也会被永久删除。EmptyDir用途如下：
+```
+
 
 - 临时空间，例如用于某些应用程序运行时所需的临时目录，且无须永久保留。
 - 一个窗口需要从另一个窗口中获取数据的目录（多窗口共享目录）
 
 案例：
 
-​		在一个pod中准备两个容器nginx和busybox，然后声明一个Volume分别挂在到两个容器的目录中，然后nginx窗口负责向Volume中写日志，busybox中通过命令将日志内容读到控制台。
+```
+在一个pod中准备两个容器nginx和busybox，然后声明一个Volume分别挂在到两个容器的目录中，然后nginx窗口负责向Volume中写日志，busybox中通过命令将日志内容读到控制台。
+```
+
 
 volume-emptydir.yaml
 
@@ -3433,15 +3514,19 @@ curl 10.244.1.100
 kubectl logs -f volume-emptydir -n dev -c busybox
 ```
 
-
-
 ## P72-基本存储--HostPath
 
 ### 8.1.2 HostPath
 
-​		EmptyDir中数据不会被持久化， 它会随着Pod的结束而销毁，如果想简单的将数据持久化到主机中，可以选择HostPath。
+```
+EmptyDir中数据不会被持久化， 它会随着Pod的结束而销毁，如果想简单的将数据持久化到主机中，可以选择HostPath。
+```
 
-​		HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就要以保证Pod销毁了，但是数据依然可以存在于nodey主机上。
+
+```
+HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就要以保证Pod销毁了，但是数据依然可以存在于nodey主机上。
+```
+
 
 volume-hostpath.yaml
 
@@ -3487,7 +3572,10 @@ spec:
 
 ## P73-基本存储--NFS
 
-​		HostPath可以解决数据持久化的问题，但是一旦Node节点的故障了，pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的有NFS, CIFS。
+```
+HostPath可以解决数据持久化的问题，但是一旦Node节点的故障了，pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的有NFS, CIFS。
+```
+
 
 1、准备nfs服务器
 
@@ -3557,18 +3645,18 @@ tail -f /root/data/nfs/access.log
 10.244.3.1 - - [27/Apr/2021:06:18:19 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"
 ```
 
-
-
 ## P74-高级存储--pv和pvc的介绍
 
 ![image-20210428104907303](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210428104907303.png)
 
 ### 8.2.1  PV和PVC
 
-​		NFS提供存储，此时就要求用户会搭建NFS系统，并且会在yaml配置nfs。由于k8s支持的存储系统很多，要求客户全都要掌握，显然不现实。为了能够屏蔽底层存储实现的细节，方便用户使用，k8s引入PV和PVC两种资源对象。
+```
+NFS提供存储，此时就要求用户会搭建NFS系统，并且会在yaml配置nfs。由于k8s支持的存储系统很多，要求客户全都要掌握，显然不现实。为了能够屏蔽底层存储实现的细节，方便用户使用，k8s引入PV和PVC两种资源对象。
+```
+
 
 - PV（Persistent Volume）是持久化卷的意思。是对底层的共享在座的一种抽象。一般情况下PV由k8s管理员进行 创建和配置，它与底层具体的共享存储技术有关，并通过插件完成与共享存储的对接。
-
 - PVC（Persistent Volume Claim）是持久卷声明的意思，是用户对于存储需求的一种声明。换句话说，PVC其实就是用户向k8s系统发出的一种资源需求申请。
 
 使用了PV和PVC之后，工作可以进一步细分：
@@ -3602,9 +3690,7 @@ spec:
 PV的关键参数说明：
 
 - 存储类型：底层实际存储的类型，k8s支持多种存储类型，每种存储类型的配置都有所差异。
-
 - 存储能力（capacity）：目前只支持存储空间的设置（storage=1Gi）。不过未来可能会加入IOSPS，吞吐量等指标的配置。
-
 - 访问模式（accessModes）：用于描述用户应用对存储资源的访问权限，访问权限包括下面几种方式：
 
   - ReadWriteOnce（RWO）：读写权限，但是只能被单个节点挂载。
@@ -3612,7 +3698,6 @@ PV的关键参数说明：
   - ReadWriteMany（RWX）：读写权限，可以被多个节点挂载
 
   <font color='red'>需要注意的是是，底层不同的存储类型可能支持的访问模式不同</font>
-
 - 回收策略（persistentVolumeReclaimPolicy）：当PV不再被使用了之后，对其的处理方式。目前支持3种策略：
 
   - Retain（保留）：保留数据，需要管理员手工清理数据
@@ -3620,12 +3705,10 @@ PV的关键参数说明：
   - Delete（删除）：与PV相连后端存储完成volume的删除操作，当我这常见于云服务商的存储服务
 
   <font color='red'>需要注意的是是，底层不同的存储类型可能支持的访问模式不同</font>
-
 - 存储类别：PV通过storageClassName参数指定一个存储类别（比较少用）
 
   - 具有特定类别的PV只能与请求了该类别的PVC进行绑定。
   - 未这对定类别的PV则只能与不请求任保类别的PVC进行绑定
-
 - 状态（status）：一个PV的生命周期中，可能会处于不同的阶段：
 
   - Available（可用）：表示可用状态，还未被任保PVC绑定
@@ -3667,7 +3750,7 @@ spec:
   nfs:
     path: /root/data/pv1
     server: 192.168.132.31
-    
+  
 ---
 
 apiVersion: v1
@@ -3683,7 +3766,7 @@ spec:
   nfs:
     path: /root/data/pv2
     server: 192.168.132.31
-    
+  
 ---
 
 apiVersion: v1
@@ -3754,7 +3837,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-    
+  
 ---
 
 apiVersion: v1
@@ -3768,7 +3851,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-    
+  
 ---
 
 apiVersion: v1
@@ -3805,15 +3888,15 @@ spec:
   - name: busybox
     image: busybox:1.30
     command: ["/bin/sh","-c","while true;do echo pod1 >> /root/out.txt; sleep 10; done;"] 
-    volumeMounts:	
+    volumeMounts:
     - name: volume
       mountPath: /root/		#绑定容器内部的路径
-  volumes: 	
+  volumes: 
   - name: volume
     persistentVolumeClaim:
       claimName: pvc1
       readOnly: false
-      
+    
 ---
 
 apiVersion: v1
@@ -3826,10 +3909,10 @@ spec:
   - name: busybox
     image: busybox:1.30
     command: ["/bin/sh","-c","while true;do echo pod2 >> /root/out.txt; sleep 10; done;"] 
-    volumeMounts:	
+    volumeMounts:
     - name: volume
       mountPath: /root/
-  volumes: 	
+  volumes: 
   - name: volume
     persistentVolumeClaim:
       claimName: pvc2
@@ -3844,8 +3927,6 @@ tail -f /root/data/pv1/out.txt
 tail -f /root/data/pv2/out.txt
 ```
 
-
-
 ## P77-高级存储--pv和pvc的生命周期
 
 #### 8.2.4 生命周期
@@ -3853,31 +3934,23 @@ tail -f /root/data/pv2/out.txt
 PVC和PV是一一对应的，PV和PVC之间的相互作用遵循以下生命周期：
 
 - **资源供应**：管理员手动创建底层存储和PV
-
 - 资源绑定：用户创建PVC, k8s负责根据PVC的声明去寻找PV，并绑定在用户定义好的PVC之后，系统将根据PVC对存储资源的请求在已存在的PV中选择一个满足条件的
 
   - 一旦找到，就将该PV与用户定义的PVC进行绑定，用户的应用就可以使用这个PVC了
   - 如果找不到，PVC则会无限期处于Pending状态，直到等到系统管理员创建一个符合其要求的PV
 
   <font color='red'>PV一旦绑定到某个PVC上，就会被这个PVC独占，不能再与其他PVC进行绑定了</font>
-
 - **资源使用**：用户可在pod中像volume一样使用PVC
 
   Pod使用Volume的定义，将PVC挂载到容器内的某个路径进行使用。
-
 - **资源释放**：用户删除pvc来释放pv
 
   当存储资源使用完毕后，用户可以删除pvc，与该PVC绑定的PV将会被标记为“released"，但还不能立刻与其他pvc进行绑定，通过之前PVC写入的数据可能还被留在存储设备上，只有在清除之后该pv才能再次使用。
-
 - 资源回收：k8s根据pv设置的回收策略进行资源的回收
 
   对于pv，管理员可以设定回收策略，用于设置与之绑定的PVC释放资源之后如何处理遗留数据的问题。只有PV的存储空间完成回收，才能供新的PVC绑定和使用。
 
   ![image-20210428144917804](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210428144917804.png)
-
-  
-
-  
 
 ## P78-配置存储--configmap
 
@@ -3931,6 +4004,7 @@ spec:
     configMap:
       name: configmap
 ```
+
 ```sh
 # 创建pod
 kubectl create -f pod-configmap.yaml
@@ -3954,7 +4028,10 @@ more info
 
 #### 8.3.2 Secret
 
-​		它主要用于存储敏感信息，例如密码，密钥，证书等
+```
+它主要用于存储敏感信息，例如密码，密钥，证书等
+```
+
 
 1、对base64对数据进行编码
 
@@ -4013,7 +4090,7 @@ spec:
     volumeMounts: 	# 将secret挂载到目录
     - name: config
       mountPath: /secret/config
-  volumes:	
+  volumes:
   - name: config
     secret:
       secretName: secret
@@ -4038,7 +4115,11 @@ admin
 
 ### 9.1  访问控制概述
 
-​		k8s作为一个分布式集群的管理工具，保证集群的安全性是其一个重要的任务。所谓安全性其实就是保证对k8s的各种**客户端**进行**认证和鉴权**操作
+```
+k8s作为一个分布式集群的管理工具，保证集群的安全性是其一个重要的任务。所谓安全性其实就是保证对k8s的各种
+```
+
+**客户端**进行**认证和鉴权**操作
 
 客户端：
 
@@ -4057,19 +4138,27 @@ admin
 
 ### 9.2 认证管理
 
-​		k8s集群安全的最关键点在于如何识别并认证客户端身份，它提供了3种客户端身份认证方式：
+```
+k8s集群安全的最关键点在于如何识别并认证客户端身份，它提供了3种客户端身份认证方式：
+```
+
 
 - **http Base认证**：通过用户名+密码的方式认证
 
-  ​	这种认证方式是把“用户名：密码”用BASE6算法进行编码后的字符串放在http请求中的Header Authorization域里发送给服务端。服务端收到后进行解码，获取用户名及密码，然后进行用户身份认证的进程。
-
+  ```
+  这种认证方式是把“用户名：密码”用BASE6算法进行编码后的字符串放在http请求中的Header Authorization域里发送给服务端。服务端收到后进行解码，获取用户名及密码，然后进行用户身份认证的进程。
+  ```
 - **http token认证**：通过一个token来识别合法用户
 
-  ​	这种认证方式是用一个很长的难以被模仿的字符串——token来表明客户身份的一种方式。每个token对应一个用户名，当客户端发起API调用请求时，需要在http Header里放入token，API Server接到token后会跟服务器中保存的tokken进行比对，然后进行用户身份认证的过程。
-
+  ```
+  这种认证方式是用一个很长的难以被模仿的字符串——token来表明客户身份的一种方式。每个token对应一个用户名，当客户端发起API调用请求时，需要在http Header里放入token，API Server接到token后会跟服务器中保存的tokken进行比对，然后进行用户身份认证的过程。
+  ```
 - **https证书认证**：基于CA根证书签名的双向数字证书认证方式
 
-  ​	这种认证方式是安全性最高的一种方式，但是同时也是操作起来最麻烦的一种方式。
+  ```
+  这种认证方式是安全性最高的一种方式，但是同时也是操作起来最麻烦的一种方式。
+  ```
+
 
   ![image-20210430103703990](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20210430103703990.png)
 
@@ -4077,8 +4166,9 @@ http认证大体分为3个过程：
 
 1. 证书申请和下发
 
-   ​	https通过双方的服务器向ca机构申请证书，ca机构下发根证书、服务端证书及私钥给申请者
-
+   ```
+   https通过双方的服务器向ca机构申请证书，ca机构下发根证书、服务端证书及私钥给申请者
+   ```
 2. 客户端和服务端的双向认证
 
    ```md
@@ -4088,12 +4178,17 @@ http认证大体分为3个过程：
    2. 客户端发送自己的证书给服务器端，服务端接收到证书后，通过私钥解密证书，
       在证书中获得客户端的公钥，并用该公钥认证证书信息，确认客户端是否合法。
    ```
-
 3. 服务器端和客户端进行通信
 
-   ​	服务端和客户端协商好加密方案后，客户端会产生一个随机的秘钥并加密，然后发送到服务端。
+   ```
+   服务端和客户端协商好加密方案后，客户端会产生一个随机的秘钥并加密，然后发送到服务端。
+   ```
 
-   ​    服务端接收这个秘钥后，双方接下来通信的所有内容都通过该随机秘钥加密
+
+   ```
+   服务端接收这个秘钥后，双方接下来通信的所有内容都通过该随机秘钥加密
+   ```
+
 
    PS：**k8s允许同时配置多种认证方式，只要其中任意一个方式认证通过即可**。
 
@@ -4101,22 +4196,23 @@ http认证大体分为3个过程：
 
 ### 9.3  授权管理
 
-​		授权发生在认证成功之后，通过认证就可以态度同一个求用 户是谁，然后k8s会根据事先定义的授权策略来决定用户是否有权限访问，这个过程就称为授权。
+```
+授权发生在认证成功之后，通过认证就可以态度同一个求用 户是谁，然后k8s会根据事先定义的授权策略来决定用户是否有权限访问，这个过程就称为授权。
+```
 
-​		每个发送到ApiServer的请求都带上了用户和资源的信息：比如发送请求的用户，请求的路径，请求的动作等，授权就是根据这些信息和授权策略进行比较，如果符合策略，则认为授权通过，否则会返回错误。
+
+```
+每个发送到ApiServer的请求都带上了用户和资源的信息：比如发送请求的用户，请求的路径，请求的动作等，授权就是根据这些信息和授权策略进行比较，如果符合策略，则认为授权通过，否则会返回错误。
+```
+
 
 API Server目前支持以下几种授权策略：
 
 - AlwaysDeny：表示拒绝所有请求，一般用于测试
-
 - AlwaysAllow：允许接收所有请求，相当于集群不需要授权流程（k8s默认的策略）
-
 - ABAC：基于属性的访问控制，表示使用用户配置的授权规则对用䚮请求进行匹配和控制。
-
 - Webhook：通过调用外部REST服务对用户进行授权。
-
 - Node：是一各专用模式，用于对kubelet发出的请求进行访问控制。
-
 - **RBAC**：基于角色的访问控制（kubeadm安装方式下的默认选项）
 
   RBAC（Role-Base Access Control）基于角色的访问控制，主要是在描述一件事情：**给哪些对象授予哪些权限**
@@ -4181,8 +4277,6 @@ rules:
 "get", "list", "watch", "create", "update", "patch", "delete", "exec"
 ```
 
-
-
 **RoleBinding， ClusterRoleBinding**
 
 角色绑定用来把一个角色绑定到一个目标对象上，绑定目标可以是User，Group或者ServiceAccount
@@ -4199,7 +4293,7 @@ subjects:
   name: heima
   apiGroup: rbac.authorization.k8s.io
 roleRef:
-  kind: Role	
+  kind: Role
   name: authorization-role	# 将authorization-role的角色赋予heima的用户
   apiGroup: rbac.authorization.k8s.io
 ```
@@ -4241,7 +4335,7 @@ subjects:
   name: heima
   apiGroup: rbac.authorization.k8s.io
 roleRef:
-  kind: ClusterRole	
+  kind: ClusterRole
   name: authorization-clusterrole	# 将authorization-role的角色赋予heima的用户
   apiGroup: rbac.authorization.k8s.io
 ```
@@ -4432,4 +4526,3 @@ kubectl describe secrets dashboard-admin-token-j4svz -n kubernetes-dashboard
 ## P85-DashBoard-使用演示
 
 ip: https://192.168.132.32:30009
-

@@ -101,3 +101,32 @@ service docker restart
 ————————————————
 版权声明：本文为CSDN博主「tianshuhao521」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 原文链接：https://blog.csdn.net/tianshuhao521/article/details/84782309
+
+
+
+## docker启动WARNING：IPv4 forwarding is disabled. Networking will not work. 报错解决办法
+
+https://www.cnblogs.com/nulige/articles/9204841.html
+
+centos 7 docker 启动了一个web服务 但是启动时 报
+
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+
+**#需要做如下配置**
+
+**解决办法：**
+
+```sh
+vi /etc/sysctl.conf
+net.ipv4.ip_forward=1 #添加这段代码
+
+#重启network服务
+systemctl restart network && systemctl restart docker
+
+#查看是否修改成功 （备注：返回1，就是成功）
+[root@docker-node2 ~]# sysctl net.ipv4.ip_forward
+net.ipv4.ip_forward = 1
+```
+
+
+

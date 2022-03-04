@@ -1,3 +1,95 @@
+# js中浮点型运算 加减乘除
+
+from: https://www.cnblogs.com/lhm166/articles/8670024.html
+
+```js
+// 方法一：有js自定义函数
+<script>
+ 
+//加法函数，用来得到精确的加法结果
+//说明：javascript的加法结果会有误差，在两个浮点数相加的时候会比较明显。这个函数返回较为精确的加法结果。
+//调用：accAdd(arg1,arg2)
+//返回值：arg1加上arg2的精确结果
+function accAdd(arg1,arg2){
+var r1,r2,m;
+try{r1=arg1.toString().split(".")[1].length}catch(e){r1=0}
+try{r2=arg2.toString().split(".")[1].length}catch(e){r2=0}
+m=Math.pow(10,Math.max(r1,r2))
+return (arg1*m+arg2*m)/m
+}
+//给Number类型增加一个add方法，调用起来更加方便。
+Number.prototype.add = function (arg){
+return accAdd(arg,this);
+}
+ 
+//加法函数，用来得到精确的加法结果
+//说明：javascript的加法结果会有误差，在两个浮点数相加的时候会比较明显。这个函数返回较为精确的加法结果。
+//调用：accAdd(arg1,arg2)
+//返回值：arg1加上arg2的精确结果
+function accSub(arg1,arg2){
+    var r1,r2,m,n;
+    try{r1=arg1.toString().split(".")[1].length}catch(e){r1=0}
+    try{r2=arg2.toString().split(".")[1].length}catch(e){r2=0}
+    m=Math.pow(10,Math.max(r1,r2));
+    //last modify by deeka
+    //动态控制精度长度
+    n=(r1>=r2)?r1:r2;
+    return ((arg1*m-arg2*m)/m).toFixed(n);
+}
+ 
+//除法函数，用来得到精确的除法结果
+//说明：javascript的除法结果会有误差，在两个浮点数相除的时候会比较明显。这个函数返回较为精确的除法结果。
+//调用：accDiv(arg1,arg2)
+//返回值：arg1除以arg2的精确结果
+function accDiv(arg1,arg2){
+var t1=0,t2=0,r1,r2;
+try{t1=arg1.toString().split(".")[1].length}catch(e){}
+try{t2=arg2.toString().split(".")[1].length}catch(e){}
+with(Math){
+r1=Number(arg1.toString().replace(".",""))
+r2=Number(arg2.toString().replace(".",""))
+return (r1/r2)*pow(10,t2-t1);
+}
+}
+//给Number类型增加一个div方法，调用起来更加方便。
+Number.prototype.div = function (arg){
+return accDiv(this, arg);
+}
+ 
+//乘法函数，用来得到精确的乘法结果
+//说明：javascript的乘法结果会有误差，在两个浮点数相乘的时候会比较明显。这个函数返回较为精确的乘法结果。
+//调用：accMul(arg1,arg2)
+//返回值：arg1乘以arg2的精确结果
+function accMul(arg1,arg2)
+{
+var m=0,s1=arg1.toString(),s2=arg2.toString();
+try{m+=s1.split(".")[1].length}catch(e){}
+try{m+=s2.split(".")[1].length}catch(e){}
+return Number(s1.replace(".",""))*Number(s2.replace(".",""))/Math.pow(10,m)
+}
+//给Number类型增加一个mul方法，调用起来更加方便。
+Number.prototype.mul = function (arg){
+return accMul(arg, this);
+}
+ 
+var a=0.69;
+var b=10;
+alert(a*b);//6.8999999999999995
+alert((a*100)/10);
+</script>
+```
+
+```js
+// 方法2
+//方法二：如果在知道小数位个数的前提下，可以考虑通过将浮点数放大倍数到整型(最后再除以相应倍数)，再进行运算操作，这样就能得到正确的结果了
+alert(11*22.9);//得到251.89999999999998
+alert(11*(22.9*10)/10);//得到251.9
+```
+
+
+
+
+
 # object -> json
 
 ```javascript

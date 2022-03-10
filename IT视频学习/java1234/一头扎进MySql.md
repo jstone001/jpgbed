@@ -36,10 +36,10 @@ SELECT func_gal(2)  ###调用函数
 ## 2 创建存过和函数
 ### 2.3 变量的使用
 ```sql
---定义变量
+# 定义变量
 DECLEAR a,b VARCHAR(20);
 
---变量的赋值
+# 变量的赋值
 DROP PROCEDURE IF EXISTS `proc_t1`$$
 
 CREATE DEFINER=`root`@`%` PROCEDURE `proc_t1`()
@@ -52,7 +52,7 @@ BEGIN
 DELIMITER ;
 
 
---第二种方法
+# 第二种方法
 DELIMITER $$
 
 USE `db_jpxgyw`$$

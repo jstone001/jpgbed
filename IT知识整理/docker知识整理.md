@@ -57,6 +57,55 @@ from: https://www.cnblogs.com/subendong/p/13766184.html
 
 docker login 的域名要和docker push的镜像一致
 
+# docker自定义网络模式，实现容器固定ip地址
+
+http://blog.java1234.com/blog/articles/634.html
+
+我们在使用Docker容器时候，每次启动容器，容器分配到的虚拟IP经常变动，比如我们现在使用Mycat +  Mysql，我们是需要配置Mysql服务IP地址的，这个IP是Docker分配的虚拟IP，假如老是变，那我们还得老是修改配置，那就很麻烦了；所以我们需要固定手工分配容器IP；
+
+Docker默认使用的是bridge 桥接网络模式
+
+```sh
+# 查看docker网络模式
+docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+dc1fcd2e7148        bridge              bridge              local
+923358e1c0b4        host                host                local
+387a08b6228f        none                null                local
+```
+
+```sh
+# 我们创建自定义网络模式；
+docker network create --subnet=172.20.0.0/16 extnetwork		# 增加16个
+NETWORK ID          NAME                DRIVER              SCOPE
+dc1fcd2e7148        bridge              bridge              local
+03c14f0e7c33        extnetwork          bridge              local
+923358e1c0b4        host                host                local
+387a08b6228f        none                null                local
+```
+
+```sh
+# 通过--net extnetwork --ip 172.20.0.2 指定   
+docker run -p 3306:3306 --name master   -d  -v /home/mysql/mysql.conf.d/:/etc/mysql/mysql.conf.d/\
+-v /home/mysql/log/:/var/log --net extnetwork --ip 172.20.0.2  \
+-e MYSQL_ROOT_PASSWORD=123456  镜像ID
+
+docker run -p 3307:3306 --name slave   -d  \
+-v /home/mysql2/mysql.conf.d/:/etc/mysql/mysql.conf.d/ \
+-v /home/mysql2/log/:/var/log \
+--net extnetwork --ip 172.20.0.3 \
+-e MYSQL_ROOT_PASSWORD=123456  镜像ID 
+
+# 我们启动两个Mysql容器，并且固定分配IP  172.20.0.2和172.20.0.3
+# （注意：这里必须用172.20.0.2开始分配，因为172.20.0.1是网关；）
+```
+
+```sh
+# 扩展：
+docker network rm extnetwork #删除网络
+docker rm -f $(docker ps -qa) #删除所有容器
+```
+
 # docker tag
 
 from: https://docs.docker.com/engine/reference/commandline/tag/
@@ -120,8 +169,10 @@ WARNING: IPv4 forwarding is disabled. Networking will not work.
 vi /etc/sysctl.conf
 net.ipv4.ip_forward=1 #添加这段代码
 
+echo net.ipv4.ip_forward=1 >> vi /etc/sysctl.conf
+
 #重启network服务
-systemctl restart network && systemctl restart docker
+systemctl restart network 
 
 #查看是否修改成功 （备注：返回1，就是成功）
 [root@docker-node2 ~]# sysctl net.ipv4.ip_forward

@@ -509,7 +509,7 @@ DELIMITER ;
 EXPLAIN select * from t1 inner join t2 on t1.a= t2.a;  -- // a字段有索引
 ```
 
-![image-20220309100000039](E:\JS\booknote\jpgBed\image-20220309100000039.png)
+![image-20220309100000039](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20220309100000039.png)
 
 从执行计划中可以看到这些信息：
 
@@ -534,7 +534,7 @@ EXPLAIN select * from t1 inner join t2 on t1.a= t2.a;  -- // a字段有索引
 EXPLAIN select * from t1 inner join t2 on t1.b= t2.b; -- // b字段没有索引
 ```
 
-![345](E:\JS\booknote\jpgBed\640.png)
+![345](https://gitee.com/jstone001/booknote/raw/master/jpgBed/640.png)
 
 Extra 中 的`Using join buffer (Block Nested Loop)`说明该关联查询使用的是 BNL 算法。
 
@@ -630,7 +630,7 @@ select * from A where exists (select 1 from B where B.id = A.id)
  -- 注意：以上4条sql只有根据某个字段count不会统计字段
 ```
 
-![image-20220309100027195](E:\JS\booknote\jpgBed\image-20220309100027195.png)
+![image-20220309100027195](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20220309100027195.png)
 
 经过测试发现：四个sql的执行计划一样，说明这四个sql执行效率应该差不多
 
@@ -656,7 +656,7 @@ select * from A where exists (select 1 from B where B.id = A.id)
 
 对于myisam存储引擎的表做不带where条件的count查询性能是很高的，因为myisam存储引擎的表的总行数会被mysql存储在磁盘上，查询不需要计算.
 
-![image-20220309100133752](E:\JS\booknote\jpgBed\image-20220309100133752.png)
+![image-20220309100133752](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20220309100133752.png)
 
 对于innodb存储引擎的表mysql不会存储表的总记录行数(因为有MVCC机制，后面会讲)，查询count需要实时计算.
 
@@ -664,7 +664,7 @@ select * from A where exists (select 1 from B where B.id = A.id)
 
 如果只需要知道表总行数的估计值可以用如下sql查询，性能很高
 
-<img src="E:\JS\booknote\jpgBed\image-20220309100156129.png" alt="image-20220309100156129" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20220309100156129.png" alt="image-20220309100156129" style="zoom:80%;" />
 
 #### 3、将总数维护到Redis里
 

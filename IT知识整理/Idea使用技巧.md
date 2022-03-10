@@ -36,13 +36,13 @@ org.apache.jasper.JasperException: This absolute uri (http://java.sun.com/jsf/co
 解决方法：
  把 jstl jar 包下META_INF中的这几个文件复制一下，放到项目的WEB-INF目录下即可，如下图：
 
-![在这里插入图片描述](E:\JS\booknote\jpgBed\20190305001341196-16456774606742.png)
+![在这里插入图片描述](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20190305001341196-16456774606742.png)
 
 复制其中这几个，如图：
- ![在这里插入图片描述](E:\JS\booknote\jpgBed\20190305001433535.png)
+ ![在这里插入图片描述](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20190305001433535.png)
 
 放到项目的WEB-INF目录下：
- ![在这里插入图片描述](E:\JS\booknote\jpgBed\20190305001632820.png)
+ ![在这里插入图片描述](https://gitee.com/jstone001/booknote/raw/master/jpgBed/20190305001632820.png)
  再运行！解决！~~
 
 ## IDEA启动Tomcat报错 java.lang.ClassNotFoundException: org.apache.jsp.index_jsp

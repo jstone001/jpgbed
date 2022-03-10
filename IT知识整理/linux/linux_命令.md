@@ -370,7 +370,7 @@ from: https://www.cnblogs.com/M18-BlankBox/p/5326484.html
 
 那有什么方法既可以让A在‘取’或‘给’B的时候既能完成目标任务又不浪费那1s空闲等待时间去处理其他事务呢？我们知道产生这种结果主要是因为B跟不上A的节奏，但即使这样A也得必须等B处理完本次事务才能干其他活（单核cpu来说），除非你有三头六臂。那有小伙伴可能会问了，能不能在A和B之间加一层区域比如说ab，让ab既能跟上A的频率也会照顾B的感受，没错我们确实可以这样设计来磨合接口速率上的差异，你可以这样想象，在区域ab提供了两个交互接口一个是a接口另一个是b接口，a接口的速率接近A，b接口的速率最少等于B，然后我们把ab的a和A相连，ab的b和B相连，ab就像一座桥把A和B链接起来，并告知A和B通过他都能转发给对方，文件可以暂时存储，最终拓扑大概如下：
 
-![img](E:\JS\booknote\jpgBed\917695-20160327123829839-630260780.png)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/917695-20160327123829839-630260780.png)
 
 **示例**
 
@@ -382,7 +382,7 @@ from: https://www.cnblogs.com/M18-BlankBox/p/5326484.html
 
 看了上面这个例子，那我们现在看一下在计算机领域，在处理磁盘IO读写的时候，cpu，memory，disk基于这种模型给出的一个实例。我们先来一幅图：（我从别家当来的，我觉得，看N篇文档 不如瞄此一图）
 
-![img](E:\JS\booknote\jpgBed\webp.webp)
+![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/webp.webp)
 
 **示例**
 

@@ -88,9 +88,9 @@ http://blog.java1234.com/blog/articles/632.html
 
 主库把外界接收的SQL请求记录到自己的binlog日志中，从库的I/O thread去请求主库的binlog日志，并将binlog日志写到中继日志中，然后从库重做中继日志的SQL语句。主库通过I/O dump  thread给从库I/O thread传送binlog日志。
 
-![1095387-20181214172242259-1042240136.png](E:\JS\booknote\jpgBed\1582469390894064495.png)
+![1095387-20181214172242259-1042240136.png](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1582469390894064495.png)
 
-![image-20220216144012902](E:\JS\booknote\jpgBed\image-20220216144012902.png)
+![image-20220216144012902](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20220216144012902.png)
 
 <font color='red'>relay-log  中继日志</font>
 
@@ -203,7 +203,7 @@ FLUSH PRIVILEGES;
 SHOW MASTER STATUS	
 ```
 
-![image-20220217105412976](E:\JS\booknote\jpgBed\image-20220217105412976.png)
+![image-20220217105412976](https://gitee.com/jstone001/booknote/raw/master/jpgBed/image-20220217105412976.png)
 
 
 ### 从服务器配置
@@ -225,7 +225,7 @@ START SLAVE;
 SHOW SLAVE STATUS
 ```
 
-<img src="E:\JS\booknote\jpgBed\1582469659441010556.jpg" alt=20200223223128.jpg" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/1582469659441010556.jpg" alt=20200223223128.jpg" style="zoom:80%;" />
 
 
 
@@ -287,7 +287,7 @@ RESET MASTER;   #删除所有index file 中记录的所有binlog 文件，将日
 
 主服务器一旦有写入操作，从服务器通过读取binlog，来实现数据同步；Mycat也时时发送心跳包来检测mysql服务器是否可用；
 
-![QQ鎴浘20200228082945.jpg](E:\JS\booknote\jpgBed\1582898335926032087.jpg)
+![QQ鎴浘20200228082945.jpg](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1582898335926032087.jpg)
 
 ## 11、mycat读写分离核心配置详解
 
@@ -295,7 +295,7 @@ http://blog.java1234.com/blog/articles/639.html
 
 Mycat读写分离核心配置文件 schema.xml文件
 
-![QQ鎴浘20200228084538.jpg](E:\JS\booknote\jpgBed\1582898373160012021.jpg)
+![QQ鎴浘20200228084538.jpg](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1582898373160012021.jpg)
 
 一个逻辑库，对应多个逻辑表，每个逻辑表如上图，可以水平分片（我们后面会细讲），分成一个或者多个数据分片节点，每个数据分片节点对应一个dataHost（数据库主机），dataHost里可以通过writeHost和readHost配置写主机和读主机；
 
@@ -374,7 +374,7 @@ docker run -p 8066:8066 -it  -v /home/docker/mycat/conf/:/home/mycat/conf/ -v /h
 
 http://blog.java1234.com/blog/articles/642.html
 
-![20190807153826962.png](E:\JS\booknote\jpgBed\1583503146266003187.png)
+![20190807153826962.png](https://gitee.com/jstone001/booknote/raw/master/jpgBed/1583503146266003187.png)
 
 | 编号 | 角色    | IP地址     |
 | ---- | ------- | ---------- |
@@ -511,7 +511,7 @@ mycat官方就说明了，支持单库内任意Join，所以我们设计的时�
 - 公共表，比如数据字典表，系统属性表等，采用全局表；
 - 有些核心表，比如用户表，部门表，权限表等，业务模块偶尔用到的时候，可以通过API方式查询，无需划分到具体业务模块里去；
 
-<img src="E:\JS\booknote\jpgBed\1584958536984083176.png" alt="20200323181527.png" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/1584958536984083176.png" alt="20200323181527.png" style="zoom:80%;" />
 
 ### 22、mycat垂直分库案例实现
 

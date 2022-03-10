@@ -167,7 +167,7 @@ from: https://www.ithome.com/0/602/499.htm
 
 **・通过任务管理器查看**。如果开启了内存压缩，那么在任务管理器中，就会显示压缩内存的数据，这个还是很容易观察到的。
 
-<img src="E:\JS\booknote\jpgBed\1a47f3d9-1540-4071-bc1e-6fd30480d032.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:67%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/1a47f3d9-1540-4071-bc1e-6fd30480d032.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:67%;" />
 
 **・通过命令行查看**。使用系统管理员权限，打开 PowerShell，然后输入以下命令：
 
@@ -175,11 +175,11 @@ from: https://www.ithome.com/0/602/499.htm
 Get-MMAgent
 ```
 
-<img src="E:\JS\booknote\jpgBed\31032e87-52bb-4c43-9e07-70f04aeae57a.jpg" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/31032e87-52bb-4c43-9e07-70f04aeae57a.jpg" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
 
 按下回车键运行，如果看到“MemoryCompression”这一项是“True”，那么说明内存压缩已经开启。
 
-<img src="E:\JS\booknote\jpgBed\27f83813-f75d-4ad0-b40c-3beaa273fbba.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/27f83813-f75d-4ad0-b40c-3beaa273fbba.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
 
 **如何关闭内存压缩？**
 
@@ -189,7 +189,7 @@ Get-MMAgent
 Disable-MMAgent -mc
 ```
 
-<img src="E:\JS\booknote\jpgBed\1a5ef464-836e-4a2a-9fc3-7e3a842926df.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/1a5ef464-836e-4a2a-9fc3-7e3a842926df.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
 
 按下回车键运行，随后重启系统，内存压缩就关闭了。
 
@@ -199,7 +199,7 @@ Disable-MMAgent -mc
 Enable-MMAgent -mc
 ```
 
-<img src="E:\JS\booknote\jpgBed\57743056-711d-487c-b54f-54bd325085f7.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
+<img src="https://gitee.com/jstone001/booknote/raw/master/jpgBed/57743056-711d-487c-b54f-54bd325085f7.png" alt="Win11内存压缩 关闭内存压缩" style="zoom:80%;" />
 
 重启系统后，内存压缩就重新开启了。
 

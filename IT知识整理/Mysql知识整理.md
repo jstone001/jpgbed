@@ -1,4 +1,4 @@
-## 修改主键自增值
+# 修改主键自增值
 
 ```sql
 SELECT AUTO_INCREMENT  FROM INFORMATION_SCHEMA.`TABLES` WHERE table_name='tb_episode';		#查一下当前值
@@ -7,6 +7,21 @@ ALTER TABLE tb_episode AUTO_INCREMENT= 249612;			#修改下一个值
 
 SELECT AUTO_INCREMENT  FROM INFORMATION_SCHEMA.`TABLES` WHERE table_name='tb_episode';	#查询自增值
 ```
+
+# 新增只读用户
+
+```sql
+GRANT SElECT ON *.* TO 'username'@'%' IDENTIFIED BY "password";  # 若要限制仅指定IP可以使用此用户访问Mysql，将%改为具IP即可。
+flush privileges;
+```
+
+```sql
+CREATE USER 'readuser'@'%' IDENTIFIED BY 'secret';
+GRANT SELECT ON mydb.* TO 'readuser'@'%';
+flush privileges;
+```
+
+
 
 # 报错
 

@@ -382,7 +382,7 @@ from: https://www.cnblogs.com/M18-BlankBox/p/5326484.html
 
 看了上面这个例子，那我们现在看一下在计算机领域，在处理磁盘IO读写的时候，cpu，memory，disk基于这种模型给出的一个实例。我们先来一幅图：（我从别家当来的，我觉得，看N篇文档 不如瞄此一图）
 
-![img](https://gitee.com/jstone001/booknote/raw/master/jpgBed/webp.webp)
+![img](E:\JS\booknote\jpgBed\091523391861765.jpg)
 
 **示例**
 

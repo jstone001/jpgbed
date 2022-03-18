@@ -656,9 +656,332 @@ http://blog.java1234.com/blog/articles/651.html
 
 ### 25、mycat水平分表原则
 
+http://blog.java1234.com/blog/articles/653.html
+
+**mycat水平分表原则：**
+
+-   具体怎么个水平分表法，我们最终目标是要根据具体业务把单表的请求负载均衡的分散到多库中。
+-   不能出现大量的请求集中1，2个分表；
+-   比如订单表，我们划分的时候，不能根据id来划分，因为平时请求查询的时候一般是根据某个用户id去查询用户的订单信息的。
+-   所以我们这个订单表的划分原则是根据用户id 取模划分，这样的话，请求能均衡的分布到多个分表，以及 查询的时候 大部分情况都是一个分表查询，效率会高一些；
+
+ **MYCAT常用的分片规则如下：**
+
+- 分片枚举：  sharding-by-intfile
+
+- 主键范围约定： auto-sharding-long  此分片适用于，提前规划好分片字段某个范围属于哪个分片
+
+- 一致性hash： sharding-by-murmur
+
+- 字符串hash解析： sharding-by-stringhash
+
+- 按日期（天）分片：sharding-by-date
+
+- 按单月小时拆分： sharding-by-hour
+
+- 自然月分片： sharding-by-month
+
+- 取模： 　mod-long 此规则为对分片字段求摸运算
+
+- 取模范围约束： sharding-by-pattern 此种规则是取模运算与范围约束的结合，主要为了后续数据迁移做准备，即可以自主决定取模后数据的节点分布
+
 ### 26、mycat水平分表取模分片实现
+
+http://blog.java1234.com/blog/articles/654.html
+
+schema.xml
+
+```xml
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+   <schema name="TESTDB" checkSQLschema="true" sqlMaxLimit="100">
+     <table name="t_user" primaryKey="id" dataNode="dn1" />
+     <table name="t_order" primaryKey="id" dataNode="dn2,dn3" rule="order-rule"/>
+     <!--<table name="t_product" primaryKey="id" dataNode="dn2" />-->
+  </schema>
+    
+  <dataNode name="dn1" dataHost="host1" database="db_mall_user" />
+  <dataNode name="dn2" dataHost="host2" database="db_mall_order" />
+  <dataNode name="dn3" dataHost="host3" database="db_mall_order" />
+    
+  <dataHost name="host1" maxCon="1000" minCon="10" balance="3"
+         writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+     <heartbeat>select user()</heartbeat>
+     <!-- can have multi write hosts -->
+     <writeHost host="hostM1" url="172.20.0.7:3306" user="root"
+             password="123456">
+     </writeHost>
+  </dataHost>
+    
+  <dataHost name="host2" maxCon="1000" minCon="10" balance="3"
+         writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+     <heartbeat>select user()</heartbeat>
+     <!-- can have multi write hosts -->
+     <writeHost host="hostM2" url="172.20.0.8:3306" user="root"
+             password="123456">
+     </writeHost>
+  </dataHost>
+    
+  <dataHost name="host3" maxCon="1000" minCon="10" balance="3"
+         writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+     <heartbeat>select user()</heartbeat>
+     <!-- can have multi write hosts -->
+     <writeHost host="hostM3" url="172.20.0.9:3306" user="root"
+             password="123456">
+     </writeHost>
+  </dataHost>
+</mycat:schema>
+```
+
+```sh
+这里：
+<table name="t_order" primaryKey="id" dataNode="dn2,dn3" rule="order-rule"/>
+我们搞了两个数据点dn2和dn3 作为t_order表的两个分片 规则是 order-rule
+```
+
+rule.xml
+
+```xml
+<tableRule name="order-rule">
+       <rule>
+          <columns>uId</columns>
+          <algorithm>mod-long</algorithm>
+       </rule>
+  </tableRule>
+
+<!-- 加一个配置这里 columns是规则字段 根据这个字段来实现分表；
+algorithm是分表算法 我们用 mod-long 取模分片； -->
+
+
+<!-- 第122行 下方function有具体定义：-->
+<function name="mod-long" class="io.mycat.route.function.PartitionByMod">
+     <!-- how many data nodes -->
+     <property name="count">2</property>
+  </function>
+```
+
+```sh
+# 我们启动三个mysql
+docker run -p 3306:3306 --name db_mall_user   -d  -v /home/mysql7/mysql.conf.d/:/etc/mysql/mysql.conf.d/ -v /home/mysql7/log/:/var/log --net extnetwork --ip 172.20.0.7  -e MYSQL_ROOT_PASSWORD=123456  镜像ID
+
+docker run -p 3307:3306 --name db_mall_order   -d -v  /home/mysql8/mysql.conf.d/:/etc/mysql/mysql.conf.d/ -v /home/mysql8/log/:/var/log --net extnetwork --ip 172.20.0.8 -e MYSQL_ROOT_PASSWORD=123456  镜像ID
+
+docker run -p 3308:3306 --name db_mall_order2   -d -v  /home/mysql9/mysql.conf.d/:/etc/mysql/mysql.conf.d/ -v /home/mysql9/log/:/var/log --net extnetwork --ip 172.20.0.9 -e MYSQL_ROOT_PASSWORD=123456  镜像ID
+
+# 再启动mycat
+docker run -p 8066:8066 -it  -v /home/docker/mycat2/conf/:/home/mycat/conf/ -v /home/docker/mycat2/logs/:/home/mycat/logs/ --net extnetwork --ip 172.20.0.6 91a24c31abc1
+```
+
+
+
+```sql
+# mycat执行：
+CREATE TABLE `T_USER` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `userName` varchar(20) DEFAULT NULL COMMENT '用户名',
+  `password` varchar(20) DEFAULT NULL COMMENT '密码',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+ 
+
+CREATE TABLE `T_ORDER` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `pId` int(11) DEFAULT NULL COMMENT '商品编号',
+  `num` int(11) DEFAULT NULL COMMENT '购买数量',
+  `uId` int(11) DEFAULT NULL COMMENT '用户编号',
+  `orderDate` datetime DEFAULT NULL COMMENT '下单时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+ 
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values (1,1,1,1,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values (2,1,1,2,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values (3,1,1,2,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values (4,1,1,4,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values (5,1,1,5,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values (6,1,1,5,'2020-03-16 22:10:25');
+```
+
+
+
+
+
+![Q20200327223004.jpg](E:\JS\booknote\jpgBed\1585834011692080116.jpg)
+
+
+
+```sql
+SELECT * FROM T_ORDER	# 结果是mycat拼接后的结果
+```
+
+![20200327223047.jpg](E:\JS\booknote\jpgBed\1585834035692028245.jpg)
+
+## 全局自增ID
+
+### 27、全局自增ID
+
+http://blog.java1234.com/blog/articles/655.html
+
+介绍：
+
+- 水平分表后，会产生一个问题，就是自增ID问题；
+- 我们以前单表的时候，直接 mysql自增很好搞。单是分表后，就不行了，会有冲突；
+- 所以解决方案可以不用自增，在应用层搞唯一id，
+- 比如<font color='red'>redis单线程incr 生成自增id；</font>
+- 或者 uuid，基于雪花算法的 UidGenerator等；
+
+我们这里用mycat提供的支持来生成全局自增ID；
+
+#### 第1步：执行dbseq.sql
+
+mycat都给我们提供了，在mysql的conf目录下，dbseq.sql文件；
+
+我们在第一个分片节点dn2 的db_mall_order数据库里导入sql脚本执行即可；
+
+![20200406224546.jpg](E:\JS\booknote\jpgBed\1586185220395085797.jpg)
+
+#### 第2步：修改sequence_db_conf.properties文件
+
+![QQ20200406224750.jpg](E:\JS\booknote\jpgBed\1586185238723049626.jpg)
+
+#### 第3步：修改server.xml配置文件的 sequnceHandlerType配置；改成1
+
+
+
+![QQ20200406225509.jpg](E:\JS\booknote\jpgBed\1586185259911091586.jpg)
+
+sequnceHandlerType配置
+
+- 0 本地方式
+- 1 数据库方式
+- 2 时间戳方式
+
+#### 第4步：重启mycat
+
+#### 第5步：测试
+
+```sql
+# 测试；
+DELETE FROM T_ORDER
+
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values ('next value for MYCATSEQ_GLOBAL',1,1,1,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values ('next value for MYCATSEQ_GLOBAL',1,1,2,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values ('next value for MYCATSEQ_GLOBAL',1,1,2,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values ('next value for MYCATSEQ_GLOBAL',1,1,4,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values ('next value for MYCATSEQ_GLOBAL',1,1,5,'2020-03-16 22:10:25');
+insert  into `T_ORDER`(`id`,`pId`,`num`,`uId`,`orderDate`) values ('next value for MYCATSEQ_GLOBAL',1,1,5,'2020-03-16 22:10:25');
+
+SELECT * FROM T_ORDER
+```
+
+![QQ鎴浘20200406225714.jpg](E:\JS\booknote\jpgBed\1586185290958016098.jpg)
 
 ## 全局表
 
+### 28、mycat全局表
+
+http://blog.java1234.com/blog/articles/656.html
+
+前面讲过，当两个或者多个表有join关联时候，跨分片查询会有瓶颈问题，我们其中有一个解决方案是通过全局表，
+
+全局表的话，每个分片节点都有这个表，并且mycat会实时同步数据；
+
+适合数据量不大，不频繁变动数据的表，比如 数据字典表，或者一些类别表；
+
+schema.xml
+
+```xml
+<!-- 指定  type="global"  即可； -->
+<table name="T_DATADIC" primaryKey="ID" dataNode="dn1,dn2,dn3" type="global" />
+
+```
+
+```sql
+ CREATE TABLE `T_DATADIC` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `name` varchar(20) DEFAULT NULL COMMENT '数据字典名称',
+  `value` varchar(20) DEFAULT NULL COMMENT '数据字典值',
+  `remark` varchar(100) DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+
+insert  into `T_DATADIC`(`id`,`name`,`value`,`remark`) values (1,'性别','男',NULL),(2,'性别','女',NULL),(3,'性别','男变女',NULL),(4,'性别','女变男',NULL),(5,'政治面貌','共产党',NULL),(6,'政治面貌','共青团员',NULL),(7,'政治面貌','无党派人士',NULL);
  
+```
+
+
+
+#  Mycat-web
+
+## 29、mycat-web介绍
+
+http://blog.java1234.com/blog/articles/657.html
+
+MyCAT-WEB就是基于mycat的一个性能监控工具，方便大家更有效的使用mycat管理mycat监控mycat，让大家的mycat工作更加高效，是运维人员的好工具；
+
+ mycat-web运行需要引入ZooKeeper作为配置中心；
+
+## 30、zookeeper在centos上安装
+
+http://blog.java1234.com/blog/articles/658.html
+
+我们先去下载zookeeper ，找一个镜像下载即可；
+
+https://mirror.bit.edu.cn/apache/zookeeper/
+
+```sh
+ tar -zxvf zookeeper-3.4.14.tar.gz  #解压；
+
+#修改下 配置文件名；
+进入conf 找到zoo_sample.cfg 改成zoo.cfg
+
+# 进入bin 启动zkServer
+./zkServer.sh start
+
+# 查看是否启动成功；
+ps -ef|grep zookeeper
+```
+
+![20200419112023.jpg](E:\JS\booknote\jpgBed\1587312888334074377.jpg)
+
+
+
+## 31、mycat-web安装
+
+http://blog.java1234.com/blog/articles/659.html
+
+http://www.mycat.io/官网 下载mycat-web
+
+```sh
+ tar -zxvf Mycat-web-1.0-SNAPSHOT-20170102153329-linux.tar.gz
+ 
+  ./start.sh&
+
+# 后台启动；
+netstat -ant|grep 8082 查看端口；
+```
+
+http://192.168.1.106:8082/mycat/
+
+<img src="E:\JS\booknote\jpgBed\1587313036693004944.jpg" alt="QQ20200419204848.jpg" style="zoom:80%;" />
+
+
+
+## 32、mycat-web使用
+
+http://blog.java1234.com/blog/articles/660.html
+
+![QQ20200420000708.jpg](E:\JS\booknote\jpgBed\1587313114881086984.jpg)
+
+![20200420000658.jpg](E:\JS\booknote\jpgBed\1587313131365017786.jpg)
+
+```sh
+docker run --name mycat1 -p 8066:8066 -p 9066:9066 -it  -v /home/mycat2/conf/:/home/mycat/conf/ -v /home/mycat2/logs/:/home/mycat/logs/ --net extnetwork --ip 172.20.0.6 fdc0228059ee
+```
+
+<img src="E:\JS\booknote\jpgBed\1587313152412068346.jpg" alt="QQ20200420001035.jpg" style="zoom:80%;" />
+
+
 

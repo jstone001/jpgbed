@@ -490,15 +490,16 @@ SHOW SLAVE STATUS 测试；
 
 ### 21、mycat垂直分库最佳实践
 
-垂直分库如何根据表来分库呢？
+- 垂直分库如何根据表来分库呢？
 
-这里一种情况，比如订单表，商品表。 订单表的一个商品外检关联商品表主键；多对一的关系；
+- 这里一种情况，比如订单表，商品表。 订单表的一个商品外检关联商品表主键；多对一的关系；
 
-如果我们把 订单表 商品表拆分到两个数据库中，那这里就会有一个很头疼的问题，这两个表Join关联查询的话，如何来搞呢。
+- 如果我们把 订单表 商品表拆分到两个数据库中，那这里就会有一个很头疼的问题，这两个表Join关联查询的话，如何来搞呢。
+
 
 **这里传统的话，有四种解决方案：**
 
-- mycat新版本，提供了跨库2表join，但是假如数据量大的话，会有性能问题；
+- mycat新版本，<font color='red'>提供了跨库2表join，但是假如数据量大的话，会有性能问题；</font>
 - 全局表，后面会讲到，每个数据库都有搞个商品表，有点浪费资源；
 - 不join查询，业务代码里通过API方式另外再查询，看具情况使用；
 - 采用冗余数据方式，订单表里面把商品id，商品名称，价格等数据库也搞进自己的表里，这样就不用join查询，也是有点浪费资源；
@@ -576,7 +577,6 @@ insert  into `t_datadic`(`id`,`name`,`value`,`remark`) values (1,'性别','男',
 
 ```sql
 #启动两个mysql
-
  docker run -p 3306:3306 --name db_mall_user   -d  -v /home/mysql7/mysql.conf.d/:/etc/mysql/mysql.conf.d/ -v /home/mysql7/log/:/var/log --net extnetwork --ip 172.20.0.7  -e MYSQL_ROOT_PASSWORD=123456  镜像ID
 
 docker run -p 3307:3306 --name db_mall_order   -d -v  /home/mysql8/mysql.conf.d/:/etc/mysql/mysql.conf.d/ -v /home/mysql8/log/:/var/log --net extnetwork --ip 172.20.0.8 -e MYSQL_ROOT_PASSWORD=123456  镜像ID
@@ -589,9 +589,9 @@ docker run -p 3307:3306 --name db_mall_order   -d -v  /home/mysql8/mysql.conf.d/
 <!DOCTYPE mycat:schema SYSTEM "schema.dtd">
 <mycat:schema xmlns:mycat="http://io.mycat/">
   <schema name="TESTDB" checkSQLschema="true" sqlMaxLimit="100">
-     <table name="t_user" primaryKey="id" dataNode="dn1" />
-     <table name="t_order" primaryKey="id" dataNode="dn2" />
-     <table name="t_product" primaryKey="id" dataNode="dn2" />
+     <table name="T_USER" primaryKey="id" dataNode="dn1" />
+     <table name="T_ORDER" primaryKey="id" dataNode="dn2" />
+     <table name="T_PRODUCT" primaryKey="id" dataNode="dn2" />
   </schema>
   <dataNode name="dn1" dataHost="host1" database="db_mall_user" />
   <dataNode name="dn2" dataHost="host2" database="db_mall_order" />
@@ -619,7 +619,7 @@ docker run -p 3307:3306 --name db_mall_order   -d -v  /home/mysql8/mysql.conf.d/
 ```sh
 # 启动mycat
 
-docker run -p 8066:8066 -it  -v /home/docker/mycat1/conf/:/home/mycat/conf/ -v /home/docker/mycat1/logs/:/home/mycat/logs/ --net extnetwork --ip 172.20.0.9 镜像ID
+docker run --name mycat1 -p 8066:8066 -it  -v /home/docker/mycat1/conf/:/home/mycat/conf/ -v /home/docker/mycat1/logs/:/home/mycat/logs/ --net extnetwork --ip 172.20.0.9 镜像ID
 ```
 
 ```sql
@@ -696,9 +696,9 @@ schema.xml
 <!DOCTYPE mycat:schema SYSTEM "schema.dtd">
 <mycat:schema xmlns:mycat="http://io.mycat/">
    <schema name="TESTDB" checkSQLschema="true" sqlMaxLimit="100">
-     <table name="t_user" primaryKey="id" dataNode="dn1" />
-     <table name="t_order" primaryKey="id" dataNode="dn2,dn3" rule="order-rule"/>
-     <!--<table name="t_product" primaryKey="id" dataNode="dn2" />-->
+     <table name="T_USER" primaryKey="id" dataNode="dn1" />
+     <table name="T_ORDER" primaryKey="id" dataNode="dn2,dn3" rule="order-rule"/>
+     <!--<table name="T_PRODUCT" primaryKey="id" dataNode="dn2" />-->
   </schema>
     
   <dataNode name="dn1" dataHost="host1" database="db_mall_user" />
@@ -770,7 +770,7 @@ docker run -p 3307:3306 --name db_mall_order   -d -v  /home/mysql8/mysql.conf.d/
 docker run -p 3308:3306 --name db_mall_order2   -d -v  /home/mysql9/mysql.conf.d/:/etc/mysql/mysql.conf.d/ -v /home/mysql9/log/:/var/log --net extnetwork --ip 172.20.0.9 -e MYSQL_ROOT_PASSWORD=123456  镜像ID
 
 # 再启动mycat
-docker run -p 8066:8066 -it  -v /home/docker/mycat2/conf/:/home/mycat/conf/ -v /home/docker/mycat2/logs/:/home/mycat/logs/ --net extnetwork --ip 172.20.0.6 91a24c31abc1
+docker run --name mycat2 -p 8066:8066 -it  -v /home/mycat2/conf/:/home/mycat/conf/ -v /home/mycat2/logs/:/home/mycat/logs/ --net extnetwork --ip 172.20.0.6 91a24c31abc1
 ```
 
 
@@ -783,6 +783,8 @@ CREATE TABLE `T_USER` (
   `password` varchar(20) DEFAULT NULL COMMENT '密码',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+insert  into `T_USER`(`id`,`userName`,`password`) values (1,'java1234','123456'),(2,'jack','123'),(3,'marry','456');
  
 
 CREATE TABLE `T_ORDER` (

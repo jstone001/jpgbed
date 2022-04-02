@@ -486,6 +486,26 @@ from: http://www.pc0359.cn/article/win10/69109.html
 
 以上就是小编解决win10中Compatibility Telemetry占用CPU使用率的方法，在电脑出现卡顿的时候大家一定不要觉得是自己正在使用的软件造成的，很多时候都是由于电脑中的某些程序自动运行并占用大量使用率产生的！需要的朋友赶紧试试吧！
 
+## win10 锁屏聚焦不换图片
+
+from：https://jingyan.baidu.com/article/ed2a5d1f84b28409f6be17c6.html
+
+将背景这个地方改成不是window 聚焦
+
+![windows聚焦 锁屏壁纸不切换](E:\JS\booknote\jpgBed\5a5a00def4dca0396beadf5858d96975f3c40d49.jpg)
+
+然后在我的电脑进入以下文件夹：C:\Users\<username>\AppData\Local\Packages\Microsoft.Windows.ContentDeliveryManager_<characters>\Settings。其中<username> 指的是你电脑当前用户名，<characters>是一个随机的字符，每台电脑不一样，这一步需要打开文件夹选项里面的显示隐藏文件夹
+
+![windows聚焦 锁屏壁纸不切换](E:\JS\booknote\jpgBed\edd84743040148fe9fb74cdf8fd149299b880249.jpg)
+
+如果里面有 roaming.lock 和 settigns.dat 文件，删除他们
+
+![windows聚焦 锁屏壁纸不切换](E:\JS\booknote\jpgBed\edafb3bcbe2f4770caedce6e6f3b3b8603217949.jpg)
+
+再找到锁屏设置界面，把背景改回 windows 聚焦，然后注销电脑或者重启，这样又可以有更换的windows 聚焦图片啦
+
+
+
 ## Win10此电脑视频、图片等7个文件夹怎么去除
 
 使用Windows10电脑的时候，很多朋友发现，我们打开此电脑以后，在此电脑中默认是显示6个文件夹的，如“视频、图片、文档、下载、音乐、桌面”那么我们怎么快速的去除这6个文件夹，让他们不显示出来呢，当然我们需要的时候怎么让这六个文件夹再次快速显示出来呢，基本的方法是操作注册表，但是很多朋友不知道怎么操作，有没有更简单的方法呢，其实我们可以创作一个注册表文件，然后直接快速的操作，希望帮助朋友们参考。

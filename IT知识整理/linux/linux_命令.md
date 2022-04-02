@@ -179,6 +179,33 @@ ps -ef | grep xxx | grep -v root | awk '{print $2}' | xargs kill -9   # grep -v�
 from: https://blog.csdn.net/weixin_36453829/article/details/116614988
 ```
 
+#### 查看占cpu, 内存最大的10个应用
+
+```sh
+# linux下获取占用CPU资源最多的10个进程，可以使用如下命令组合：
+ps aux|head -1;ps aux|grep -v PID|sort -rn -k +3|head  # 或者top （然后按下M，注意这里是大写）
+
+
+#linux下获取占用内存资源最多的10个进程，可以使用如下命令组合：	
+ps aux|head -1;ps aux|grep -v PID|sort -rn -k +4|head   # 或者top （然后按下P，注意这里是大写）
+
+
+补充:内容解释
+
+PID：进程的ID
+USER：进程所有者
+PR：进程的优先级别，越小越优先被执行
+NInice：值
+VIRT：进程占用的虚拟内存
+RES：进程占用的物理内存
+SHR：进程使用的共享内存
+S：进程的状态。S表示休眠，R表示正在运行，Z表示僵死状态，N表示该进程优先值为负数
+%CPU：进程占用CPU的使用率
+%MEM：进程使用的物理内存和总内存的百分比
+TIME+：该进程启动后占用的总的CPU时间，即占用CPU使用时间的累加值。
+COMMAND：进程启动命令名称
+```
+
 
 
 

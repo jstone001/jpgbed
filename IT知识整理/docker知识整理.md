@@ -122,7 +122,7 @@ docker tag 0e5574283393 myregistryhost:5000/fedora/httpd:version1.0
 
 from: https://www.cnblogs.com/zhouzhifei/p/11557118.html
 
-# Docker内bash 没有vim
+# Docker内bash 没有vim, ping 
 
 ```sh
 # 进入docker容器
@@ -133,6 +133,9 @@ apt-get update
 #如果下载过程中卡在[waiting for headers] 删除/var/cache/apt/archives/下的所有文件 
 #安装vim 
 apt-get install vim
+
+#安装 Ping
+apt install iputils-ping
 ```
 
 

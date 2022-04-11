@@ -118,6 +118,18 @@ du -ah --max-depth=1   # 该目录下第1级文件到夹的大小
 
 ## rmdir
 
+# 语言
+
+## locale
+
+```sh
+locale 		# 显示目前所支持的语系
+LANG=zh_CN.UTF-8		# 只负责输出的格式
+export LC_ALL=en_US.utf8 # 所有的
+```
+
+
+
 # 进程命令
 
 ## lsof

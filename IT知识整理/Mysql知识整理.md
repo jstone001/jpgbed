@@ -1,3 +1,247 @@
+# Mysql安装
+
+## mysql的win安装 
+
+from: https://www.cnblogs.com/zhangkanghui/p/9613844.html
+
+官网下载win的zip包
+
+**配置环境变量**：
+
+```bat
+%MySql_HOME%
+```
+
+**生成data文件**
+
+```shell
+# 以管理员身份运行cmd
+mysqld --initialize-insecure --user=mysql  在E:\mysql\mysql-8.0.12-winx64目录下生成data目录
+
+mysqld -install  # 安装mysql
+net start MySQL  # 启动服务
+```
+
+**登录MySQL**
+
+```sh
+E:\python\mysql\mysql-8.0.12-winx64\bin>mysql -u root -p
+
+```
+
+**查询用户密码**
+
+```sql
+mysql> select host,user,authentication_string from mysql.user;
+mysql> use mysql;
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+mysql> flush privileges;  
+mysql> quit;
+
+```
+
+**关于修改密码再次登录出现ERROR的解决方案：**
+
+```sh
+net stop mysql
+打开mysql的安装目录，找到data文件夹，将其删除！
+回到cmd命令窗口，输入mysqld -remove
+```
+
+```sql
+接下来按照上面教程，从第二步生成data文件开始执行，一定要注意修改密码那里：
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+```
+
+
+
+## mysql的Linux安装
+
+```sh
+https://www.cnblogs.com/zk-blog/p/11097514.html
+
+一、清理老的mysql
+（1）卸载已有的mysql
+查找以前是否装有mysql命令：
+1      rpm -qa|grep -i mysql
+         停止mysql服务，卸载之前安装的mysql
+1 rpm -ev 包名
+如果卸载过程中报依赖错误，直接在卸载命名后面加参数 --nodeps
+1 rpm -ev 包名 --nodeps  
+（2）查找之前老版本mysql的文件并删除老版本mysql的文件 
+1 find / -name mysql
+2 # 出来一堆列表
+3 # 一个一个删除就ok
+二、安装前的准备
+（1）安装mysql之前需要确保系统中有libaio依赖
+1 yum search libaio 
+2 yum install libaio 
+（2）下载安装包（tar.gz的包，非rpm和yum） 
+1 cd /usr/
+2 mkdir database
+3 cd database
+4 wget https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.22-el7-x86_64.tar.gz
+（3）解压
+1 tar -zxvf mysql-5.7.22-el7-x86_64.tar.gz 
+2 mv mysql-5.7.22-el7-x86_64 mysql5.7 #重命名为mysql5.7 
+三、安装
+（1）添加用户和组
+1 #添加用户组
+2 groupadd mysql
+3 #添加用户mysql 到用户组mysql(使用-r参数表示mysql用户是一个系统用户，不能登录)
+4 useradd -r -g mysql mysql
+5 #添加完用下面命令测试,能看到mysql用户的信息
+6 id mysql
+（2）手动创建MySQL data目录
+1 cd /usr/database/mysql5.7/
+2 mkdir data
+（3）目录权限设置
+1 将mysql及其下所有的目录所有者和组均设为mysql
+2 chown -R mysql:mysql /usr/database/mysql5.7/
+3 查看是否设置成功，执行下面命令，可以看到文件的所有者和组都变成了mysql
+4 cd /usr/database/
+5 ll
+6 结果中出现：drwxr-xr-x 10 mysql mysql      4096 Jul  3 13:57 mysql5.7
+ 
+（4）配置my.cnf文件
+此文件非常重要，初始化之前要把此文件放到 /etc 目录下 
+1 rm -rf /etc/my.cnf
+2 vim /etc/my.cnf
+3 #此文件内容如下(路径根据自己的实际情况):
+4 [client]
+5 port = 3306
+6 socket = /tmp/mysql.sock
+7
+8 [mysqld]
+9 init-connect='SET NAMES utf8'
+10 basedir=/usr/database/mysql5.7       #根据自己的安装目录填写 
+11 datadir=/usr/database/mysql5.7/data #根据自己的mysql数据目录填写
+12 socket=/tmp/mysql.sock
+13 max_connections=200 # 允许最大连接数
+14 character-set-server=utf8 # 服务端使用的字符集默认为8比特编码的latin1字符集
+15 default-storage-engine=INNODB # 创建新表时将使用的默认存储引擎
+（5）初始化mysql
+1 /usr/database/mysql5.7/bin/mysqld --initialize-insecure --user=mysql  --basedir=/usr/database/mysql5.7 --datadir=/usr/database/mysql5.7/data
+2 #注意：mysqld --initialize-insecure初始化后的mysql是没有密码的
+3 #重新修改下各个目录的权限
+4 chown -R root:root /usr/database/mysql5.7/ #把安装目录的目录的权限所有者改为root
+5 chown -R mysql:mysql /usr/database/mysql5.7/data/ #把data目录的权限所有者改为mysql
+（6）启动mysql
+1 /usr/database/mysql5.7/bin/mysqld_safe --user=mysql &
+（7）修改密码
+1 cd /usr/database/mysql5.7/bin/
+2 ./mysql -u root -p # 默认没有密码,直接敲回车就可以
+3 use mysql;
+4 update user set authentication_string=password('这里填你设置的密码') where user='root';
+5 flush privileges;
+6 exit;
+（8）测试登录
+1 cd /usr/database/mysql5.7/bin/
+2 ./mysql mysql -u root -p
+3 输入密码后，应该就连接上了
+4 show databases;
+5 exit; #退出
+（9）copy启动脚本并将其添加到服务且设置为开机启动
+1 #mysql启动脚本为：/usr/database/mysql5.7/support-files/mysql.server
+2 cp /usr/database/mysql5.7/support-files/mysql.server /etc/init.d/mysql
+3 #添加服务
+4 chkconfig --add mysql   
+5 # 显示服务列表
+6 chkconfig --list    
+7 # 开机启动
+8 chkconfig --level 345 mysql on
+9 # 测试添加的服务是否能用
+10 service mysql status #查看状态
+11 service mysql start  #启动mysql服务
+12 service mysql stop   #停止mysql服务
+四、设置外网可以访问
+1 在mysql的bin目录下执行：mysql -uroot -p密码 登陆到数据：
+2 执行：use mysql;
+3 执行：select host,user from user;
+4 可以看到user为root，host为localhost的话，说明mysql只允许本机连接，那么外网，本地软件客户端就无法连接了。
+5 调整方法：
+6 执行：update user set host='%' where user ='root';
+7 执行刷新:flush privileges;
+8 OK!现在可以访问了！
+9 如果还访问不了，那可能是防火墙问题,修改下防火墙就ok，修改方法这里就不提了，网上很多资料
+五、相关说明
+（1）mysql服务的启动和停止命令
+1 service mysql status #查看状态
+2 service mysql start  #启动mysql服务
+3 service mysql stop   #停止mysql服务 
+（2）怎么在Linux中登录mysql
+1 #进入mysql安装目录的bin目录，然后输入以下命令
+2 ./mysql -u root -p
+3 #然后输入密码就登录成功
+4 exit; #退出mysql
+```
+
+## 安装mysql5.7.37
+
+```sh
+# 卸载原有的Mysql
+rpm -qa | grep -i mysql  # 搜索已安装的mysql (系统中老的mysql)
+rpm -e mysql-libs-5.1.71-1.e16.x86_64 --nodeps # 卸载老的mysql  nodeps去除所有的依赖
+
+# 安装依赖包
+yum -y install libaio.so.1 libgcc_s.so.1 libstdc++.so.6 libncurses.so.5  --setopt=protected_multilib=false   # 安装依赖包
+yum update libstdc++-4.4.7-4.el6.x86_64
+
+# # 安装
+rpm -ivh mysql-community-common-5.7.37-1.el7.x86_64.rpm
+rpm -ivh mysql-community-libs-5.7.37-1.el7.x86_64.rpm
+rpm -ivh mysql-community-client-5.7.37-1.el7.x86_64.rpm
+rpm -ivh mysql-community-server-5.7.37-1.el7.x86_64.rpm
+
+# 修改/etc/my.cnf
+[mysqld] 
+skip-grant-tables  #  不用密码登录
+
+
+# 启动mysql
+systemctl start mysqld
+
+# 进入mysql
+mysql -u root -p
+
+# 修改密码
+update mysql.user set authentication_string=password('newpassword') where user='root';
+flush privileges;
+
+# 修改密码
+set password='123456';
+set global validate_password_policy=LOW;
+set global validate_password_length=6;
+grant all privileges  on *.* to root@'%' identified by "123456";
+FLUSH PRIVILEGES;
+```
+
+
+
+## 安装MariaDB
+
+```sh
+rpm -ivh xxxx.rpm
+yum install -y mariadb mariadb-server
+systemctl start mariadb
+mysql -uroot -p
+update user set password=password('123') where user='root';
+flush privileges;
+
+#sqlyog远程链接
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' IDENTIFIED BY 'password' WITH GRANT OPTION;   # %:表示从任何主机连接到mysql服务器
+flush privileges;
+```
+# MySql的登录
+
+```sh
+mysql -uroot -P 8066 -h 127.0.0.1 -p -A   # -P必须和-h 一起使用， 有时change 数据库时会卡死，此时要用-A
+```
+
+
+
 # 修改主键自增值
 
 ```sql
@@ -224,201 +468,6 @@ host已经有了%这个值，所以直接运行命令：
 
 ```sh
 mysqldump -uroot -p123 --databases db_txt > e:\mysql_backup\db_txt.sql
-```
-
-# Mysql安装
-
-## mysql的win安装 
-
-from: https://www.cnblogs.com/zhangkanghui/p/9613844.html
-
-官网下载win的zip包
-
-**配置环境变量**：
-
-```bat
-%MySql_HOME%
-```
-
-**生成data文件**
-
-```shell
-# 以管理员身份运行cmd
-mysqld --initialize-insecure --user=mysql  在E:\mysql\mysql-8.0.12-winx64目录下生成data目录
-
-mysqld -install  # 安装mysql
-net start MySQL  # 启动服务
-```
-
-**登录MySQL**
-
-```sh
-E:\python\mysql\mysql-8.0.12-winx64\bin>mysql -u root -p
-
-```
-
-**查询用户密码**
-
-```sql
-mysql> select host,user,authentication_string from mysql.user;
-mysql> use mysql;
-mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
-mysql> flush privileges;  
-mysql> quit;
-
-```
-
-**关于修改密码再次登录出现ERROR的解决方案：**
-
-```sh
-net stop mysql
-打开mysql的安装目录，找到data文件夹，将其删除！
-回到cmd命令窗口，输入mysqld -remove
-```
-
-```sql
-接下来按照上面教程，从第二步生成data文件开始执行，一定要注意修改密码那里：
-mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
-mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
-mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
-```
-
-
-
-## mysql的Linux安装
-
-```sh
-https://www.cnblogs.com/zk-blog/p/11097514.html
-
-一、清理老的mysql
-（1）卸载已有的mysql
-查找以前是否装有mysql命令：
-1      rpm -qa|grep -i mysql
-         停止mysql服务，卸载之前安装的mysql
-1 rpm -ev 包名
-如果卸载过程中报依赖错误，直接在卸载命名后面加参数 --nodeps
-1 rpm -ev 包名 --nodeps  
-（2）查找之前老版本mysql的文件并删除老版本mysql的文件 
-1 find / -name mysql
-2 # 出来一堆列表
-3 # 一个一个删除就ok
-二、安装前的准备
-（1）安装mysql之前需要确保系统中有libaio依赖
-1 yum search libaio 
-2 yum install libaio 
-（2）下载安装包（tar.gz的包，非rpm和yum） 
-1 cd /usr/
-2 mkdir database
-3 cd database
-4 wget https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.22-el7-x86_64.tar.gz
-（3）解压
-1 tar -zxvf mysql-5.7.22-el7-x86_64.tar.gz 
-2 mv mysql-5.7.22-el7-x86_64 mysql5.7 #重命名为mysql5.7 
-三、安装
-（1）添加用户和组
-1 #添加用户组
-2 groupadd mysql
-3 #添加用户mysql 到用户组mysql(使用-r参数表示mysql用户是一个系统用户，不能登录)
-4 useradd -r -g mysql mysql
-5 #添加完用下面命令测试,能看到mysql用户的信息
-6 id mysql
-（2）手动创建MySQL data目录
-1 cd /usr/database/mysql5.7/
-2 mkdir data
-（3）目录权限设置
-1 将mysql及其下所有的目录所有者和组均设为mysql
-2 chown -R mysql:mysql /usr/database/mysql5.7/
-3 查看是否设置成功，执行下面命令，可以看到文件的所有者和组都变成了mysql
-4 cd /usr/database/
-5 ll
-6 结果中出现：drwxr-xr-x 10 mysql mysql      4096 Jul  3 13:57 mysql5.7
- 
-（4）配置my.cnf文件
-此文件非常重要，初始化之前要把此文件放到 /etc 目录下 
-1 rm -rf /etc/my.cnf
-2 vim /etc/my.cnf
-3 #此文件内容如下(路径根据自己的实际情况):
-4 [client]
-5 port = 3306
-6 socket = /tmp/mysql.sock
-7
-8 [mysqld]
-9 init-connect='SET NAMES utf8'
-10 basedir=/usr/database/mysql5.7       #根据自己的安装目录填写 
-11 datadir=/usr/database/mysql5.7/data #根据自己的mysql数据目录填写
-12 socket=/tmp/mysql.sock
-13 max_connections=200 # 允许最大连接数
-14 character-set-server=utf8 # 服务端使用的字符集默认为8比特编码的latin1字符集
-15 default-storage-engine=INNODB # 创建新表时将使用的默认存储引擎
-（5）初始化mysql
-1 /usr/database/mysql5.7/bin/mysqld --initialize-insecure --user=mysql  --basedir=/usr/database/mysql5.7 --datadir=/usr/database/mysql5.7/data
-2 #注意：mysqld --initialize-insecure初始化后的mysql是没有密码的
-3 #重新修改下各个目录的权限
-4 chown -R root:root /usr/database/mysql5.7/ #把安装目录的目录的权限所有者改为root
-5 chown -R mysql:mysql /usr/database/mysql5.7/data/ #把data目录的权限所有者改为mysql
-（6）启动mysql
-1 /usr/database/mysql5.7/bin/mysqld_safe --user=mysql &
-（7）修改密码
-1 cd /usr/database/mysql5.7/bin/
-2 ./mysql -u root -p # 默认没有密码,直接敲回车就可以
-3 use mysql;
-4 update user set authentication_string=password('这里填你设置的密码') where user='root';
-5 flush privileges;
-6 exit;
-（8）测试登录
-1 cd /usr/database/mysql5.7/bin/
-2 ./mysql mysql -u root -p
-3 输入密码后，应该就连接上了
-4 show databases;
-5 exit; #退出
-（9）copy启动脚本并将其添加到服务且设置为开机启动
-1 #mysql启动脚本为：/usr/database/mysql5.7/support-files/mysql.server
-2 cp /usr/database/mysql5.7/support-files/mysql.server /etc/init.d/mysql
-3 #添加服务
-4 chkconfig --add mysql   
-5 # 显示服务列表
-6 chkconfig --list    
-7 # 开机启动
-8 chkconfig --level 345 mysql on
-9 # 测试添加的服务是否能用
-10 service mysql status #查看状态
-11 service mysql start  #启动mysql服务
-12 service mysql stop   #停止mysql服务
-四、设置外网可以访问
-1 在mysql的bin目录下执行：mysql -uroot -p密码 登陆到数据：
-2 执行：use mysql;
-3 执行：select host,user from user;
-4 可以看到user为root，host为localhost的话，说明mysql只允许本机连接，那么外网，本地软件客户端就无法连接了。
-5 调整方法：
-6 执行：update user set host='%' where user ='root';
-7 执行刷新:flush privileges;
-8 OK!现在可以访问了！
-9 如果还访问不了，那可能是防火墙问题,修改下防火墙就ok，修改方法这里就不提了，网上很多资料
-五、相关说明
-（1）mysql服务的启动和停止命令
-1 service mysql status #查看状态
-2 service mysql start  #启动mysql服务
-3 service mysql stop   #停止mysql服务 
-（2）怎么在Linux中登录mysql
-1 #进入mysql安装目录的bin目录，然后输入以下命令
-2 ./mysql -u root -p
-3 #然后输入密码就登录成功
-4 exit; #退出mysql
-```
-
-## 安装MariaDB
-
-```sh
-rpm -ivh xxxx.rpm
-yum install -y mariadb mariadb-server
-systemctl start mariadb
-mysql -uroot -p
-update user set password=password('123') where user='root';
-flush privileges;
-
-#sqlyog远程链接
-GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' IDENTIFIED BY 'password' WITH GRANT OPTION;   # %:表示从任何主机连接到mysql服务器
-flush privileges;
 ```
 
 

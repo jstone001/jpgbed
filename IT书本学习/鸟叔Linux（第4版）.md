@@ -318,7 +318,121 @@ quit
 
 #### [Ctrl]-c 按键
 
+#### [Ctrl]-d 按键  = EOF   (End of File)
+
 #### [shift]+{[PageUP]|[Page Down]}按键
+
+## **4.3 Linux** **系统的在线求助** **man page** **与** **info page**
+
+## **4.3.1** **指令的** **--help** **求助说明**
+
+## 4.3.2 man 
+
+```sh
+man date
+```
+
+
+
+| 按键      | 进行工作                                                     |
+| --------- | ------------------------------------------------------------ |
+| /string   | 向『下』搜寻 string 这个字符串，如果要搜寻 vbird 的话，就输入 /vbird |
+| ?string   | 向『上』搜寻 string 这个字符串                               |
+| n, N      | 利用 / 或 ? 来搜寻字符串时，可以用 n 来继续下一个搜寻 (不论是 / 或 ?) ，可以利用 N 来进利用 / 或 ? 来搜寻字符串时，可以用 n 来继续下一个搜寻 (不论是 / 或 ?) ，可以利用 N 来进行『反向』搜寻。举例来说，我以 /vbird 搜寻 vbird 字符串， 那么可以 n 继续往下查询，用 N 往上查询。若以 ?vbird 向上查询 vbird 字符串， 那我可以用 n 继续『向上』查询，用 N 反向查 |
+| 空格 or f | 下一页                                                       |
+| p         | 第1页                                                        |
+| b         | 上一页                                                       |
+| q         | 退出man                                                      |
+
+DATE(1)
+
+1的含义：
+
+| 代号 | 代表内容                                                     |
+| ---- | ------------------------------------------------------------ |
+| 1    | 用户在 shell 环境中可以操作的指令或可执行文件                |
+| 2    | 系统核心可呼叫的函数与工具等                                 |
+| 3    | 一些常用的函数(function)与函式库(library)，大部分为 C 的函式库(libc) |
+| 4    | 装置文件的说明，通常在/dev 下的文件                          |
+| 5    | 配置文件或者是某些文件的格式                                 |
+| 6    | 游戏(games)                                                  |
+| 7    | 惯例与协议等，例如 Linux 文件系统、网络协议、ASCII code 等等的说明 |
+| 8    | 系统管理员可用的管理指令                                     |
+| 9    | 跟 kernel 有关的文件                                         |
+
+```sh
+ man -f date
+date (1)             - print or set the system date and time
+date (1p)            - write the date and time
+
+ man 1 date # <==这里是用 date(1) 的文件数据
+```
+
+```sh
+[dmtsai@study ~]$ whatis [指令或者是数据] # <==相当于 man -f [指令或者是数据]
+[dmtsai@study ~]$ apropos [指令或者是数据] # <==相当于 man -k [指令或者是数据]
+```
+
+## **4.3.3 info page**
+
+- File：代表这个 info page 的资料是来自 info.info 文件所提供的；
+- Node：代表目前的这个页面是属于 Top 节点。 意思是 info.info 内含有很多信息，而 Top 仅是 info.info 文件内的一个节点内容而已；
+- Next：下一个节点的名称为 Getting Started，你也可以按『N』到下个节点去；
+- Up：回到上一层的节点总揽画面，你也可以按下『U』回到上一层；
+- Prev：前一个节点。但由于 Top 是 info.info 的第一个节点，所以上面没有前一个节点的信息。
+- Space: 下一页
+- del: 上一页
+- h: 帮助 
+- x: 关闭帮助
+- tab：快速移动到下个节点
+- Enter：进入这个节点 
+
+![image-20220425104300130](/Users/anne/Downloads/js/jpgBed/image-20220425104300130.png)
+
+
+
+| 按键                           | 进行工作                                            |
+| ------------------------------ | --------------------------------------------------- |
+| 空格键                         | 向下翻一页                                          |
+| [Page Down]                    | 向下翻一页                                          |
+| [Page Up]                      | 向上翻一页                                          |
+| <font color='red'>[tab]</font> | 在 node 之间移动，有 node 的地方，通常会以 * 显示。 |
+| [Enter]                        | 当光标在 node 上面时，按下 Enter 可以进入该 node 。 |
+| b                              | 移动光标到该 info 画面当中的第一个 node 处          |
+| e                              | 移动光标到该 info 画面当中的最后一个 node 处        |
+| n                              | 前往下一个 node 处                                  |
+| p                              | 前往上一个 node 处                                  |
+| u                              | 向上移动一层                                        |
+| s(/)                           | 在 info page 当中进行搜寻                           |
+| h, ?                           | 显示求助选单                                        |
+| q                              | 结束这次的 info page                                |
+
+
+
+### **4.3.4** **其他有用的文件****(documents)**
+
+/usr/share/doc 
+
+## **4.4** **超简单文书编辑器：** **nano**
+
+## **4.5** **正确的关机方法**
+
+### **数据同步写入磁盘：** **sync**
+
+### **惯用的关机指令：** **shutdown**
+
+单纯执行 shutdown 之后， 系统默认会在 1 分钟后进行『关机』的动作喔！
+
+```sh
+shutdown -h now
+init 0
+systemctl reboot
+systemctl poweroff
+```
+
+
+
+
 
 # 第9章 vim程序编辑器
 

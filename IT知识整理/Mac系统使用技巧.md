@@ -1,3 +1,9 @@
+# 进入root
+
+```sh
+sudo su -   # 密码是登录密码
+```
+
 # 清除Mac上Dock中的最近历史记录
 
 from:https://wenku.baidu.com/view/b3d91f4c1ed9ad51f11df21f.html

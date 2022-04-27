@@ -267,6 +267,56 @@ flush privileges;
 
 
 
+# mycat分页
+
+https://www.csdn.net/tags/MtjaUg4sMDc2MDktYmxvZwO0O0OO0O0O.html
+
+原始SQL:SELECT * FROM table_name WHERE type='xxx' ORDER BY create_time LIMIT 10000,1000;
+
+直接在mysql中执行：SELECT * FROM table_name WHERE type='xxx' ORDER BY create_time LIMIT 10000,1000;
+
+通过mycat执行：SELECT * FROM table_name WHERE type='xxx' ORDER BY create_time LIMIT 0,11000;   **#在mysql中真实执行SQL**
+
+```sh
+坑点：
+在分表的情况下，且limit 的开始位置特别大的时候，将需要查询大量的数据，并将各个分表的结果集返回到mycat中，然后在mycat中进行合并和排序，再返回结果。
+
+结果集特别大的情况会查询很慢，且容易导致mycat OOM.
+ 
+
+建议:
+不要用mycat进行大批量的数据分页查询;通过条件过滤，减小分页前数据量大小;
+```
+
+[Mysql系列八：Mycat和Sharding-jdbc的区别、Mycat分片join、Mycat分页中的坑、Mycat注解、Catlet使用 - 小不点啊 - 博客园 (cnblogs.com)](https://www.cnblogs.com/leeSmall/p/9539370.html)
+
+**所以要在Mycat的server.xm里面开启使用非堆内存。否则内存会爆掉**
+
+```xml
+<property name="useOffHeapForMerge">1</property>
+```
+
+```sql
+# 优化：
+
+# 1）先查出id
+
+SELECT id FROM customer ORDER BY id LIMIT 1000100, 100;
+这个sql语句被mycat转化后
+
+1 -> dn1{SELECT  id  FROM customer ORDER BY id LIMIT 0, 1000100}
+2 -> dn2{SELECT  id  FROM customer ORDER BY id LIMIT 0, 1000100}
+2) 拿到所有的id以后再取获取需要的数据
+
+SELECT * FROM customer where id in(1,2,3....);
+# 这个sql语句被mycat转化后
+
+1 -> dn1{SELECT * FROM customer where id in(1,2,3....);}
+2 -> dn2{SELECT * FROM customer where id in(1,2,3....);}
+```
+
+
+
 # 报错
 
 ## mysql查询出现In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregate...

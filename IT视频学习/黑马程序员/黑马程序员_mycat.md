@@ -172,6 +172,33 @@ flush privileges;
 ## P67. MyCat - 架构剖析 - 核心技术之分布式事务的支持
 ## P68. MyCat - 架构剖析 - 核心技术之SQL路由实现
 ## P69. MyCat - 架构剖析 - 核心技术之跨库join实现
+
+### 全局表
+
+### ER表
+
+### Catlet
+
+java中自定义catlet 实现类
+
+```java
+// 实现2个方法
+void processSQL(String sql , EngineCtx ctx);	//执行sql
+void route();		// 路由方法，系统配置和schema配置  
+```
+
+编译后的xxxCatlet.class 类，放在mycat_home/catlet 目录下，系统会加载相关class，并且每1分钟扫描文件是否更新，有更新也无需重启。
+
+**ShareJoin**
+
+<font color='red'>只支持2个表的join</font>
+
+shareJoin是catlet的实现，还需要借助mycat中的注解，在执行sql时，使用catlet注解。
+
+```sql
+/*!mycat:catlet=demo.catlets.ShareJoin */ select aid as aid, a.id, b.id as bid, b.name as name from customer a, b where a.company_id=b.id and a.id =1;
+```
+
 ## P70. MyCat - 架构剖析 - 核心技术之数据汇聚与排序实现
 
 # MyCat -案例
@@ -184,13 +211,23 @@ flush privileges;
 ## P76. MyCat - 环境搭建 - Eureka注册中心搭建
 ## P77. MyCat - 环境搭建 - 微服务网关gateway搭建
 ## P78. MyCat - 商品管理 - 需求分析
+
+- SPU: 是商品信息聚合的最小单位。是一组可复用，易检索的标准化信息的集合。通俗讲，属性值，特性相同的货品就可称为一个SPU。例如：华为P30就是一个SPU。
+- SKU:  stock keeping unit （库存量单位 ）。例如：红色 64G 全网通的华为P30 就是一个SKU。<font color='red'>（带规格的）</font>
+
 ## P79. MyCat - 商品管理 - 微服务搭建
 ## P80. MyCat - 商品管理 - 根据ID查询SPU
 ## P81. MyCat - 商品管理 - 根据条件分页查询SPU列表
 ## P82. MyCat - 商品管理 - 根据ID查询SKU信息
 ## P83. MyCat - 订单模块 - 需求分析及微服务环境搭建
 ## P84. MyCat - 订单模块 - 提交订单业务分析
+
+只是个架子
+
 ## P85. MyCat - 订单模块 - 根据条件分页订单数据
+
+
+
 ## P86. MyCat - 网关联合测试
 ## P87. MyCat - 日志模块 - 微服务搭建
 ## P88. MyCat - 日志模块 - 日志表的ID生成分析
@@ -205,16 +242,6 @@ flush privileges;
 ## P94. MyCat - 分片 - 服务器配置说明
 ## P95. MyCat - 分片 - 数据库分片配置
 ## P96. MyCat - 分片 - MyCat环境搭建
-
-# 
-
-全局表
-
-ER表
-
-catlet
-
-## P96 Mycat 环境搭建
 
 ```sql
 create database v_order default charset utf8mb4;

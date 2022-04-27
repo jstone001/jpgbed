@@ -34,6 +34,31 @@
 
 ### **7.3 table 标签**
 
+## **第 8 章 Mycat 的分片 join**
+
+全局表，ER 分片，catletT(人工智能)和 ShareJoin
+
+### **8.3 ER Join**
+
+### **8.4 Share join**
+
+```sql
+/*!mycat:catlet=demo.catlets.ShareJoin */
+```
+
+### **8.5 catlet（人工智能）**
+
+```java
+EngineCtx ctx=new EngineCtx();//包含 MyCat.SQLEngine
+String sql=,“select a.id ,a.name from a 
+
+ctx.executeNativeSQLSequnceJob(allAnodes,new DirectDBJoinHandler());
+```
+
+
+
+### **8.6 Spark/Storm 对 join 扩展**
+
 # 高级进阶篇
 
 # 生产实践篇

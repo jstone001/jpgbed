@@ -1,6 +1,6 @@
 # 命令行状态
 
-## 清屏
+## 清除全文
 
 ```sh
 $ sudo vim test.txt

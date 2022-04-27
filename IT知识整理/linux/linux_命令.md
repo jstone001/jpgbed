@@ -129,6 +129,15 @@ du -sh # 当前文件夹大小
 
 ## rmdir
 
+# 远程服务器
+
+## scp
+
+```sh
+scp -r /home/test1 username@192.168.0.1:/home/test2 	# 复制到远程机器 
+scp -r username@192.168.0.1:/home/test2 /home/test1 	# 复制到本地
+```
+
 # 语言
 
 ## locale

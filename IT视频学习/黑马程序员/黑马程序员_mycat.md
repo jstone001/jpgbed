@@ -216,7 +216,62 @@ shareJoin是catlet的实现，还需要借助mycat中的注解，在执行sql时
 - SKU:  stock keeping unit （库存量单位 ）。例如：红色 64G 全网通的华为P30 就是一个SKU。<font color='red'>（带规格的）</font>
 
 ## P79. MyCat - 商品管理 - 微服务搭建
+
+pom.xml
+
+```xml
+	<!-- Eureka客户端 -->
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+
+<!-- mysql驱动 -->
+<dependency>
+	<groupId>mysql</groupId>
+	<artifactId>mysql-connector-java</aifactId>
+</dependency>
+
+
+<!-- mybatis分布插件 -->
+<dependency>
+	<groupId>com.github.pagehelper</groupId>
+	<artifactId>pagehelper-spring-book-starter</aifactId>
+</dependency>
+
+<!--web起步依赖 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-web</aifactId>
+</dependency>
+
+<!--redis -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-redis</aifactId>
+</dependency>
+
+<!--fastJson依赖 -->
+<dependency>
+	<groupId>com.alibaba</groupId>
+	<artifactId>fastjson</aifactId>
+</dependency>
+
+<!--Feign依赖 -->
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-start-openfeign</aifactId>
+</dependency>
+```
+
+
+
 ## P80. MyCat - 商品管理 - 根据ID查询SPU
+
+<font color='red'>（还是要查所有的数据，不是真正的分页查询）</font>
+
+
+
 ## P81. MyCat - 商品管理 - 根据条件分页查询SPU列表
 ## P82. MyCat - 商品管理 - 根据ID查询SKU信息
 ## P83. MyCat - 订单模块 - 需求分析及微服务环境搭建
@@ -226,7 +281,16 @@ shareJoin是catlet的实现，还需要借助mycat中的注解，在执行sql时
 
 ## P85. MyCat - 订单模块 - 根据条件分页订单数据
 
+```java
+//1. 设置分页参数
+PageHelper.startPage(page, size);
+//2. 执行分页查询 
+List<TbOrder> orderList=orderMapper.search(searchMap);
 
+return(Page)orderList;
+```
+
+<font color='red'>（还是要查所有的数据，不是真正的分页查询）</font>
 
 ## P86. MyCat - 网关联合测试
 ## P87. MyCat - 日志模块 - 微服务搭建

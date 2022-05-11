@@ -432,7 +432,7 @@ systemctl poweroff
 
 
 
-# 第五章、Linux **的文件权限与目录配置**
+# 第5章、Linux **的文件权限与目录配置**
 
 ## **5.1** **使用者与群组**
 
@@ -518,7 +518,7 @@ FHS 针对目录树架构仅定义出三层目录底下应该放置什么数据�
 - /usr (unix software resource)：与软件安装/执行有关；
 - /var (variable)：与系统运作过程有关。
 
-目录
+#### /  的意义和内容
 
 ![image-20220429124453657](/Users/anne/Downloads/js/jpgBed/image-20220429124453657.png)
 
@@ -534,7 +534,19 @@ FHS 针对目录树架构仅定义出三层目录底下应该放置什么数据�
 
 ![image-20220429125206590](/Users/anne/Downloads/js/jpgBed/image-20220429125206590.png)
 
+/etc /bin /dev  /lib  /sbin   重要
 
+
+
+#### /usr
+
+usr: Unix Software Resource Unix 操作系统软件资源
+
+就像 c;/program files/
+
+#### /var 
+
+主要针对常态性变动的文件，包括快取(cache)、登录档(log file)以及某些软件运作所产生的文件
 
 # 第9章 vim程序编辑器
 

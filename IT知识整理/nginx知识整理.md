@@ -24,6 +24,26 @@ systemctl status  firewalld #查看防火墙状态
 # 输入ip地址有nignx主页即可
 ```
 
+# windows上nignx的安装
+
+from: https://blog.csdn.net/zhy810302/article/details/122254477
+
+```sh
+
+# 启动
+nginx.exe
+start nginx
+
+tasklist /fi “imagename eq nginx.exe”  # 查看进程
+netstat -ano | findstr 0.0.0.0:80 或 netstat -ano | findstr “80”   # 检查80端口是否被占用的命令
+nginx -s stop  #(快速停止nginx)  
+nginx -s quit	# (完整有序的停止nginx)
+taskkill /f /t /im nginx.exe  	# 杀死nginx
+
+```
+
+
+
 # 反向代理
 
 要先关闭selinux

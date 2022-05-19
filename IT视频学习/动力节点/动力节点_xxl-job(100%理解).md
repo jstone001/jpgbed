@@ -108,19 +108,64 @@ http://localhost:8080/xxl-job-admin
 
 ## P09-XXL-JOB分布式任务执行器
 
-```properties
-xxl.job.executor.logretentiondays=-1 # 值大于 3 时生效，启用执行器 Log 文件定期清理功能，否则不生效； 
+```sh
+xxl.job.executor.logretentiondays=-1 # 值大于 3 时生效，启用执行器 Log 文件定期清理功能，否则不生效；
+xxl.job.accessToken:   # 通信的密码
 ```
 
 
 
 ## P10-调度中心如何配置执行器任务
+
+路由策略
+
 ## P11-调度中心对执行器的调度
 ## P12-执行器任务集群高可用部署的调度
+
+本地集群部署(多executor）
+
+```sh
+# run/debug configuration 下 
+Program arguments:  --server.port=8082
+```
+
 ## P13-调度中心的高可用部署
+
+要用到nginx
+
+执行器application.properties
+
+```properties
+xxl.job.admin.addresses=http://www.jobs.com/xxl-job-admin
+```
+
+nginx.conf
+
+```sh
+upstream xxl-job-admin{
+	#2个调试中心
+	server 127.0.0.1:8080;
+	server 127.0.0.1:8081;
+}
+
+location /xxl-job-admin{
+	proxy_pass http://xxl-job-admin;
+}
+```
+
+
+
 ## P14-调度中心执行器集群高可用部署调度
 ## P15-XXL-JOB调度平台的设计思路
 
+- 基于netty 开发
 
+- 自研PRC(xxl-rpc)
 
-## 
+- 调度方式：ScheduledExecutorService
+
+  
+
+[动力节点官网](www.bjpowernode.com)
+
+<font color='red'>[蛙课网官网](www.wkcto.com)</font>

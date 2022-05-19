@@ -12,3 +12,26 @@ sudo touch xxl-job-admin.log
 sudo chmod 666 xxl-job-admin.log 
 ```
 
+# 运行sh文件
+
+```sh
+# 选择commandJobHandler
+@XxlJob("commandJobHandler")
+
+# 参数为
+f:\a.txt
+```
+
+# 运行glue(powershell)
+
+```powershell
+# 因为在此系统上禁止运行脚本。有关详细信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=135170 中的 about_Execution_Policies。
+
+用管理员身份运行 PowerShell，然后输入: set-executionpolicy remotesigned
+```
+
+```powershell
+# 在GLUE IDE中直接输入
+f:/a.bat  #即可
+```
+

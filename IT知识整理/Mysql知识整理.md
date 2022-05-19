@@ -16,7 +16,7 @@ from: https://www.cnblogs.com/zhangkanghui/p/9613844.html
 
 ```shell
 # 以管理员身份运行cmd
-mysqld --initialize-insecure --user=mysql  在E:\mysql\mysql-8.0.12-winx64目录下生成data目录
+mysqld --initialize-insecure --user=mysql  # 在E:\mysql\mysql-8.0.12-winx64目录下生成data目录
 
 mysqld -install  # 安装mysql
 net start MySQL  # 启动服务

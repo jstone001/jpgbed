@@ -1,1 +1,0 @@
-from: https://www.imooc.com/wiki/markdownlesson/markdownfootnote.html

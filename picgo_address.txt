@@ -1,1 +1,3 @@
 https://gitee.com/jstone001/booknote/raw/master/jpgBed/
+
+https://raw.githubusercontent.com/jstone001/jpgbed/master/picgo/
